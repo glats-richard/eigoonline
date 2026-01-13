@@ -24,127 +24,111 @@ type Props = { ranking: Ranking };
 const { ranking } = Astro.props satisfies Props;
 
 const cols = Math.max(1, ranking.items.length);
-const colWidth = `${100 / cols}%`;
-const tableMinWidth = cols >= 4 ? "780px" : cols === 3 ? "640px" : "0px";
+const tableMinWidth = cols >= 4 ? "920px" : cols === 3 ? "720px" : cols === 2 ? "520px" : "0px";
+
+const colBorder = (rank: number) => {
+  if (rank === 1) return "#f5c542";
+  if (rank === 2) return "#bdbdbd";
+  if (rank === 3) return "#c79a6b";
+  return "#9fd6ff";
+};
+
+const labelBar = "bg-zinc-100 text-zinc-700";
 ---
 
 <div class="mt-4 overflow-x-auto [-webkit-overflow-scrolling:touch]">
-  <table
-    class="w-full border-separate border-spacing-0 overflow-hidden rounded-xl ring-1 ring-zinc-200"
-    style={tableMinWidth !== "0px" ? `min-width:${tableMinWidth}` : undefined}
+  <div
+    class="grid gap-4 px-1 pb-1"
+    style={[
+      tableMinWidth !== "0px" ? `min-width:${tableMinWidth}` : "",
+      `grid-template-columns: repeat(${cols}, minmax(220px, 1fr));`,
+    ].filter(Boolean).join(";")}
   >
-    <thead>
-      <tr>
-        {ranking.items.map((x, idx) => (
-          <th class="bg-sky-50 p-3 align-top text-left" style={`width:${colWidth}`}>
-            <div class="flex items-start gap-3">
-              {idx + 1 <= 3 ? (
+    {ranking.items.map((x, idx) => {
+      const rank = idx + 1;
+      const borderColor = colBorder(rank);
+      return (
+        <section class="rounded-xl border-2 bg-white shadow-sm" style={`border-color:${borderColor}`}>
+          <div class="px-3 pb-4 pt-3 text-center">
+            <div class="flex items-center justify-center">
+              {rank <= 3 ? (
                 <img
-                  src={`/rank${idx + 1}.png`}
-                  alt={`${idx + 1}位`}
-                  width="28"
-                  height="28"
+                  src={`/rank${rank}.png`}
+                  alt={`${rank}位`}
+                  width="40"
+                  height="40"
                   loading="eager"
                   decoding="async"
-                  class="mt-0.5 h-7 w-7 shrink-0 object-contain"
+                  class="h-10 w-10 object-contain"
                 />
               ) : (
-                <div class="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-xs font-extrabold text-amber-700 ring-1 ring-amber-200">
-                  {idx + 1}
+                <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-extrabold text-zinc-800 ring-1 ring-zinc-300">
+                  {rank}
                 </div>
               )}
-              <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="truncate text-sm font-extrabold text-zinc-900">{x.data.name}</span>
-                </div>
-                {x.data.logoUrl ? (
-                  <img
-                    src={x.data.logoUrl}
-                    alt={`${x.data.name} ロゴ`}
-                    class="mt-2 h-8 w-auto max-w-[160px] object-contain"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : null}
-              </div>
             </div>
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody class="[&_tr:not(:last-child)_td]:border-b [&_td:not(:last-child)]:border-r [&_td]:border-zinc-200">
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <div class="text-xs font-bold text-zinc-500">総合評価</div>
-            <div class="mt-1"><StarRating value={x.data.rating ?? null} /></div>
-          </td>
-        ))}
-      </tr>
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <div class="text-xs font-bold text-zinc-500">月額</div>
-            <div class="mt-1 text-sm font-semibold text-zinc-900">{x.data.priceText ?? "—"}</div>
-          </td>
-        ))}
-      </tr>
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <div class="text-xs font-bold text-zinc-500">受講できる時間</div>
-            <div class="mt-1 text-sm font-semibold text-zinc-900">{x.data.hoursText ?? "—"}</div>
-          </td>
-        ))}
-      </tr>
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <div class="text-xs font-bold text-zinc-500">無料体験</div>
-            <div class="mt-1 text-sm font-semibold text-zinc-900">{x.data.trialText ?? "—"}</div>
-          </td>
-        ))}
-      </tr>
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <div class="text-xs font-bold text-zinc-500">おすすめポイント</div>
-            {x.data.points?.length ? (
-              <ul class="mt-2 list-disc pl-5 text-sm text-zinc-800">
-                {x.data.points.slice(0, 3).map((p) => (
-                  <li>{p}</li>
-                ))}
-              </ul>
-            ) : (
-              <div class="mt-1 text-sm text-zinc-500">—</div>
-            )}
-          </td>
-        ))}
-      </tr>
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <div class="text-xs font-bold text-zinc-500">こんな人におすすめ</div>
-            {x.data.recommendedFor?.length ? (
-              <ul class="mt-2 list-disc pl-5 text-sm text-zinc-800">
-                {x.data.recommendedFor.slice(0, 3).map((p) => (
-                  <li>{p}</li>
-                ))}
-              </ul>
-            ) : (
-              <div class="mt-1 text-sm text-zinc-500">—</div>
-            )}
-          </td>
-        ))}
-      </tr>
-      <tr>
-        {ranking.items.map((x) => (
-          <td class="p-3 align-top">
-            <CTAButton href={x.data.officialUrl} label="詳しく見る" />
-          </td>
-        ))}
-      </tr>
-    </tbody>
-  </table>
+
+            {x.data.logoUrl ? (
+              <div class="mt-2 flex items-center justify-center">
+                <img
+                  src={x.data.logoUrl}
+                  alt={`${x.data.name} ロゴ`}
+                  class="h-10 w-auto max-w-[200px] object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            ) : null}
+
+            <a
+              href={`#school-${x.id}`}
+              class="mt-2 block truncate text-sm font-extrabold text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800"
+            >
+              {x.data.name}
+            </a>
+
+            <div class="mt-2 flex items-center justify-center">
+              <StarRating value={x.data.rating ?? null} size={18} />
+            </div>
+          </div>
+
+          <div class={`px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>月額</div>
+          <div class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg">{x.data.priceText ?? "—"}</div>
+
+          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>受講できる時間</div>
+          <div class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg">{x.data.hoursText ?? "—"}</div>
+
+          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>無料体験</div>
+          <div class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg">{x.data.trialText ?? "—"}</div>
+
+          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>おすすめポイント</div>
+          {x.data.points?.length ? (
+            <ul class="px-3 py-3 text-left text-sm font-semibold text-zinc-900">
+              {x.data.points.slice(0, 3).map((p) => (
+                <li class="mb-1 last:mb-0">・{p}</li>
+              ))}
+            </ul>
+          ) : (
+            <div class="px-3 py-3 text-center text-sm font-semibold text-zinc-500">—</div>
+          )}
+
+          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>こんな人におすすめ</div>
+          {x.data.recommendedFor?.length ? (
+            <ul class="px-3 py-3 text-left text-sm font-semibold text-zinc-900">
+              {x.data.recommendedFor.slice(0, 3).map((p) => (
+                <li class="mb-1 last:mb-0">・{p}</li>
+              ))}
+            </ul>
+          ) : (
+            <div class="px-3 py-3 text-center text-sm font-semibold text-zinc-500">—</div>
+          )}
+
+          <div class="border-t border-zinc-200 p-3">
+            <CTAButton href={x.data.officialUrl} label="公式サイトを見る" fullWidth />
+          </div>
+        </section>
+      );
+    })}
+  </div>
 </div>
 

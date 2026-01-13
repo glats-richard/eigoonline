@@ -32,7 +32,8 @@ const { overall, daily, business, columns = 4 } = Astro.props satisfies Props;
 
 const sliceCols = (r: Ranking, n: number) => ({ ...r, items: r.items.slice(0, n) });
 const desktopCols = columns;
-const mobileCols = Math.min(2, columns);
+// Show up to 4 columns on mobile as well (horizontal scroll enabled in table).
+const mobileCols = Math.min(4, columns);
 
 const oMobile = sliceCols(overall, mobileCols);
 const dMobile = sliceCols(daily, mobileCols);
