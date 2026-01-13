@@ -2,13 +2,17 @@
 type Props = {
   href: string;
   label?: string;
+  fullWidth?: boolean;
 };
 
-const { href, label = "公式サイトを見る" } = Astro.props satisfies Props;
+const { href, label = "公式サイトを見る", fullWidth = false } = Astro.props satisfies Props;
 ---
 
 <a
-  class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-orange-500 px-4 py-2 text-sm font-extrabold text-white shadow-sm transition will-change-transform hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+  class:list={[
+    "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-orange-500 px-4 py-2 text-sm font-extrabold text-white shadow-sm transition will-change-transform hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+    fullWidth ? "w-full" : "",
+  ]}
   href={href}
   target="_blank"
   rel="nofollow sponsored noopener noreferrer"
