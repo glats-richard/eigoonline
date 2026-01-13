@@ -1,8 +1,8 @@
 {
   "name": "レアジョブ英会話",
   "priceText": null,
-  "trialText": "最大14回（ページ例）",
-  "benefitText": "日本人カウンセラーの学習相談付き（ページ例）",
+  "trialText": "最大14回",
+  "benefitText": "日本人カウンセラーの学習相談付き",
   "rating": null,
   "features": [
     "初心者から日常英会話を習得したい",
@@ -10,7 +10,7 @@
   ],
   "logoUrl": "/logos/company-50.png",
   "officialUrl": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2",
-  "campaignText": "【1月31日まで】期間限定キャンペーン：最大49,500円割引／英会話フレーズ集プレゼント（ページ表記）",
+  "campaignText": "【1月31日まで】期間限定キャンペーン：最大49,500円割引／英会話フレーズ集プレゼント",
   "summary": "初心者の日常英会話や、日本人講師のレッスンも検討したい人向けのオンライン英会話。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",

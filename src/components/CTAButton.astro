@@ -10,7 +10,7 @@ const { href, label = "公式サイトを見る", fullWidth = false } = Astro.pr
 
 <a
   class:list={[
-    "cta-sweep group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-orange-500 px-5 py-3 text-center text-base font-extrabold text-white shadow-lg shadow-orange-500/20 transition will-change-transform hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-xl hover:shadow-orange-500/25 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+    "cta-sweep group relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-orange-500 px-5 py-3 text-center text-base font-extrabold text-white shadow-lg shadow-orange-500/20 transition will-change-transform hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-xl hover:shadow-orange-500/25 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
     fullWidth ? "w-full" : "w-full sm:w-auto",
   ]}
   href={href}
@@ -18,7 +18,9 @@ const { href, label = "公式サイトを見る", fullWidth = false } = Astro.pr
   rel="nofollow sponsored noopener noreferrer"
   referrerpolicy="no-referrer"
 >
-  {label}
-  <span aria-hidden="true">→</span>
+  <span class="cta-sweep__content inline-flex items-center gap-2">
+    <span>{label}</span>
+    <span aria-hidden="true">→</span>
+  </span>
 </a>
 

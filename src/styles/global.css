@@ -45,8 +45,63 @@
   }
 }
 
-/* Diagonal sweep highlight (like provided CSS) */
-@keyframes ctaSweep {
+/* Diagonal sweep highlight (as provided) */
+.cta-sweep:hover {
+  text-decoration: none;
+  color: #fbfbfb;
+}
+
+.cta-sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cta-sweep::before {
+  position: absolute;
+  content: "";
+  display: inline-block;
+  top: -180px;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background-color: #fbfbfb;
+  animation: btn_animation 2.5s ease-in-out infinite;
+  will-change: transform, opacity;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Strong sweep: once per ~10s */
+.cta-sweep::after {
+  content: none;
+}
+
+.cta-sweep__content {
+  position: relative;
+  z-index: 10;
+}
+
+@-webkit-keyframes btn_animation {
+  0% {
+    -webkit-transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  80% {
+    -webkit-transform: scale(0) rotate(45deg);
+    opacity: 0.5;
+  }
+  81% {
+    -webkit-transform: scale(4) rotate(45deg);
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(50) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes btn_animation {
   0% {
     transform: scale(0) rotate(45deg);
     opacity: 0;
@@ -65,26 +120,14 @@
   }
 }
 
-.cta-sweep {
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-sweep::before {
-  position: absolute;
-  content: "";
-  display: inline-block;
-  top: -180px;
-  left: 0;
-  width: 30px;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.9);
-  animation: ctaSweep 10s ease-in-out infinite;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
+  /* User asked "always moving": keep a *subtle* slow sweep even in reduced-motion. */
   .cta-sweep::before {
-    animation: none !important;
+    animation-duration: 6s !important;
+    opacity: 0.35;
+  }
+  /* Avoid the strong burst in reduced-motion environments. */
+  .cta-sweep::after {
+    display: none !important;
   }
 }

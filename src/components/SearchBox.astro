@@ -76,8 +76,14 @@ const { action = "/search" } = Astro.props satisfies Props;
       </div>
     </fieldset>
 
-    <button type="submit" class="h-11 rounded-xl bg-sky-600 px-4 text-sm font-extrabold text-white hover:bg-sky-500">
-      条件に合うオンライン英会話を検索
+    <button
+      type="submit"
+      class="cta-sweep group isolate inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 text-sm font-extrabold text-white shadow-lg shadow-orange-500/20 transition will-change-transform hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-xl hover:shadow-orange-500/25 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+    >
+      <span class="cta-sweep__content inline-flex items-center gap-2">
+        <span>条件に合うオンライン英会話を検索</span>
+        <span aria-hidden="true">→</span>
+      </span>
     </button>
   </form>
 </section>
