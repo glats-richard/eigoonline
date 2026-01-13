@@ -30,10 +30,17 @@ type Props = {
 
 const { overall, daily, business, columns = 4 } = Astro.props satisfies Props;
 
-const sliceCols = (r: Ranking) => ({ ...r, items: r.items.slice(0, columns) });
-const o = sliceCols(overall);
-const d = sliceCols(daily);
-const b = sliceCols(business);
+const sliceCols = (r: Ranking, n: number) => ({ ...r, items: r.items.slice(0, n) });
+const desktopCols = columns;
+const mobileCols = Math.min(2, columns);
+
+const oMobile = sliceCols(overall, mobileCols);
+const dMobile = sliceCols(daily, mobileCols);
+const bMobile = sliceCols(business, mobileCols);
+
+const oDesktop = sliceCols(overall, desktopCols);
+const dDesktop = sliceCols(daily, desktopCols);
+const bDesktop = sliceCols(business, desktopCols);
 ---
 
 <section class="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 overflow-hidden">
@@ -52,7 +59,7 @@ const b = sliceCols(business);
     >
       <div class="grid h-[80%] place-items-center">
         <span class="grid grid-rows-2 leading-tight">
-          <span class="block">{o.title}</span>
+          <span class="block">{overall.title}</span>
           <span class="block select-none text-transparent" aria-hidden="true">英会話</span>
         </span>
       </div>
@@ -82,13 +89,28 @@ const b = sliceCols(business);
   </div>
 
   <div class="mt-4 hidden peer-checked/ct-overall:block">
-    <CompareTable ranking={o} />
+    <div class="sm:hidden">
+      <CompareTable ranking={oMobile} />
+    </div>
+    <div class="hidden sm:block">
+      <CompareTable ranking={oDesktop} />
+    </div>
   </div>
   <div class="mt-4 hidden peer-checked/ct-daily:block">
-    <CompareTable ranking={d} />
+    <div class="sm:hidden">
+      <CompareTable ranking={dMobile} />
+    </div>
+    <div class="hidden sm:block">
+      <CompareTable ranking={dDesktop} />
+    </div>
   </div>
   <div class="mt-4 hidden peer-checked/ct-business:block">
-    <CompareTable ranking={b} />
+    <div class="sm:hidden">
+      <CompareTable ranking={bMobile} />
+    </div>
+    <div class="hidden sm:block">
+      <CompareTable ranking={bDesktop} />
+    </div>
   </div>
 </section>
 

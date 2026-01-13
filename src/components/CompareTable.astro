@@ -22,14 +22,21 @@ type Ranking = {
 type Props = { ranking: Ranking };
 
 const { ranking } = Astro.props satisfies Props;
+
+const cols = Math.max(1, ranking.items.length);
+const colWidth = `${100 / cols}%`;
+const tableMinWidth = cols >= 4 ? "780px" : cols === 3 ? "640px" : "0px";
 ---
 
-<div class="mt-4 overflow-x-auto">
-  <table class="min-w-[780px] w-full border-separate border-spacing-0 overflow-hidden rounded-xl ring-1 ring-zinc-200">
+<div class="mt-4 overflow-x-auto [-webkit-overflow-scrolling:touch]">
+  <table
+    class="w-full border-separate border-spacing-0 overflow-hidden rounded-xl ring-1 ring-zinc-200"
+    style={tableMinWidth !== "0px" ? `min-width:${tableMinWidth}` : undefined}
+  >
     <thead>
       <tr>
         {ranking.items.map((x, idx) => (
-          <th class="w-1/4 bg-sky-50 p-3 align-top text-left">
+          <th class="bg-sky-50 p-3 align-top text-left" style={`width:${colWidth}`}>
             <div class="flex items-start gap-3">
               {idx + 1 <= 3 ? (
                 <img
