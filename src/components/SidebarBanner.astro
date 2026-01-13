@@ -1,0 +1,29 @@
+---
+type Banner = { href: string; image: string; alt: string; label?: string };
+type Props = { heading?: string; items: Banner[] };
+
+const { heading = "バナー", items } = Astro.props satisfies Props;
+---
+
+<section class="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
+  <div class="px-2 pb-2 text-xs font-extrabold text-zinc-500">{heading}</div>
+  {items.length ? (
+    <div class="grid gap-3">
+      {items.slice(0, 1).map((b) => (
+        <a href={b.href} class="group relative block overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+          {b.label ? (
+            <span class="absolute left-2 top-2 z-10 inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-[10px] font-extrabold text-white">
+              {b.label}
+            </span>
+          ) : null}
+          <img src={b.image} alt={b.alt} loading="lazy" decoding="async" class="h-auto w-full object-contain transition group-hover:opacity-95" />
+        </a>
+      ))}
+    </div>
+  ) : (
+    <div class="grid h-24 place-items-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50 text-xs font-semibold text-zinc-500">
+      バナー枠（準備中）
+    </div>
+  )}
+</section>
+

@@ -1,0 +1,40 @@
+{
+  "name": "Berlitz",
+  "priceText": "16,500円",
+  "trialText": "1回",
+  "benefitText": "最大49,500円割引キャンペーン実施中！（ページ表記）",
+  "rating": 3.8,
+  "features": [
+    "ネイティブ講師のマンツーマンレッスン（ページ表記）",
+    "対面型も選べる（ページ表記）"
+  ],
+  "logoUrl": "/logos/company-51.png",
+  "officialUrl": "https://www.berlitz.com/ja-jp",
+  "campaignText": "【1月31日まで】期間限定キャンペーン：最大49,500円割引キャンペーン実施中！／英会話フレーズ集プレゼント！（ページ表記）",
+  "summary": "ネイティブ講師のマンツーマン指導に強み。対面型の選択肢もある英会話サービス。",
+  "source": {
+    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "note": "比較表およびランキング本文の表記を参照"
+  },
+  "hoursText": "朝6時～深夜24時55分",
+  "teacherQuality": 3,
+  "trialDetailText": "1回（日本人のサポート付き：ページ表記）",
+  "planUrl": "https://www.berlitz.com/ja-jp",
+  "editorialComments": [
+    "ネイティブ講師によるマンツーマンで実践的に学べる（ページ表記）",
+    "目的・レベルに合わせて学習できる（ページ表記）"
+  ],
+  "campaignEndsAt": null,
+  "campaignBullets": [],
+  "points": [
+    "ネイティブ講師のマンツーマン",
+    "対面型も選べる"
+  ],
+  "recommendedFor": [
+    "ビジネス英語が必要",
+    "短期間で英語力を上達させたい"
+  ],
+  "bannerImage": "/banners/company-51.png",
+  "bannerAlt": "Berlitz バナー",
+  "bannerHref": "https://www.berlitz.com/ja-jp"
+}

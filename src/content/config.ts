@@ -1,0 +1,140 @@
+import { defineCollection, z } from 'astro:content';
+
+const schools = defineCollection({
+	type: 'data',
+	schema: z.object({
+		name: z.string(),
+		/** Monthly price text (e.g. "7,425円"). */
+		priceText: z.string().nullable().optional(),
+		/** Free trial text (e.g. "7日間", "1回"). */
+		trialText: z.string().nullable().optional(),
+		/** Benefit/promo text shown in list (e.g. "初月50%OFF"). */
+		benefitText: z.string().nullable().optional(),
+		/** Lesson hours text (e.g. "24時間", "朝5時〜深夜25時"). */
+		hoursText: z.string().nullable().optional(),
+		/** Teacher quality score 0-5 in 0.5 steps (for the small table). */
+		teacherQuality: z
+			.number()
+			.min(0)
+			.max(5)
+			.nullable()
+			.optional()
+			.refine((v) => v === null || Math.round(v * 2) / 2 === v, {
+				message: 'teacherQuality must be in 0.5 increments',
+			}),
+		/** Free-trial detail text shown in the small table. */
+		trialDetailText: z.string().nullable().optional(),
+		/** Plan & price link (separate from officialUrl). */
+		planUrl: z.string().url().nullable().optional(),
+		/** Banner image shown in the long section (local path like "/banners/xxx.jpg"). */
+		bannerImage: z.string().nullable().optional(),
+		bannerAlt: z.string().nullable().optional(),
+		bannerHref: z.string().url().nullable().optional(),
+		/** Editorial comments bullets for the long section. */
+		editorialComments: z.array(z.string()).default([]),
+		/** Campaign end date (YYYY-MM-DD or ISO). Used for countdown (client-side). */
+		campaignEndsAt: z.string().nullable().optional(),
+		/** Campaign bullets (preferred over parsing campaignText). */
+		campaignBullets: z.array(z.string()).default([]),
+		/** Strong points for compare table. */
+		points: z.array(z.string()).default([]),
+		/** Recommended-for bullets. */
+		recommendedFor: z.array(z.string()).default([]),
+		rating: z.number().min(0).max(5).nullable().optional(),
+		features: z.array(z.string()).default([]),
+		// Allow absolute URLs or local public paths like "/logos/company-27.png"
+		logoUrl: z.string().nullable().optional(),
+		officialUrl: z.string().url(),
+		campaignText: z.string().nullable().optional(),
+		summary: z.string(),
+		source: z.object({
+			url: z.string().url(),
+			note: z.string().optional(),
+		}),
+	}),
+});
+
+const rankingCategory = z.enum(['overall', 'daily', 'business']);
+
+const rankings = defineCollection({
+	type: 'data',
+	schema: z.object({
+		category: rankingCategory,
+		title: z.string(),
+		description: z.string().optional(),
+		/** Ordered list of school IDs (filenames in src/content/schools). */
+		items: z.array(z.string().min(1)).min(1),
+		source: z.object({
+			url: z.string().url(),
+			note: z.string().optional(),
+		}),
+	}),
+});
+
+const categories = defineCollection({
+	type: 'data',
+	schema: z.object({
+		group: z.enum(['level', 'age', 'recommend']),
+		title: z.string(),
+		href: z.string(),
+		image: z.string().nullable().optional(),
+	}),
+});
+
+const pickups = defineCollection({
+	type: 'data',
+	schema: z.object({
+		label: z.string().default('PR'),
+		title: z.string(),
+		body: z.string(),
+		schoolId: z.string().optional(),
+		ctaLabel: z.string().default('公式サイトをチェック'),
+		ctaHref: z.string(),
+		image: z.string().nullable().optional(),
+	}),
+});
+
+const articles = defineCollection({
+	type: 'data',
+	schema: z.object({
+		title: z.string(),
+		href: z.string(),
+		image: z.string().nullable().optional(),
+	}),
+});
+
+const banners = defineCollection({
+	type: 'data',
+	schema: z.object({
+		placement: z.enum(['sidebar', 'sidebar_top', 'sidebar_mid', 'sidebar_bottom']),
+		href: z.string(),
+		image: z.string(),
+		alt: z.string(),
+		label: z.string().optional(),
+	}),
+});
+
+const reviews = defineCollection({
+	type: 'data',
+	schema: z.object({
+		schoolId: z.string(),
+		items: z
+			.array(
+				z.object({
+					age: z.string(),
+					rating: z.number().min(0).max(5),
+					body: z.string(),
+				}),
+			)
+			.default([]),
+		source: z
+			.object({
+				url: z.string().url(),
+				note: z.string().optional(),
+			})
+			.optional(),
+	}),
+});
+
+export const collections = { schools, rankings, categories, pickups, articles, banners, reviews };
+

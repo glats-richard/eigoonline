@@ -1,0 +1,11 @@
+{
+  "category": "daily",
+  "title": "日常英会話",
+  "description": "日常会話を中心に、続けやすさ・学びやすさを重視したランキング。",
+  "items": ["rarejob", "kimini", "dmm", "nativecamp"],
+  "source": {
+    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "note": "参照元をベースに、日常英会話目的として編集した表示順（暫定）"
+  }
+}
+

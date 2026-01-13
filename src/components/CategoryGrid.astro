@@ -1,0 +1,30 @@
+---
+type Category = {
+  title: string;
+  href: string;
+  image?: string | null;
+};
+
+type Props = {
+  heading: string;
+  items: Category[];
+};
+
+const { heading, items } = Astro.props satisfies Props;
+---
+
+<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+  <h3 class="text-base font-extrabold text-zinc-900">{heading}</h3>
+  <div class="mt-4 grid grid-cols-2 gap-3">
+    {items.map((c) => (
+      <a
+        href={c.href}
+        class="group relative overflow-hidden rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-4 hover:shadow-sm"
+      >
+        <div class="text-sm font-extrabold text-zinc-900 group-hover:text-sky-800">{c.title}</div>
+        <div class="mt-1 text-xs font-semibold text-zinc-500">{c.href}</div>
+      </a>
+    ))}
+  </div>
+</section>
+

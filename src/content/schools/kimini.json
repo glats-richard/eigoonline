@@ -1,0 +1,31 @@
+{
+  "name": "Kimini英会話",
+  "priceText": "月額1,210円から（LP表記）",
+  "trialText": "30日間（ページ表記）",
+  "benefitText": "期間限定：30日間無料体験（ページ表記）",
+  "rating": null,
+  "features": [
+    "中学英語の基礎からやり直したい。",
+    "月額費用を抑えたい。"
+  ],
+  "logoUrl": "/logos/company-30.png",
+  "officialUrl": "https://kimini.online/lp/tosho-fev/",
+  "campaignText": "【1月19日まで】期間限定キャンペーン：30日間無料体験キャンペーン実施中！！",
+  "summary": "学研が運営するオンライン英会話。基礎から学び直したい人や、月額を抑えて始めたい人向け。",
+  "source": {
+    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "note": "ページ内に「7位 Kimini英会話」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
+  },
+  "hoursText": null,
+  "points": [],
+  "recommendedFor": [],
+  "teacherQuality": null,
+  "trialDetailText": null,
+  "planUrl": null,
+  "editorialComments": [],
+  "campaignEndsAt": null,
+  "campaignBullets": [],
+  "bannerImage": "/banners/company-30.png",
+  "bannerAlt": "Kimini英会話 バナー",
+  "bannerHref": "https://kimini.online/lp/tosho-fev/"
+}

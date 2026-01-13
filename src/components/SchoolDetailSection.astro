@@ -1,0 +1,183 @@
+---
+import CTAButton from "./CTAButton.astro";
+import StarRating from "./StarRating.astro";
+import ReviewList from "./ReviewList.astro";
+import Countdown from "./Countdown.astro";
+
+type Review = { age: string; rating: number; body: string };
+
+type School = {
+  name: string;
+  rating?: number | null;
+  logoUrl?: string | null;
+  officialUrl: string;
+  planUrl?: string | null;
+  bannerImage?: string | null;
+  bannerAlt?: string | null;
+  bannerHref?: string | null;
+  trialText?: string | null;
+  trialDetailText?: string | null;
+  hoursText?: string | null;
+  teacherQuality?: number | null;
+  recommendedFor?: string[];
+  editorialComments?: string[];
+  campaignText?: string | null;
+  campaignBullets?: string[];
+  campaignEndsAt?: string | null;
+};
+
+type Props = {
+  rank: number;
+  item: School;
+  reviews?: Review[];
+};
+
+const { rank, item, reviews = [] } = Astro.props satisfies Props;
+
+const quality = typeof item.teacherQuality === "number" ? item.teacherQuality : null;
+const planHref = item.planUrl || item.officialUrl;
+const bannerHref = item.bannerHref || planHref;
+---
+
+<section class="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div class="flex items-start gap-4">
+      {rank <= 3 ? (
+        <img
+          src={`/rank${rank}.png`}
+          alt={`${rank}位`}
+          width="56"
+          height="56"
+          loading="eager"
+          decoding="async"
+          class="h-14 w-14 shrink-0 object-contain"
+        />
+      ) : (
+        <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-zinc-50 text-xl font-extrabold text-zinc-800 ring-1 ring-zinc-200">
+          {rank}
+        </div>
+      )}
+      <div class="min-w-0">
+        <h3 class="text-xl font-extrabold text-zinc-900">
+          {item.name}
+        </h3>
+        <div class="mt-2 flex flex-wrap items-center gap-3">
+          <span class="text-sm font-extrabold text-zinc-700">総合評価</span>
+          <StarRating value={item.rating ?? null} />
+          {typeof item.rating === "number" ? (
+            <span class="text-sm font-extrabold text-zinc-900">{item.rating.toFixed(1)}pt</span>
+          ) : null}
+        </div>
+      </div>
+    </div>
+
+    {item.logoUrl ? (
+      <img src={item.logoUrl} alt={`${item.name} ロゴ`} class="h-12 w-auto max-w-[200px] object-contain" loading="lazy" decoding="async" />
+    ) : null}
+  </div>
+
+  {item.bannerImage ? (
+    <a
+      href={bannerHref}
+      target={bannerHref.startsWith("http") ? "_blank" : undefined}
+      rel={bannerHref.startsWith("http") ? "nofollow sponsored noopener noreferrer" : undefined}
+      class="mt-5 block overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50"
+    >
+      <img
+        src={item.bannerImage}
+        alt={item.bannerAlt ?? `${item.name} バナー`}
+        loading="lazy"
+        decoding="async"
+        class="h-auto w-full object-contain"
+      />
+    </a>
+  ) : null}
+
+  <div class="mt-5 overflow-x-auto">
+    <table class="min-w-[520px] w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
+      <thead>
+        <tr class="bg-zinc-50 text-left text-xs font-extrabold text-zinc-700">
+          <th class="p-3">講師の質</th>
+          <th class="p-3">無料体験</th>
+          <th class="p-3">受講可能時間</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm text-zinc-800">
+        <tr class="[&_td]:border-t [&_td]:border-zinc-200">
+          <td class="p-3">
+            <StarRating value={quality} label="講師の質" showValue={false} size={16} />
+          </td>
+          <td class="p-3">
+            <div class="font-extrabold text-zinc-900">{item.trialText ?? "—"}</div>
+            {item.trialDetailText ? <div class="text-sm text-zinc-700">{item.trialDetailText}</div> : null}
+          </td>
+          <td class="p-3">
+            <div class="font-extrabold text-zinc-900">{item.hoursText ?? "—"}</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-5 grid gap-4 sm:grid-cols-2">
+    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+      <div class="text-sm font-extrabold text-zinc-900">こんな人におすすめ</div>
+      {item.recommendedFor?.length ? (
+        <ul class="mt-3 list-disc pl-5 text-sm text-zinc-800">
+          {item.recommendedFor.slice(0, 6).map((t) => (
+            <li>{t}</li>
+          ))}
+        </ul>
+      ) : (
+        <div class="mt-2 text-sm text-zinc-500">準備中</div>
+      )}
+      <div class="mt-4">
+        <CTAButton href={planHref} label="プランと料金を詳しくチェック" />
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-200 bg-white p-4">
+      <div class="text-sm font-extrabold text-zinc-900">編集部のコメント</div>
+      {item.editorialComments?.length ? (
+        <ul class="mt-3 list-disc pl-5 text-sm text-zinc-800">
+          {item.editorialComments.slice(0, 6).map((t) => (
+            <li>{t}</li>
+          ))}
+        </ul>
+      ) : (
+        <div class="mt-2 text-sm text-zinc-500">準備中</div>
+      )}
+      <div class="mt-4">
+        <CTAButton href={item.officialUrl} label="公式サイトを見る" />
+      </div>
+    </div>
+  </div>
+
+  {reviews.length ? (
+    <div class="mt-5">
+      <ReviewList title={`${item.name}の口コミ・評判`} items={reviews} />
+    </div>
+  ) : null}
+
+  {(item.campaignText || (item.campaignBullets && item.campaignBullets.length) || item.campaignEndsAt) ? (
+    <div class="mt-5 grid gap-3">
+      <Countdown endsAt={item.campaignEndsAt ?? null} />
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div class="text-sm font-extrabold text-amber-900">期間限定キャンペーン</div>
+        {item.campaignBullets?.length ? (
+          <ul class="mt-2 list-disc pl-5 text-sm text-amber-950/90">
+            {item.campaignBullets.slice(0, 6).map((t) => (
+              <li>{t}</li>
+            ))}
+          </ul>
+        ) : item.campaignText ? (
+          <p class="mt-2 text-sm text-amber-950/90">{item.campaignText}</p>
+        ) : null}
+        <div class="mt-4">
+          <CTAButton href={item.officialUrl} label="無料体験レッスンを受ける" />
+        </div>
+      </div>
+    </div>
+  ) : null}
+</section>
+

@@ -1,0 +1,23 @@
+---
+type Props = {
+  href: string;
+  label?: string;
+};
+
+const { href, label = "公式サイトを見る" } = Astro.props satisfies Props;
+---
+
+<a
+  class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-orange-500 px-4 py-2 text-sm font-extrabold text-white shadow-sm transition will-change-transform hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+  href={href}
+  target="_blank"
+  rel="nofollow sponsored noopener noreferrer"
+>
+  <span
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+  ></span>
+  {label}
+  <span aria-hidden="true">→</span>
+</a>
+

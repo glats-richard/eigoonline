@@ -1,0 +1,43 @@
+---
+type Props = {
+  value: number | null | undefined;
+  max?: number;
+  label?: string;
+  showValue?: boolean;
+  size?: number;
+};
+
+const { value, max = 5, label = "評価", showValue = true, size = 18 } = Astro.props satisfies Props;
+const safe = typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(max, value)) : null;
+const rounded = safe === null ? null : Math.round(safe * 2) / 2;
+
+const STAR_FULL = "/star.webp";
+const STAR_HALF = "/star-half.webp";
+const STAR_GRAY = "/star-gray.webp";
+---
+
+{safe === null ? (
+  <span class="text-sm text-zinc-500">{label}：—</span>
+) : (
+  <div class="inline-flex items-center gap-2">
+    <span class="sr-only">{label}：{safe} / {max}</span>
+    <div class="flex items-center gap-0.5" aria-hidden="true">
+      {Array.from({ length: max }).map((_, i) => {
+        const remain = Math.max(0, (rounded ?? safe) - i);
+        const src = remain >= 1 ? STAR_FULL : remain >= 0.5 ? STAR_HALF : STAR_GRAY;
+        return (
+          <img
+            src={src}
+            width={size}
+            height={size}
+            alt=""
+            decoding="async"
+            class="block"
+          />
+        );
+      })}
+    </div>
+    {showValue ? <span class="text-sm font-medium text-zinc-700">{safe.toFixed(1)}</span> : null}
+  </div>
+)}
+

@@ -1,0 +1,37 @@
+{
+  "name": "Bizmate",
+  "priceText": "7,425円",
+  "trialText": "1回",
+  "benefitText": "無料英語力診断＋初月50%OFF",
+  "rating": 4.9,
+  "features": [
+    "スキマ時間を活かして、実践的なビジネス英語力を伸ばしたい社会人",
+    "仕事でもプライベートでも使える、英会話の基礎を固めたい方"
+  ],
+  "logoUrl": "/logos/company-27.png",
+  "officialUrl": "https://www.bizmates.jp/",
+  "campaignText": "【1月31日まで】期間限定キャンペーン：無料体験レッスン／初月50%OFF（ページ表記）",
+  "summary": "ビジネス英会話に強みがあるオンライン英会話。スキマ時間で実践的に学びたい人向け。",
+  "source": {
+    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "note": "ページ内に「1位 Bizmate」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
+  },
+  "hoursText": "朝5時〜深夜25時",
+  "teacherQuality": null,
+  "trialDetailText": null,
+  "planUrl": null,
+  "editorialComments": [],
+  "campaignEndsAt": null,
+  "campaignBullets": [],
+  "points": [
+    "ビジネス英会話に強い",
+    "学習アドバイス付きの無料体験"
+  ],
+  "recommendedFor": [
+    "スキマ時間で実践的に学びたい",
+    "仕事でも使える英語を伸ばしたい"
+  ],
+  "bannerImage": "/banners/company-27.jpg",
+  "bannerAlt": "Bizmate バナー",
+  "bannerHref": "https://www.bizmates.jp/"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "DMM英会話",
+  "priceText": "4,800円",
+  "trialText": "7日間",
+  "benefitText": "【全プラン対象】初月1円！",
+  "rating": 4,
+  "features": [
+    "人気No.1英会話（ページ表記）",
+    "どの英会話よりも安く始められる（ページ表記）"
+  ],
+  "logoUrl": "/logos/company-39.png",
+  "officialUrl": "https://eikaiwa.dmm.com/",
+  "campaignText": null,
+  "summary": "幅広い目的に対応し、始めやすさを打ち出しているオンライン英会話。",
+  "source": {
+    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "note": "ページ内の比較表に「DMM英会話」および特徴表記あり"
+  },
+  "hoursText": "24時間",
+  "points": [
+    "始めやすい料金設計",
+    "幅広い目的に対応"
+  ],
+  "recommendedFor": [
+    "とにかく安く始めたい",
+    "英語初心者で不安がある"
+  ],
+  "teacherQuality": null,
+  "trialDetailText": null,
+  "planUrl": null,
+  "editorialComments": [],
+  "campaignEndsAt": null,
+  "campaignBullets": [],
+  "bannerImage": "/banners/company-39.png",
+  "bannerAlt": "DMM英会話 バナー",
+  "bannerHref": "https://eikaiwa.dmm.com/"
+}

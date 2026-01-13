@@ -1,0 +1,17 @@
+{
+  "name": "99-eigoonline",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "astro preview --host 0.0.0.0 --port $PORT",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.16.7",
+    "tailwindcss": "^4.1.18"
+  }
+}
