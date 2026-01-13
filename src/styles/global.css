@@ -45,13 +45,46 @@
   }
 }
 
-.cta-shine {
-  /* Run the shimmer about once every ~10 seconds */
-  animation: ctaShine 10s ease-in-out infinite;
+/* Diagonal sweep highlight (like provided CSS) */
+@keyframes ctaSweep {
+  0% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0.5;
+  }
+  81% {
+    transform: scale(4) rotate(45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(50) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.cta-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-sweep::before {
+  position: absolute;
+  content: "";
+  display: inline-block;
+  top: -180px;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  animation: ctaSweep 10s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cta-shine {
+  .cta-sweep::before {
     animation: none !important;
   }
 }
