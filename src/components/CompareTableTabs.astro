@@ -36,19 +36,19 @@ const d = sliceCols(daily);
 const b = sliceCols(business);
 ---
 
-<section class="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4">
+<section class="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 overflow-hidden">
   <input class="peer/ct-overall sr-only" type="radio" name="comparetab" id="ct-overall" checked />
   <input class="peer/ct-daily sr-only" type="radio" name="comparetab" id="ct-daily" />
   <input class="peer/ct-business sr-only" type="radio" name="comparetab" id="ct-business" />
 
-  <div class="grid h-[50px] grid-cols-3 items-end gap-[10px] bg-[#ecf9fe] px-[2%] text-zinc-600
+  <div class="grid h-[50px] grid-cols-3 items-end gap-0.5 bg-[#ecf9fe] px-[2%] text-zinc-600 sm:gap-[10px]
     peer-checked/ct-overall:[&_.tab-overall]:h-full peer-checked/ct-overall:[&_.tab-overall]:bg-[linear-gradient(to_top,#FFFF0D,#FFFFA3_10%,#FFFFA3_100%)] peer-checked/ct-overall:[&_.tab-overall]:text-zinc-900 peer-checked/ct-overall:[&_.tab-overall]:shadow-[2px_0px_4px_#999]
     peer-checked/ct-daily:[&_.tab-daily]:h-full peer-checked/ct-daily:[&_.tab-daily]:bg-[linear-gradient(to_top,#FFFF0D,#FFFFA3_10%,#FFFFA3_100%)] peer-checked/ct-daily:[&_.tab-daily]:text-zinc-900 peer-checked/ct-daily:[&_.tab-daily]:shadow-[2px_0px_4px_#999]
     peer-checked/ct-business:[&_.tab-business]:h-full peer-checked/ct-business:[&_.tab-business]:bg-[linear-gradient(to_top,#FFFF0D,#FFFFA3_10%,#FFFFA3_100%)] peer-checked/ct-business:[&_.tab-business]:text-zinc-900 peer-checked/ct-business:[&_.tab-business]:shadow-[2px_0px_4px_#999]
   ">
     <label
       for="ct-overall"
-      class="tab tab-overall cursor-pointer rounded-t-xl bg-[#d1d1d1] px-3 py-1 text-center text-sm font-extrabold leading-tight transition hover:bg-zinc-200"
+      class="tab tab-overall cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
     >
       <div class="grid h-[80%] place-items-center">
         <span class="grid grid-rows-2 leading-tight">
@@ -59,7 +59,7 @@ const b = sliceCols(business);
     </label>
     <label
       for="ct-daily"
-      class="tab tab-daily cursor-pointer rounded-t-xl bg-[#d1d1d1] px-3 py-1 text-center text-sm font-extrabold leading-tight transition hover:bg-zinc-200"
+      class="tab tab-daily cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
     >
       <div class="grid h-[80%] place-items-center">
         <span class="grid grid-rows-2 leading-tight">
@@ -70,7 +70,7 @@ const b = sliceCols(business);
     </label>
     <label
       for="ct-business"
-      class="tab tab-business cursor-pointer rounded-t-xl bg-[#d1d1d1] px-3 py-1 text-center text-sm font-extrabold leading-tight transition hover:bg-zinc-200"
+      class="tab tab-business cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
     >
       <div class="grid h-[80%] place-items-center">
         <span class="grid grid-rows-2 leading-tight">
