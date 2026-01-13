@@ -5,6 +5,12 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  // Astro 5.4+ adds host allowlist checks (preview/dev).
+  // Allow custom domain + Railway host headers to avoid "Blocked request".
+  // You can tighten this later to an explicit array allowlist.
+  server: {
+    allowedHosts: true
+  },
   vite: {
     plugins: [tailwindcss()],
     // Allow Railway + custom domain host headers for preview server
