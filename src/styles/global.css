@@ -24,3 +24,33 @@
     max-width: 100%;
   }
 }
+
+/* Subtle periodic "shine" for CTA buttons (mobile-first).
+   Disabled automatically for users who prefer reduced motion. */
+@keyframes ctaShine {
+  0% {
+    transform: translateX(-140%);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  18% {
+    transform: translateX(140%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(140%);
+    opacity: 0;
+  }
+}
+
+.cta-shine {
+  animation: ctaShine 3.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-shine {
+    animation: none !important;
+  }
+}
