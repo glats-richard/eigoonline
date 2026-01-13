@@ -9,7 +9,10 @@ export default defineConfig({
     plugins: [tailwindcss()],
     // Allow Railway + custom domain host headers for preview server
     preview: {
-      allowedHosts: ['eigoonline.com', '.up.railway.app']
+      // NOTE: Railway + custom domains can present varying Host headers.
+      // Setting `true` disables host checking for preview to avoid "Blocked request".
+      // If you want to lock this down later, replace with an explicit allowlist.
+      allowedHosts: true
     },
     // (Optional) keep dev server consistent if accessed via custom host
     server: {
