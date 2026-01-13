@@ -46,7 +46,8 @@
 }
 
 .cta-shine {
-  animation: ctaShine 3.6s ease-in-out infinite;
+  /* Run the shimmer about once every ~10 seconds */
+  animation: ctaShine 10s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
