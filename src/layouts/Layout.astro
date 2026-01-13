@@ -30,6 +30,10 @@ const orgName = "eigoonline";
 const orgLogo = new URL("/eigoonline_logo.png", siteUrl).toString();
 const orgUrl = siteUrl.toString().replace(/\/$/, "");
 
+// Debug/deploy trace: helps confirm which build is being served (useful under CDN caching).
+const buildId =
+  (typeof process !== "undefined" && process.env && (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.GITHUB_SHA)) || "";
+
 const jsonLd = [
   {
     "@context": "https://schema.org",
@@ -97,10 +101,12 @@ const jsonLd = [
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageAbs} />
 
+    {buildId ? <meta name="x-build-id" content={buildId} /> : null}
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
   </head>
   <body class="min-h-dvh overflow-x-hidden bg-white text-zinc-900 antialiased">
     {showHeader ? <SiteHeader /> : null}
+    {buildId ? <span class="sr-only" data-build-id={buildId}>build:{buildId}</span> : null}
     <slot />
   </body>
 </html>
