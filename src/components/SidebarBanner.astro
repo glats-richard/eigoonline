@@ -3,6 +3,7 @@ type Banner = { href: string; image: string; alt: string; label?: string };
 type Props = { heading?: string; items: Banner[] };
 
 const { heading = "バナー", items } = Astro.props satisfies Props;
+const isExternal = (href: string) => /^https?:\/\//.test(href);
 ---
 
 <section class="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
@@ -10,7 +11,13 @@ const { heading = "バナー", items } = Astro.props satisfies Props;
   {items.length ? (
     <div class="grid gap-3">
       {items.slice(0, 1).map((b) => (
-        <a href={b.href} class="group relative block overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+        <a
+          href={b.href}
+          target={isExternal(b.href) ? "_blank" : undefined}
+          rel={isExternal(b.href) ? "nofollow sponsored noopener noreferrer" : undefined}
+          referrerpolicy={isExternal(b.href) ? "no-referrer" : undefined}
+          class="group relative block overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+        >
           {b.label ? (
             <span class="absolute left-2 top-2 z-10 inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-[10px] font-extrabold text-white">
               {b.label}

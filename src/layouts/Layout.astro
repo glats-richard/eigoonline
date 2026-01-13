@@ -29,6 +29,10 @@ const canonical = Astro.site
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0" />
     <meta name="generator" content={Astro.generator} />
+    <!-- Avoid leaking full referrer data to external sites -->
+    <meta name="referrer" content="no-referrer" />
+    <!-- Disable legacy interest-cohort/FLoC-style tracking -->
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
 
     {robots ? <meta name="robots" content={robots} /> : null}
     <meta name="keywords" content={keywords} />

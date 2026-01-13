@@ -81,6 +81,7 @@ const bannerHref = item.bannerHref || planHref;
       href={bannerHref}
       target={bannerHref.startsWith("http") ? "_blank" : undefined}
       rel={bannerHref.startsWith("http") ? "nofollow sponsored noopener noreferrer" : undefined}
+      referrerpolicy={bannerHref.startsWith("http") ? "no-referrer" : undefined}
       class="mt-5 block overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50"
     >
       <img
