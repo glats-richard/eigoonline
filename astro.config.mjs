@@ -2,9 +2,12 @@
 import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://eigoonline.com',
+  integrations: [sitemap()],
   // Astro 5.4+ adds host allowlist checks (preview/dev).
   // Allow custom domain + Railway host headers to avoid "Blocked request".
   // You can tighten this later to an explicit array allowlist.

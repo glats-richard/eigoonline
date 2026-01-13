@@ -10,16 +10,55 @@ type Props = {
 };
 
 const {
-  title = "オンライン英会話おすすめ比較・ランキング",
-  description = "オンライン英会話を比較しやすいカード形式でランキング表示。料金の目安・特徴・公式サイト導線をまとめてチェックできます。",
-  keywords = "オンライン英会話,おすすめ,人気,比較,ランキング",
+  title = "オンライン英会話 おすすめ比較・ランキング",
+  description = "オンライン英会話のおすすめを目的別（総合/日常/ビジネス）に比較。料金・特徴・無料体験・公式サイト導線までまとめてチェックできます。",
+  keywords = "オンライン英会話,オンライン英会話 おすすめ,おすすめ,人気,比較,ランキング",
   robots,
   ogImage = "/favicon.svg",
 } = Astro.props satisfies Props;
 
-const canonical = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site).toString()
-  : Astro.url.toString();
+const siteUrl = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageAbs = new URL(ogImage, siteUrl).toString();
+
+const defaultRobots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
+
+const orgName = "eigoonline";
+const orgLogo = new URL("/eigoonline_logo.png", siteUrl).toString();
+const orgUrl = siteUrl.toString().replace(/\/$/, "");
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${orgUrl}#organization`,
+    name: orgName,
+    url: orgUrl,
+    logo: {
+      "@type": "ImageObject",
+      url: orgLogo,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${orgUrl}#website`,
+    url: orgUrl,
+    name: title,
+    publisher: { "@id": `${orgUrl}#organization` },
+    inLanguage: "ja-JP",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${canonical}#webpage`,
+    url: canonical,
+    name: title,
+    description,
+    isPartOf: { "@id": `${orgUrl}#website` },
+    inLanguage: "ja-JP",
+  },
+];
 ---
 
 <!doctype html>
@@ -34,22 +73,28 @@ const canonical = Astro.site
     <!-- Disable legacy interest-cohort/FLoC-style tracking -->
     <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
 
-    {robots ? <meta name="robots" content={robots} /> : null}
+    <meta name="robots" content={robots ?? defaultRobots} />
     <meta name="keywords" content={keywords} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hrefLang="ja" href={canonical} />
+    <meta name="theme-color" content="#0ea5e9" />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(ogImage, canonical).toString()} />
+    <meta property="og:site_name" content={orgName} />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:image" content={ogImageAbs} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(ogImage, canonical).toString()} />
+    <meta name="twitter:image" content={ogImageAbs} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
   </head>
   <body class="min-h-dvh bg-white text-zinc-900 antialiased">
     <slot />

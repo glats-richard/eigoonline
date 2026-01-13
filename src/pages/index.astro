@@ -42,12 +42,64 @@ const sidebarBannersMid = banners.filter((b) => b.data.placement === "sidebar_mi
 const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar_bottom").map((b) => b.data);
 
 const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
+
+const base = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
+const pageUrl = new URL(Astro.url.pathname, base).toString();
+const itemListJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ItemList",
+	name: "オンライン英会話 おすすめランキング（総合）",
+	itemListOrder: "http://schema.org/ItemListOrderAscending",
+	url: pageUrl,
+	numberOfItems: Math.min(8, overallItems.length),
+	itemListElement: overallItems.slice(0, 8).map((x, idx) => ({
+		"@type": "ListItem",
+		position: idx + 1,
+		name: x.data.name,
+		url: new URL(`#school-${x.id}`, pageUrl).toString(),
+	})),
+};
+
+const faqJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	mainEntity: [
+		{
+			"@type": "Question",
+			name: "オンライン英会話のおすすめはどう選べばいい？",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text:
+					"目的（総合/日常/ビジネス）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "無料体験は受けた方がいい？",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "おすすめです。講師との相性や教材の使いやすさ、予約の取りやすさを実際に確認できます。",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "初心者でも続けやすいオンライン英会話の特徴は？",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "日本語サポート・初心者向け教材・短時間レッスン・受講できる時間帯が広いサービスは継続しやすい傾向があります。",
+			},
+		},
+	],
+};
 ---
 <Layout
-	title="オンライン英会話おすすめ比較・ランキング（総合・日常・ビジネス）"
-	description="オンライン英会話を「総合 / 日常英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・公式サイト導線をまとめてチェックできます。"
+	title="オンライン英会話 おすすめ比較・ランキング（総合・日常・ビジネス）"
+	description="オンライン英会話のおすすめを「総合 / 日常英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
 	ogImage="/eigoonline_logo.png"
 >
+	<script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)}></script>
+	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
+
 	<header class="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
 		<div class="mx-auto w-full max-w-6xl px-4 py-3">
 			<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -83,11 +135,11 @@ const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.it
 						<span class="text-zinc-500">目的別</span>
 					</div>
 					<h1 class="mt-4 text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl">
-						オンライン英会話
-						<span class="block text-sky-700">人気ランキング</span>
+						オンライン英会話 <span class="text-sky-700">おすすめ</span>
+						<span class="block text-sky-700">ランキング</span>
 					</h1>
 					<p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-700">
-						「総合 / 日常英会話 / ビジネス英会話」タブで目的別に比較。料金の目安・特徴・公式サイト導線までまとめてチェックできます。
+						「総合 / 日常英会話 / ビジネス英会話」タブで目的別に比較。料金の目安・特徴・無料体験・公式サイト導線までまとめてチェックできます。
 					</p>
 					<p class="mt-3 text-sm text-zinc-500">
 						※表示順は当サイト内の基準で調整しているカテゴリがあります（例：総合はKimini=1位、レアジョブ=2位固定）。
@@ -98,7 +150,7 @@ const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.it
 					<div class="w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
 						<img
 							src="/fv_1.png"
-							alt="オンライン英会話 人気ランキング"
+							alt="オンライン英会話 おすすめランキング"
 							loading="eager"
 							decoding="async"
 							class="h-auto w-full object-contain"
@@ -221,8 +273,34 @@ const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.it
 					</div>
 
 					{overallItems.map((x, idx) => (
-						<SchoolDetailSection rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+						<div id={`school-${x.id}`} class="scroll-mt-24">
+							<SchoolDetailSection rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+						</div>
 					))}
+				</section>
+
+				<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+					<h2 class="text-xl font-extrabold text-zinc-900">よくある質問（オンライン英会話 おすすめ）</h2>
+					<div class="mt-4 space-y-3">
+						<details class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+							<summary class="cursor-pointer text-sm font-extrabold text-zinc-900">オンライン英会話のおすすめはどう選べばいい？</summary>
+							<p class="mt-2 text-sm text-zinc-700">
+								目的（総合/日常/ビジネス）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。
+							</p>
+						</details>
+						<details class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+							<summary class="cursor-pointer text-sm font-extrabold text-zinc-900">無料体験は受けた方がいい？</summary>
+							<p class="mt-2 text-sm text-zinc-700">
+								おすすめです。講師との相性や教材の使いやすさ、予約の取りやすさを実際に確認できます。
+							</p>
+						</details>
+						<details class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+							<summary class="cursor-pointer text-sm font-extrabold text-zinc-900">初心者でも続けやすいオンライン英会話の特徴は？</summary>
+							<p class="mt-2 text-sm text-zinc-700">
+								日本語サポート・初心者向け教材・短時間レッスン・受講できる時間帯が広いサービスは継続しやすい傾向があります。
+							</p>
+						</details>
+					</div>
 				</section>
 
 				<section id="search">
