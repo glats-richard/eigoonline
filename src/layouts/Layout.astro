@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import SiteHeader from "../components/SiteHeader.astro";
 
 type Props = {
   title?: string;
@@ -7,6 +8,7 @@ type Props = {
   keywords?: string;
   robots?: string;
   ogImage?: string;
+  showHeader?: boolean;
 };
 
 const {
@@ -15,6 +17,7 @@ const {
   keywords = "オンライン英会話,オンライン英会話 おすすめ,おすすめ,人気,比較,ランキング",
   robots,
   ogImage = "/favicon.svg",
+  showHeader = true,
 } = Astro.props satisfies Props;
 
 const siteUrl = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
@@ -97,6 +100,7 @@ const jsonLd = [
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
   </head>
   <body class="min-h-dvh overflow-x-hidden bg-white text-zinc-900 antialiased">
+    {showHeader ? <SiteHeader /> : null}
     <slot />
   </body>
 </html>

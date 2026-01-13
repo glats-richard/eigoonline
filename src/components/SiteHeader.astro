@@ -1,0 +1,56 @@
+---
+type Props = {
+  /** Logo image path under /public */
+  logoSrc?: string;
+  logoAlt?: string;
+};
+
+const { logoSrc = "/eigoonline_logo.png", logoAlt = "eigoonline.com" } = Astro.props satisfies Props;
+---
+
+<header class="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+  <div class="mx-auto w-full max-w-6xl px-4 py-3">
+    <div class="flex items-center justify-between gap-3">
+      <a href="/" class="flex shrink-0 items-center gap-3">
+        <img
+          src={logoSrc}
+          alt={logoAlt}
+          width="140"
+          height="48"
+          loading="eager"
+          decoding="async"
+          class="h-9 w-auto max-w-[160px] sm:h-10 sm:max-w-none"
+        />
+        <span class="hidden text-sm font-semibold text-zinc-900 sm:inline">オンライン英会話比較サイト</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden items-center gap-3 text-sm font-semibold text-zinc-800 sm:flex">
+        <a class="rounded-lg px-3 py-2 hover:bg-zinc-100" href="/">TOP</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-zinc-100" href="/ranking/list">ランキング</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-zinc-100" href="/article/list">コラム</a>
+      </nav>
+
+      <!-- Mobile hamburger (CSS-only via checkbox) -->
+      <div class="relative sm:hidden">
+        <input id="mobile-nav" type="checkbox" class="peer sr-only" />
+        <label
+          for="mobile-nav"
+          aria-label="メニューを開く"
+          class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-extrabold text-zinc-900 shadow-sm hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        >
+          <span aria-hidden="true">☰</span>
+        </label>
+
+        <label for="mobile-nav" aria-label="メニューを閉じる" class="fixed inset-0 z-40 hidden bg-black/20 peer-checked:block"></label>
+
+        <div class="absolute right-0 z-50 mt-2 hidden w-48 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg peer-checked:block">
+          <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-zinc-50" href="/">TOP</a>
+          <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-zinc-50" href="/ranking/list">ランキング</a>
+          <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-zinc-50" href="/article/list">コラム</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
