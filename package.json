@@ -2,11 +2,14 @@
   "name": "99-eigoonline",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "astro build && node scripts/postbuild.mjs",
     "preview": "astro preview",
-    "start": "HOST=0.0.0.0 node ./dist/server/entry.mjs",
+    "start": "HOST=0.0.0.0 PORT=${PORT:-4321} node ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
