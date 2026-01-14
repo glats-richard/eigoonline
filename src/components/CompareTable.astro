@@ -14,6 +14,8 @@ type School = {
   hoursText?: string | null;
   trialText?: string | null;
   trialDetailText?: string | null;
+  benefitText?: string | null;
+  campaignText?: string | null;
   points?: string[];
   recommendedFor?: string[];
 };
@@ -80,6 +82,12 @@ const parseMaxLessons = (a: string | null | undefined, b: string | null | undefi
   if (!m) return null;
   const n = Number(m[1]);
   return Number.isFinite(n) ? n : null;
+};
+
+const isTrialBoosted = (benefitText: string | null | undefined, campaignText: string | null | undefined) => {
+  const s = `${benefitText ?? ""} ${campaignText ?? ""}`;
+  // Only flag when the copy explicitly indicates an increase/extension.
+  return /増量|延長|追加|アップ|増や/.test(s);
 };
 ---
 
@@ -204,10 +212,20 @@ const parseMaxLessons = (a: string | null | undefined, b: string | null | undefi
                 {(() => {
                   const days = parseMaxDays(x.data.trialText, x.data.trialDetailText);
                   const lessons = parseMaxLessons(x.data.trialText, x.data.trialDetailText);
+                  const boosted = isTrialBoosted(x.data.benefitText, x.data.campaignText);
                   return (
                     <div class="space-y-1">
-                      <div class="text-sm font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
-                      <div class="text-xs font-extrabold text-zinc-700">{lessons == null ? "最大—回" : `最大${lessons}回`}</div>
+                      <div class="flex items-center gap-2">
+                        <div class="text-sm font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
+                        {boosted ? (
+                          <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
+                            増量中
+                          </span>
+                        ) : null}
+                      </div>
+                      <div class="text-xs font-extrabold text-zinc-700">
+                        期間中の最大レッスン数 {lessons == null ? "—" : `${lessons}回`}
+                      </div>
                     </div>
                   );
                 })()}
@@ -398,11 +416,21 @@ const parseMaxLessons = (a: string | null | undefined, b: string | null | undefi
             const borderColor = colBorder(idx + 1);
             const days = parseMaxDays(x.data.trialText, x.data.trialDetailText);
             const lessons = parseMaxLessons(x.data.trialText, x.data.trialDetailText);
+            const boosted = isTrialBoosted(x.data.benefitText, x.data.campaignText);
             return (
               <td class="border-t border-zinc-200 px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
                 <div class="grid place-items-center gap-1">
-                  <div class="text-base font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
-                  <div class="text-xs font-extrabold text-zinc-700">{lessons == null ? "最大—回" : `最大${lessons}回`}</div>
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="text-base font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
+                    {boosted ? (
+                      <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
+                        増量中
+                      </span>
+                    ) : null}
+                  </div>
+                  <div class="text-xs font-extrabold text-zinc-700">
+                    期間中の最大レッスン数 {lessons == null ? "—" : `${lessons}回`}
+                  </div>
                 </div>
               </td>
             );
