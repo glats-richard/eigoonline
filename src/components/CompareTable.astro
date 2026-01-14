@@ -43,6 +43,12 @@ const colBorder = (rank: number) => {
 };
 
 const labelBar = "bg-zinc-100 text-zinc-700";
+
+const fmtScore = (v: number) => {
+  const rounded = Math.round(v * 2) / 2;
+  const s = rounded.toFixed(1);
+  return s.endsWith(".0") ? s.slice(0, -2) : s;
+};
 ---
 
 {variant === "stack" ? (
@@ -100,7 +106,10 @@ const labelBar = "bg-zinc-100 text-zinc-700";
               <div class="text-xs font-extrabold text-zinc-700">講師の質</div>
               <div class="text-sm font-extrabold text-zinc-900">
                 {typeof x.data.teacherQuality === "number" && Number.isFinite(x.data.teacherQuality) ? (
-                  <StarRating value={x.data.teacherQuality} label="講師の質" showValue={false} size={16} />
+                  <div class="flex items-center justify-between gap-3">
+                    <StarRating value={x.data.teacherQuality} label="講師の質" showValue={false} size={16} />
+                    <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.teacherQuality)} / 5</span>
+                  </div>
                 ) : (
                   <span class="text-zinc-500">—</span>
                 )}
@@ -110,7 +119,10 @@ const labelBar = "bg-zinc-100 text-zinc-700";
               <div class="text-xs font-extrabold text-zinc-700">教材の質</div>
               <div class="text-sm font-extrabold text-zinc-900">
                 {typeof x.data.materialQuality === "number" && Number.isFinite(x.data.materialQuality) ? (
-                  <StarRating value={x.data.materialQuality} label="教材の質" showValue={false} size={16} />
+                  <div class="flex items-center justify-between gap-3">
+                    <StarRating value={x.data.materialQuality} label="教材の質" showValue={false} size={16} />
+                    <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.materialQuality)} / 5</span>
+                  </div>
                 ) : (
                   <span class="text-zinc-500">—</span>
                 )}
@@ -120,7 +132,15 @@ const labelBar = "bg-zinc-100 text-zinc-700";
               <div class="text-xs font-extrabold text-zinc-700">通信の質</div>
               <div class="text-sm font-extrabold text-zinc-900">
                 {typeof x.data.connectionQuality === "number" && Number.isFinite(x.data.connectionQuality) ? (
-                  <StarRating value={x.data.connectionQuality} label="通信の質" showValue={false} size={16} />
+                  <div class="flex items-center gap-3">
+                    <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
+                      <div
+                        class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-sky-500"
+                        style={`width:${Math.max(0, Math.min(100, (x.data.connectionQuality / 5) * 100))}%`}
+                      />
+                    </div>
+                    <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.connectionQuality)} / 5</span>
+                  </div>
                 ) : (
                   <span class="text-zinc-500">—</span>
                 )}
@@ -221,9 +241,12 @@ const labelBar = "bg-zinc-100 text-zinc-700";
             const borderColor = colBorder(idx + 1);
             return (
               <td class="px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
-                <div class="flex justify-center">
+                <div class="flex items-center justify-center gap-2">
                   {typeof x.data.teacherQuality === "number" && Number.isFinite(x.data.teacherQuality) ? (
-                    <StarRating value={x.data.teacherQuality} label="講師の質" showValue={false} size={16} />
+                    <>
+                      <StarRating value={x.data.teacherQuality} label="講師の質" showValue={false} size={16} />
+                      <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.teacherQuality)} / 5</span>
+                    </>
                   ) : (
                     <span class="text-sm font-semibold text-zinc-500">—</span>
                   )}
@@ -238,9 +261,12 @@ const labelBar = "bg-zinc-100 text-zinc-700";
             const borderColor = colBorder(idx + 1);
             return (
               <td class="border-t border-zinc-200 px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
-                <div class="flex justify-center">
+                <div class="flex items-center justify-center gap-2">
                   {typeof x.data.materialQuality === "number" && Number.isFinite(x.data.materialQuality) ? (
-                    <StarRating value={x.data.materialQuality} label="教材の質" showValue={false} size={16} />
+                    <>
+                      <StarRating value={x.data.materialQuality} label="教材の質" showValue={false} size={16} />
+                      <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.materialQuality)} / 5</span>
+                    </>
                   ) : (
                     <span class="text-sm font-semibold text-zinc-500">—</span>
                   )}
@@ -255,9 +281,17 @@ const labelBar = "bg-zinc-100 text-zinc-700";
             const borderColor = colBorder(idx + 1);
             return (
               <td class="border-t border-zinc-200 px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
-                <div class="flex justify-center">
+                <div class="flex items-center justify-center gap-2">
                   {typeof x.data.connectionQuality === "number" && Number.isFinite(x.data.connectionQuality) ? (
-                    <StarRating value={x.data.connectionQuality} label="通信の質" showValue={false} size={16} />
+                    <>
+                      <div class="h-2.5 w-[140px] overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
+                        <div
+                          class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-sky-500"
+                          style={`width:${Math.max(0, Math.min(100, (x.data.connectionQuality / 5) * 100))}%`}
+                        />
+                      </div>
+                      <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.connectionQuality)} / 5</span>
+                    </>
                   ) : (
                     <span class="text-sm font-semibold text-zinc-500">—</span>
                   )}
