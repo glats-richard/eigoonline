@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 
 type Props = {
   title?: string;
@@ -130,6 +131,7 @@ const jsonLd = [
     {showHeader ? <SiteHeader overlay={headerOverlay} /> : null}
     {buildId ? <span class="sr-only" data-build-id={buildId}>build:{buildId}</span> : null}
     <slot />
+    <SiteFooter />
   </body>
 </html>
 
