@@ -42,7 +42,18 @@ const { bannersTop = [], bannersMid = [], bannersBottom = [], popular, categorie
             referrerpolicy="no-referrer"
             class="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 hover:bg-zinc-50"
           >
-            <span class="truncate text-sm font-extrabold text-zinc-900">{s.name}</span>
+            <span class="flex min-w-0 items-center gap-3">
+              {s.logoUrl ? (
+                <img
+                  src={s.logoUrl}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  class="h-6 w-auto max-w-[88px] shrink-0 object-contain"
+                />
+              ) : null}
+              <span class="min-w-0 truncate text-sm font-extrabold text-zinc-900">{s.name}</span>
+            </span>
             <span class="text-xs font-bold text-zinc-500">↗</span>
           </a>
         ))}
