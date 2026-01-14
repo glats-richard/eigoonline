@@ -113,6 +113,9 @@ const faqJsonLd = {
 	ogImage="/eigoonline_logo.png"
 	headerOverlay
 >
+	<Fragment slot="head">
+		<link rel="preload" as="image" href="/fv_1.webp" fetchpriority="high" />
+	</Fragment>
 	<script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)}></script>
 	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
 
@@ -121,13 +124,17 @@ const faqJsonLd = {
 		<section class="pt-10 sm:pt-12">
 			<div class="grid gap-6 lg:grid-cols-4 lg:items-start">
 				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
-					<img
-						src="/fv_1.png"
-						alt="オンライン英会話 おすすめランキング"
-						loading="eager"
-						decoding="async"
-						class="block h-auto w-full object-cover"
-					/>
+					<picture>
+						<source srcset="/fv_1.webp" type="image/webp" />
+						<img
+							src="/fv_1.png"
+							alt="オンライン英会話 おすすめランキング"
+							loading="eager"
+							decoding="async"
+							fetchpriority="high"
+							class="block h-auto w-full object-cover"
+						/>
+					</picture>
 
 					<!-- Service logos (top picks) -->
 					<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">

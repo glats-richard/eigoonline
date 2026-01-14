@@ -7,7 +7,7 @@
   "features": [
     "語学学習機関として長い実績のあるECCが運営"
   ],
-  "logoUrl": "/logos/company-71.png",
+  "logoUrl": "/logos/company-71.webp",
   "officialUrl": "https://online.ecc.co.jp/",
   "campaignText": null,
   "summary": "ECCが運営するオンライン英会話。日本人向け教材やカリキュラムを訴求。",
@@ -33,7 +33,7 @@
     "英語で挫折経験がある",
     "基礎からしっかり学びたい"
   ],
-  "bannerImage": "/banners/company-71.png",
+  "bannerImage": "/banners/company-71.webp",
   "bannerAlt": "ECCオンラインレッスン バナー",
   "bannerHref": "https://online.ecc.co.jp/"
 }
