@@ -10,7 +10,18 @@ export default defineConfig({
   site: 'https://eigoonline.com',
   // Astro v5: former `output: "hybrid"` behavior is now the default (`static`).
   adapter: node({ mode: 'standalone' }),
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // Exclude admin pages from sitemap
+      filter: (page) => {
+        try {
+          return !new URL(page).pathname.startsWith('/tracker');
+        } catch {
+          return true;
+        }
+      },
+    }),
+  ],
   // Astro 5.4+ adds host allowlist checks (preview/dev).
   // Allow custom domain + Railway host headers to avoid "Blocked request".
   // You can tighten this later to an explicit array allowlist.
