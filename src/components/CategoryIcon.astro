@@ -1,0 +1,73 @@
+---
+type Props = { title: string; href: string; class?: string };
+const { title, href, class: className = "h-4 w-4" } = Astro.props satisfies Props;
+
+const t = `${title} ${href}`;
+const kind =
+  /低価格|lowcost/.test(t) ? "yen"
+  : /ビジネス|business(?!man)/.test(t) ? "briefcase"
+  : /マンツーマン|one-on-one/.test(t) ? "user"
+  : /初心者|beginner/.test(t) ? "seedling"
+  : /上級者|senior/.test(t) ? "spark"
+  : /キッズ|小学生|中学生|高校生|学生|kids|elementary|junior-high|high-school|student/.test(t) ? "cap"
+  : /社会人|businessman/.test(t) ? "tie"
+  : "tag";
+---
+
+{kind === "yen" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M7 4l5 7 5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M6 14h12M6 18h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M12 11v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>
+) : null}
+
+{kind === "briefcase" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M9 7V6a2 2 0 012-2h2a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M4 9h16v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    <path d="M4 13h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>
+) : null}
+
+{kind === "user" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M20 21a8 8 0 10-16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M12 11a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>
+) : null}
+
+{kind === "seedling" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 21v-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M20 4c-6 0-10 4-10 10 6 0 10-4 10-10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    <path d="M4 8c5 0 8 3 8 8-5 0-8-3-8-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+  </svg>
+) : null}
+
+{kind === "cap" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 3L2 8l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    <path d="M6 10v6c0 2 3 4 6 4s6-2 6-4v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>
+) : null}
+
+{kind === "tie" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M9 3h6l-2 4 2 3-3 11-3-11 2-3-2-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+  </svg>
+) : null}
+
+{kind === "spark" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+  </svg>
+) : null}
+
+{kind === "tag" ? (
+  <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M7 7h10v10H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    <path d="M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>
+) : null}
+
