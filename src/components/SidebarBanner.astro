@@ -10,7 +10,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
   <div class="px-2 pb-2 text-xs font-extrabold text-zinc-500">{heading}</div>
   {items.length ? (
     <div class="grid gap-3">
-      {items.slice(0, 1).map((b) => (
+      {items.map((b) => (
         <a
           href={b.href}
           target={isExternal(b.href) ? "_blank" : undefined}

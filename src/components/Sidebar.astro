@@ -15,10 +15,13 @@ type Props = {
 const { bannersTop = [], bannersMid = [], bannersBottom = [], popular, categories } = Astro.props satisfies Props;
 
 const uniqueCategories = Array.from(new Map(categories.map((c) => [c.href, c] as const)).values());
+const allBanners = [...bannersTop, ...bannersMid, ...bannersBottom];
+const topBanner = allBanners[0] ? [allBanners[0]] : [];
+const bottomBanners = allBanners.length > 1 ? allBanners.slice(1) : [];
 ---
 
 <aside class="space-y-4">
-  {bannersTop.length ? <SidebarBanner heading="おすすめバナー" items={bannersTop} /> : null}
+  {topBanner.length ? <SidebarBanner heading="おすすめバナー" items={topBanner} /> : null}
 
   {uniqueCategories.length ? (
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
@@ -70,7 +73,6 @@ const uniqueCategories = Array.from(new Map(categories.map((c) => [c.href, c] as
     </section>
   ) : null}
 
-  {bannersMid.length ? <SidebarBanner heading="おすすめバナー" items={bannersMid} /> : null}
-  {bannersBottom.length ? <SidebarBanner heading="おすすめバナー" items={bannersBottom} /> : null}
+  {bottomBanners.length ? <SidebarBanner heading="おすすめバナー" items={bottomBanners} /> : null}
 </aside>
 

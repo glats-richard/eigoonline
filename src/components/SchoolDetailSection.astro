@@ -196,15 +196,9 @@ const stats = getReviewStats(reviews);
     height: 3.5rem;
   }
 
+  /* Disable the extra glow layer around the #1 badge */
   .rank-badge--hero::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 9999px;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 215, 0, 0.65) 40%, rgba(255, 215, 0, 0) 70%);
-    filter: blur(0.5px);
-    opacity: 0.95;
-    z-index: 0;
+    content: none;
   }
 
   .rank-badge--hero img {
@@ -242,7 +236,7 @@ const stats = getReviewStats(reviews);
     z-index: 0;
     filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.35));
     opacity: 0.95;
-    animation: sparkle-rotate 2.8s linear infinite;
+    /* animation removed (static highlight) */
   }
 
   .rank-card--sparkle::after {
@@ -257,7 +251,7 @@ const stats = getReviewStats(reviews);
       radial-gradient(circle at 85% 30%, rgba(255, 215, 0, 0.65), rgba(255, 215, 0, 0) 40%),
       radial-gradient(circle at 40% 95%, rgba(255, 215, 0, 0.55), rgba(255, 215, 0, 0) 45%);
     filter: blur(0.5px);
-    animation: sparkle-twinkle 1.6s ease-in-out infinite;
+    /* animation removed (static highlight) */
   }
 
   .rank-card--sparkle > * {
@@ -265,26 +259,7 @@ const stats = getReviewStats(reviews);
     z-index: 1;
   }
 
-  @keyframes sparkle-rotate {
-    0% {
-      --sparkle-rot: 0deg;
-    }
-    100% {
-      --sparkle-rot: 360deg;
-    }
-  }
-
-  @keyframes sparkle-twinkle {
-    0%,
-    100% {
-      opacity: 0.35;
-      transform: scale(0.995);
-    }
-    50% {
-      opacity: 0.75;
-      transform: scale(1.01);
-    }
-  }
+  /* sparkle keyframes removed: animation disabled */
 
 </style>
 

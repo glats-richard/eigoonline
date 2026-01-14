@@ -2,7 +2,7 @@
   "category": "kids",
   "title": "キッズ向け",
   "description": "子どもが楽しく続けやすいサービスを中心に比較したランキング。",
-  "items": ["clouty", "kimini", "ecc", "nativecamp", "dmm", "rarejob", "berlitz", "bizmate"],
+  "items": ["kimini", "clouty", "ecc", "nativecamp", "dmm", "rarejob", "berlitz", "bizmate"],
   "source": {
     "url": "https://eigoonline.com/",
     "note": "当サイト内基準で、キッズ向けとして表示順を調整（暫定）"

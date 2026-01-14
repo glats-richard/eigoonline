@@ -121,64 +121,47 @@ const faqJsonLd = {
 	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
 
 	<main id="top" class="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 sm:pb-10 sm:pt-6">
-		<!-- Hero: 3 columns (FV 2 cols + sidebar 1 col) -->
 		<section class="pt-10 sm:pt-12">
-			<div class="grid gap-6 lg:grid-cols-3 lg:items-start">
-				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-2">
-					<picture>
-						<source srcset="/fv_1.webp" type="image/webp" />
-						<img
-							src="/fv_1.jpg"
-							alt="オンライン英会話 おすすめランキング"
-							loading="eager"
-							decoding="async"
-							fetchpriority="high"
-							class="block h-auto w-full object-cover"
-						/>
-					</picture>
+			<div class="mt-3 grid gap-6 sm:mt-4 lg:grid-cols-3 lg:items-start">
+				<div class="min-w-0 space-y-6 lg:col-span-2">
+					<!-- Hero image -->
+					<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+						<picture>
+							<source srcset="/fv_1.webp" type="image/webp" />
+							<img
+								src="/fv_1.jpg"
+								alt="オンライン英会話 おすすめランキング"
+								loading="eager"
+								decoding="async"
+								fetchpriority="high"
+								class="block h-auto w-full object-cover"
+							/>
+						</picture>
 
-					<!-- Service logos (top picks) -->
-					<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
-						<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto px-4 py-2 [-webkit-overflow-scrolling:touch]">
-							{overallItemsRated.slice(0, 8).map((x) => (
-								x.data.logoUrl ? (
-									<a
-										href={`#school-${x.id}`}
-										class="shrink-0 rounded-lg bg-white/70 px-3 py-2 ring-1 ring-black/5 hover:bg-white"
-										aria-label={`${x.data.name} の詳細へ`}
-									>
-										<img
-											src={x.data.logoUrl}
-											alt={`${x.data.name} ロゴ`}
-											loading="lazy"
-											decoding="async"
-											class="h-8 w-auto max-w-[140px] object-contain"
-										/>
-									</a>
-								) : null
-							))}
+						<!-- Service logos (top picks) -->
+						<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
+							<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto px-4 py-2 [-webkit-overflow-scrolling:touch]">
+								{overallItemsRated.slice(0, 8).map((x) =>
+									x.data.logoUrl ? (
+										<a
+											href={`#school-${x.id}`}
+											class="shrink-0 rounded-lg bg-white/70 px-3 py-2 ring-1 ring-black/5 hover:bg-white"
+											aria-label={`${x.data.name} の詳細へ`}
+										>
+											<img
+												src={x.data.logoUrl}
+												alt={`${x.data.name} ロゴ`}
+												loading="lazy"
+												decoding="async"
+												class="h-8 w-auto max-w-[140px] object-contain"
+											/>
+										</a>
+									) : null,
+								)}
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div class="hidden lg:block lg:col-span-1">
-					<Sidebar
-						bannersTop={sidebarBannersTop}
-						bannersMid={[]}
-						bannersBottom={[]}
-						popular={[]}
-						categories={[
-							...catReco.map((c) => ({ title: c.title, href: c.href })),
-							...catAge.map((c) => ({ title: c.title, href: c.href })),
-							...catLevel.map((c) => ({ title: c.title, href: c.href })),
-						]}
-					/>
-				</div>
-			</div>
-		</section>
-
-		<div class="mt-3 grid gap-6 sm:mt-4 lg:grid-cols-3 lg:items-start">
-			<div class="min-w-0 space-y-6 lg:col-span-2">
 				<section id="ranking" class="w-full min-w-0">
 					<div class="mb-4">
 						<h2 class="text-xl font-extrabold text-zinc-900">目的別ランキング</h2>
@@ -333,28 +316,43 @@ const faqJsonLd = {
 				<section id="articles">
 					<ArticleBanners heading="オンライン英会話ガイド・コラム" items={articles.map((a) => a.data)} />
 				</section>
-			</div>
+				</div>
 
-			<div class="hidden lg:block lg:col-span-1">
-				<Sidebar
-					bannersTop={[]}
-					bannersMid={sidebarBannersMid}
-					bannersBottom={sidebarBannersBottom}
-					popular={overallItems.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
-					categories={[]}
-				/>
+				<!-- Desktop sidebar -->
+				<div class="hidden lg:block lg:col-span-1">
+					<Sidebar
+						bannersTop={sidebarBannersTop}
+						bannersMid={sidebarBannersMid}
+						bannersBottom={sidebarBannersBottom}
+						popular={overallItems.slice(0, 8).map((x) => ({
+							name: x.data.name,
+							officialUrl: x.data.officialUrl,
+							logoUrl: x.data.logoUrl,
+						}))}
+						categories={[
+							...catReco.map((c) => ({ title: c.title, href: c.href })),
+							...catAge.map((c) => ({ title: c.title, href: c.href })),
+							...catLevel.map((c) => ({ title: c.title, href: c.href })),
+						]}
+					/>
+				</div>
 			</div>
-		</div>
+		</section>
 
-		<!-- Mobile: show hero sidebar blocks after main content -->
+		<!-- Mobile: show sidebar blocks after main content -->
 		<section class="mt-10 lg:hidden">
 			<Sidebar
 				bannersTop={sidebarBannersTop}
-				bannersMid={[]}
-				bannersBottom={[]}
-				popular={[]}
+				bannersMid={sidebarBannersMid}
+				bannersBottom={sidebarBannersBottom}
+				popular={overallItems.slice(0, 8).map((x) => ({
+					name: x.data.name,
+					officialUrl: x.data.officialUrl,
+					logoUrl: x.data.logoUrl,
+				}))}
 				categories={[
 					...catReco.map((c) => ({ title: c.title, href: c.href })),
+					...catAge.map((c) => ({ title: c.title, href: c.href })),
 					...catLevel.map((c) => ({ title: c.title, href: c.href })),
 				]}
 			/>
