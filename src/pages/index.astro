@@ -112,6 +112,31 @@ const faqJsonLd = {
 					decoding="async"
 					class="block h-auto w-full object-cover"
 				/>
+
+				<!-- Service logos (top picks) -->
+				<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
+					<div class="mx-auto w-full max-w-6xl px-4 py-2">
+						<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto [-webkit-overflow-scrolling:touch]">
+							{overallItems.slice(0, 8).map((x) => (
+								x.data.logoUrl ? (
+									<a
+										href={`#school-${x.id}`}
+										class="shrink-0 rounded-lg bg-white/70 px-3 py-2 ring-1 ring-black/5 hover:bg-white"
+										aria-label={`${x.data.name} の詳細へ`}
+									>
+										<img
+											src={x.data.logoUrl}
+											alt={`${x.data.name} ロゴ`}
+											loading="lazy"
+											decoding="async"
+											class="h-8 w-auto max-w-[140px] object-contain"
+										/>
+									</a>
+								) : null
+							))}
+						</div>
+					</div>
+				</div>
 			</div>
 		</section>
 
