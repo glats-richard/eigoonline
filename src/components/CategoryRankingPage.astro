@@ -130,11 +130,7 @@ const pageDesc =
             bannersMid={sidebarBannersMid}
             bannersBottom={sidebarBannersBottom}
             popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
-            categories={[
-              ...catReco.map((c) => ({ title: c.title, href: c.href })),
-              ...catAge.map((c) => ({ title: c.title, href: c.href })),
-              ...catLevel.map((c) => ({ title: c.title, href: c.href })),
-            ]}
+            categories={[]}
           />
         </div>
       </div>
@@ -198,7 +194,11 @@ const pageDesc =
           bannersMid={sidebarBannersMid}
           bannersBottom={sidebarBannersBottom}
           popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
-          categories={[]}
+          categories={[
+            ...catReco.map((c) => ({ title: c.title, href: c.href })),
+            ...catAge.map((c) => ({ title: c.title, href: c.href })),
+            ...catLevel.map((c) => ({ title: c.title, href: c.href })),
+          ]}
         />
       </div>
     </div>
