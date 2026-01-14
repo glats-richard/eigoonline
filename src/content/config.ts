@@ -54,7 +54,24 @@ const schools = defineCollection({
 	}),
 });
 
-const rankingCategory = z.enum(['overall', 'daily', 'business']);
+const rankingCategory = z.enum([
+	// Home tabs
+	'overall',
+	'daily',
+	'business',
+	// Category pages (/ranking/*)
+	'kids',
+	'beginner',
+	'senior',
+	'businessman',
+	'lowcost',
+	'one-on-one',
+	// Student categories
+	'student',
+	'elementary',
+	'junior-high',
+	'high-school',
+]);
 
 const rankings = defineCollection({
 	type: 'data',

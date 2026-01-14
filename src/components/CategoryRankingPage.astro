@@ -1,0 +1,221 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import RankingListItem from "./RankingListItem.astro";
+import CompareTable from "./CompareTable.astro";
+import SchoolDetailSection from "./SchoolDetailSection.astro";
+import Sidebar from "./Sidebar.astro";
+import { getReviewStats } from "../utils/reviewStats";
+
+type RankingCategory =
+  | "overall"
+  | "daily"
+  | "business"
+  | "kids"
+  | "beginner"
+  | "senior"
+  | "businessman"
+  | "lowcost"
+  | "one-on-one"
+  | "student"
+  | "elementary"
+  | "junior-high"
+  | "high-school";
+
+type Props = {
+  category: RankingCategory;
+  /** Override <h1> title */
+  heading?: string;
+  /** Optional intro text */
+  lead?: string;
+};
+
+const { category, heading, lead } = Astro.props satisfies Props;
+
+const schools = await getCollection("schools");
+const rankings = await getCollection("rankings");
+const categories = await getCollection("categories");
+const banners = await getCollection("banners");
+const reviews = await getCollection("reviews");
+
+const schoolsById = new Map(schools.map((s) => [s.id, s.data] as const));
+const ranking = rankings.find((r) => r.data.category === category)?.data ?? null;
+
+const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
+const reviewStatsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, getReviewStats(r.data.items)] as const));
+
+const resolveItems = (items: string[] | undefined) =>
+  (items ?? [])
+    .map((id) => ({ id, data: schoolsById.get(id) }))
+    .filter((x): x is { id: string; data: NonNullable<typeof x.data> } => Boolean(x.data));
+
+const items = resolveItems(ranking?.items);
+const itemsRated = items.map((x) => {
+  const stats = reviewStatsBySchoolId.get(x.id);
+  const rating = stats?.count ? stats.avg : null;
+  return { ...x, data: { ...x.data, rating } };
+});
+
+const sidebarBannersTop = banners.filter((b) => ["sidebar", "sidebar_top"].includes(b.data.placement)).map((b) => b.data);
+const sidebarBannersMid = banners.filter((b) => b.data.placement === "sidebar_mid").map((b) => b.data);
+const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar_bottom").map((b) => b.data);
+
+const catLevel = categories.filter((c) => c.data.group === "level").map((c) => c.data);
+const catAge = categories.filter((c) => c.data.group === "age").map((c) => c.data);
+const catReco = categories.filter((c) => c.data.group === "recommend").map((c) => c.data);
+
+const pageTitle = ranking?.title ? `${ranking.title}｜オンライン英会話ランキング` : "ランキング｜オンライン英会話";
+const pageDesc =
+  lead ?? ranking?.description ?? "カテゴリ別にオンライン英会話を比較できるランキングページです。";
+---
+
+<Layout title={pageTitle} description={pageDesc} ogImage="/eigoonline_logo.png" headerOverlay>
+  <Fragment slot="head">
+    <link rel="preload" as="image" href="/fv_1.webp" fetchpriority="high" />
+  </Fragment>
+
+  <main class="mx-auto w-full max-w-6xl px-4 pb-10 pt-4 sm:pb-12 sm:pt-6">
+    <section class="pt-10 sm:pt-12">
+      <div class="grid gap-6 lg:grid-cols-4 lg:items-start">
+        <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+          <picture>
+            <source srcset="/fv_1.webp" type="image/webp" />
+            <img
+              src="/fv_1.jpg"
+              alt="オンライン英会話 おすすめランキング"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              class="block h-auto w-full object-cover"
+            />
+          </picture>
+
+          <div class="absolute inset-x-0 top-0 bg-gradient-to-b from-black/55 to-transparent px-5 pb-6 pt-5">
+            <h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              {heading ?? ranking?.title ?? "ランキング"}
+            </h1>
+            <p class="mt-2 max-w-2xl text-sm font-semibold text-white/90 sm:text-base">
+              {pageDesc}
+            </p>
+          </div>
+
+          {itemsRated.some((x) => x.data.logoUrl) ? (
+            <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
+              <div class="pointer-events-auto flex items-center gap-4 overflow-x-auto px-4 py-2 [-webkit-overflow-scrolling:touch]">
+                {itemsRated.slice(0, 8).map((x) =>
+                  x.data.logoUrl ? (
+                    <a
+                      href={`#school-${x.id}`}
+                      class="shrink-0 rounded-lg bg-white/70 px-3 py-2 ring-1 ring-black/5 hover:bg-white"
+                      aria-label={`${x.data.name} の詳細へ`}
+                    >
+                      <img
+                        src={x.data.logoUrl}
+                        alt={`${x.data.name} ロゴ`}
+                        loading="lazy"
+                        decoding="async"
+                        class="h-8 w-auto max-w-[140px] object-contain"
+                      />
+                    </a>
+                  ) : null,
+                )}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div class="hidden lg:block lg:col-span-1">
+          <Sidebar
+            bannersTop={sidebarBannersTop}
+            bannersMid={sidebarBannersMid}
+            bannersBottom={sidebarBannersBottom}
+            popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
+            categories={[
+              ...catReco.map((c) => ({ title: c.title, href: c.href })),
+              ...catAge.map((c) => ({ title: c.title, href: c.href })),
+              ...catLevel.map((c) => ({ title: c.title, href: c.href })),
+            ]}
+          />
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-4 grid gap-6 sm:mt-6 lg:grid-cols-4 lg:items-start">
+      <div class="min-w-0 space-y-6 lg:col-span-3">
+        <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="flex items-end justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-zinc-900">ランキング</h2>
+              <p class="mt-1 text-sm text-zinc-600">上位スクールを順番に紹介します。</p>
+            </div>
+            <a class="text-sm font-extrabold text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800" href="/">
+              トップへ
+            </a>
+          </div>
+
+          <div class="mt-4 grid gap-4">
+            {itemsRated.slice(0, 8).map((x, idx) => (
+              <RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+            ))}
+          </div>
+        </section>
+
+        <section id="compare" class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 class="text-xl font-extrabold text-zinc-900">比較表</h2>
+          <p class="mt-1 text-sm text-zinc-600">上位スクールを項目ごとに比較できます。</p>
+
+          {ranking ? (
+            <div class="mt-4">
+              <div class="sm:hidden">
+                <CompareTable ranking={{ title: ranking.title, items: itemsRated.slice(0, 4) }} variant="stack" />
+              </div>
+              <div class="hidden sm:block">
+                <CompareTable ranking={{ title: ranking.title, items: itemsRated.slice(0, 4) }} variant="table" />
+              </div>
+            </div>
+          ) : (
+            <div class="mt-4 text-sm font-semibold text-zinc-500">ランキングデータが見つかりません。</div>
+          )}
+        </section>
+
+        <section id="details" class="space-y-6">
+          <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h2 class="text-xl font-extrabold text-zinc-900">ランキング詳細</h2>
+            <p class="mt-1 text-sm text-zinc-600">各社の特徴やキャンペーンをまとめて確認できます。</p>
+          </div>
+
+          {itemsRated.map((x, idx) => (
+            <div id={`school-${x.id}`} class="scroll-mt-24">
+              <SchoolDetailSection rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+            </div>
+          ))}
+        </section>
+      </div>
+
+      <div class="hidden lg:block lg:col-span-1">
+        <Sidebar
+          bannersTop={[]}
+          bannersMid={sidebarBannersMid}
+          bannersBottom={sidebarBannersBottom}
+          popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
+          categories={[]}
+        />
+      </div>
+    </div>
+
+    <section class="mt-10 lg:hidden">
+      <Sidebar
+        bannersTop={sidebarBannersTop}
+        bannersMid={sidebarBannersMid}
+        bannersBottom={sidebarBannersBottom}
+        popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
+        categories={[
+          ...catReco.map((c) => ({ title: c.title, href: c.href })),
+          ...catAge.map((c) => ({ title: c.title, href: c.href })),
+          ...catLevel.map((c) => ({ title: c.title, href: c.href })),
+        ]}
+      />
+    </section>
+  </main>
+</Layout>
+

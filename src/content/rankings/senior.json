@@ -1,0 +1,11 @@
+{
+  "category": "senior",
+  "title": "英語上級者",
+  "description": "アウトプット量・講師の質・実践力を重視して比較したランキング。",
+  "items": ["rarejob", "berlitz", "bizmate", "dmm", "nativecamp", "kimini", "ecc", "clouty"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、上級者向けとして表示順を調整（レアジョブ=1位固定）"
+  }
+}
+

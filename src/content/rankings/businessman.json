@@ -1,0 +1,11 @@
+{
+  "category": "businessman",
+  "title": "社会人向け",
+  "description": "仕事・学習の両立をしやすいサービスを中心に比較したランキング。",
+  "items": ["rarejob", "kimini", "dmm", "nativecamp", "bizmate", "berlitz", "ecc", "clouty"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、社会人向けとして表示順を調整（暫定）"
+  }
+}
+

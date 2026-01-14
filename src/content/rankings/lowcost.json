@@ -1,0 +1,11 @@
+{
+  "category": "lowcost",
+  "title": "低価格",
+  "description": "料金の安さ・続けやすさを重視して比較したランキング。",
+  "items": ["nativecamp", "dmm", "kimini", "clouty", "rarejob", "ecc", "bizmate", "berlitz"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、低価格重視として表示順を調整（暫定）"
+  }
+}
+

@@ -1,0 +1,11 @@
+{
+  "category": "one-on-one",
+  "title": "マンツーマン",
+  "description": "講師と1対1でしっかり学べるサービスを中心に比較したランキング。",
+  "items": ["kimini", "rarejob", "dmm", "nativecamp", "berlitz", "ecc", "bizmate", "clouty"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、マンツーマン重視として表示順を調整（暫定）"
+  }
+}
+

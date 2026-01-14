@@ -1,0 +1,11 @@
+{
+  "category": "elementary",
+  "title": "小学生向け",
+  "description": "小学生が無理なく続けられるサービスを中心に比較したランキング。",
+  "items": ["kimini", "clouty", "ecc", "nativecamp", "dmm", "rarejob", "berlitz", "bizmate"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、小学生向けとして表示順を調整（Kimini=1位固定）"
+  }
+}
+

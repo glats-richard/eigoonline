@@ -1,0 +1,11 @@
+{
+  "category": "junior-high",
+  "title": "中学生向け",
+  "description": "定期テスト・受験を意識しつつ、会話力も伸ばせるサービスを中心に比較したランキング。",
+  "items": ["kimini", "dmm", "nativecamp", "rarejob", "ecc", "clouty", "berlitz", "bizmate"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、中学生向けとして表示順を調整（Kimini=1位固定）"
+  }
+}
+

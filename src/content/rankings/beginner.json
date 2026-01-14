@@ -1,0 +1,11 @@
+{
+  "category": "beginner",
+  "title": "英語初心者",
+  "description": "日本語サポートや教材の分かりやすさ、続けやすさを重視したランキング。",
+  "items": ["kimini", "dmm", "nativecamp", "rarejob", "clouty", "ecc", "berlitz", "bizmate"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、初心者向けとして表示順を調整（暫定）"
+  }
+}
+

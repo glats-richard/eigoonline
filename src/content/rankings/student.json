@@ -1,0 +1,11 @@
+{
+  "category": "student",
+  "title": "学生向け",
+  "description": "学校生活と両立しやすい、続けやすさ重視のランキング。",
+  "items": ["kimini", "clouty", "dmm", "nativecamp", "ecc", "rarejob", "berlitz", "bizmate"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、学生向けとして表示順を調整（Kimini=1位固定）"
+  }
+}
+

@@ -1,0 +1,11 @@
+{
+  "category": "high-school",
+  "title": "高校生向け",
+  "description": "受験・英検・留学準備など、目的に合わせて選びやすいサービスを中心に比較したランキング。",
+  "items": ["kimini", "rarejob", "dmm", "nativecamp", "berlitz", "ecc", "bizmate", "clouty"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、高校生向けとして表示順を調整（Kimini=1位固定）"
+  }
+}
+
