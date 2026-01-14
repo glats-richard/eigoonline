@@ -15,7 +15,7 @@ const { bannersTop = [], bannersMid = [], bannersBottom = [], popular, categorie
 ---
 
 <aside class="space-y-4">
-  <SidebarBanner heading="おすすめバナー" items={bannersTop} />
+  {bannersTop.length ? <SidebarBanner heading="おすすめバナー" items={bannersTop} /> : null}
 
   <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
     <h3 class="text-base font-extrabold text-zinc-900">カテゴリ別ランキング</h3>
@@ -46,7 +46,7 @@ const { bannersTop = [], bannersMid = [], bannersBottom = [], popular, categorie
     </div>
   </section>
 
-  <SidebarBanner heading="おすすめバナー" items={bannersMid} />
-  <SidebarBanner heading="おすすめバナー" items={bannersBottom} />
+  {bannersMid.length ? <SidebarBanner heading="おすすめバナー" items={bannersMid} /> : null}
+  {bannersBottom.length ? <SidebarBanner heading="おすすめバナー" items={bannersBottom} /> : null}
 </aside>
 

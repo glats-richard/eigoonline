@@ -145,8 +145,8 @@ const faqJsonLd = {
 			</div>
 		</section>
 
-		<div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-			<div class="min-w-0 space-y-6">
+		<div class="mt-10 grid gap-6 lg:grid-cols-4 lg:items-start">
+			<div class="min-w-0 space-y-6 lg:col-span-3">
 				<section id="ranking" class="w-full min-w-0">
 					<div class="mb-4">
 						<h2 class="text-xl font-extrabold text-zinc-900">目的別ランキング</h2>
@@ -303,9 +303,9 @@ const faqJsonLd = {
 				</section>
 			</div>
 
-			<div class="hidden lg:block">
+			<div class="hidden lg:block lg:col-span-1">
 				<Sidebar
-					bannersTop={sidebarBannersTop}
+					bannersTop={[]}
 					bannersMid={sidebarBannersMid}
 					bannersBottom={sidebarBannersBottom}
 					popular={overallItems.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
