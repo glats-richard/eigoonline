@@ -124,7 +124,7 @@ const faqJsonLd = {
 		<!-- Hero: 4 columns (FV 3 cols + sidebar 1 col) -->
 		<section class="pt-10 sm:pt-12">
 			<div class="grid gap-6 lg:grid-cols-4 lg:items-start">
-				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-4">
 					<picture>
 						<source srcset="/fv_1.webp" type="image/webp" />
 						<img
@@ -159,16 +159,6 @@ const faqJsonLd = {
 							))}
 						</div>
 					</div>
-				</div>
-
-				<div class="hidden lg:block lg:col-span-1">
-					<Sidebar
-						bannersTop={sidebarBannersTop}
-						bannersMid={[]}
-						bannersBottom={[]}
-						popular={[]}
-						categories={[]}
-					/>
 				</div>
 			</div>
 		</section>
@@ -333,7 +323,7 @@ const faqJsonLd = {
 
 			<div class="hidden lg:block lg:col-span-1">
 				<Sidebar
-					bannersTop={[]}
+					bannersTop={sidebarBannersTop}
 					bannersMid={sidebarBannersMid}
 					bannersBottom={sidebarBannersBottom}
 					popular={overallItems.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}

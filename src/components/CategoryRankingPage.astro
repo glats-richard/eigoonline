@@ -77,7 +77,7 @@ const pageDesc =
   <main class="mx-auto w-full max-w-6xl px-4 pb-10 pt-4 sm:pb-12 sm:pt-6">
     <section class="pt-10 sm:pt-12">
       <div class="grid gap-6 lg:grid-cols-4 lg:items-start">
-        <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+        <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-4">
           <picture>
             <source srcset="/fv_1.webp" type="image/webp" />
             <img
@@ -122,16 +122,6 @@ const pageDesc =
               </div>
             </div>
           ) : null}
-        </div>
-
-        <div class="hidden lg:block lg:col-span-1">
-          <Sidebar
-            bannersTop={sidebarBannersTop}
-            bannersMid={sidebarBannersMid}
-            bannersBottom={sidebarBannersBottom}
-            popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
-            categories={[]}
-          />
         </div>
       </div>
     </section>
@@ -190,7 +180,7 @@ const pageDesc =
 
       <div class="hidden lg:block lg:col-span-1">
         <Sidebar
-          bannersTop={[]}
+          bannersTop={sidebarBannersTop}
           bannersMid={sidebarBannersMid}
           bannersBottom={sidebarBannersBottom}
           popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
