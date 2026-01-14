@@ -205,7 +205,6 @@ const stats = getReviewStats(reviews);
     filter: blur(0.5px);
     opacity: 0.95;
     z-index: 0;
-    animation: rank-badge-pulse 1.6s ease-in-out infinite;
   }
 
   .rank-badge--hero img {
@@ -287,18 +286,5 @@ const stats = getReviewStats(reviews);
     }
   }
 
-  @keyframes rank-badge-pulse {
-    0%,
-    100% {
-      transform: scale(0.96);
-      opacity: 0.75;
-      filter: blur(0.6px);
-    }
-    50% {
-      transform: scale(1.06);
-      opacity: 1;
-      filter: blur(0.2px);
-    }
-  }
 </style>
 
