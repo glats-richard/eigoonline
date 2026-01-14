@@ -8,6 +8,7 @@ import SearchBox from "../components/SearchBox.astro";
 import CategoryGrid from "../components/CategoryGrid.astro";
 import ArticleBanners from "../components/ArticleBanners.astro";
 import Sidebar from "../components/Sidebar.astro";
+import SidebarBanner from "../components/SidebarBanner.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
 
 const schools = await getCollection("schools");
@@ -102,21 +103,21 @@ const faqJsonLd = {
 	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
 
 	<main id="top" class="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10">
-		<!-- Hero: full-width FV image only (no text) -->
-		<section class="relative pt-16 sm:pt-20">
-			<div class="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-				<img
-					src="/fv_1.png"
-					alt="オンライン英会話 おすすめランキング"
-					loading="eager"
-					decoding="async"
-					class="block h-auto w-full object-cover"
-				/>
+		<!-- Hero: 4 columns (FV 3 cols + sidebar 1 col) -->
+		<section class="pt-16 sm:pt-20">
+			<div class="grid gap-6 lg:grid-cols-4 lg:items-start">
+				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+					<img
+						src="/fv_1.png"
+						alt="オンライン英会話 おすすめランキング"
+						loading="eager"
+						decoding="async"
+						class="block h-auto w-full object-cover"
+					/>
 
-				<!-- Service logos (top picks) -->
-				<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
-					<div class="mx-auto w-full max-w-6xl px-4 py-2">
-						<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto [-webkit-overflow-scrolling:touch]">
+					<!-- Service logos (top picks) -->
+					<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
+						<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto px-4 py-2 [-webkit-overflow-scrolling:touch]">
 							{overallItems.slice(0, 8).map((x) => (
 								x.data.logoUrl ? (
 									<a
@@ -136,6 +137,10 @@ const faqJsonLd = {
 							))}
 						</div>
 					</div>
+				</div>
+
+				<div class="lg:col-span-1">
+					<SidebarBanner heading="おすすめバナー" items={sidebarBannersTop} />
 				</div>
 			</div>
 		</section>
