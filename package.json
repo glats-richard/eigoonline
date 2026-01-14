@@ -6,11 +6,13 @@
     "dev": "node scripts/dev.mjs",
     "build": "astro build && node scripts/postbuild.mjs",
     "preview": "astro preview",
-    "start": "astro preview --host 0.0.0.0 --port $PORT --allowed-hosts=true",
+    "start": "HOST=0.0.0.0 node ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^9.5.1",
     "@astrojs/sitemap": "^3.6.1",
+    "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.7",
     "sharp": "^0.34.5",

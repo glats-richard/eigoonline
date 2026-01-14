@@ -3,10 +3,13 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://eigoonline.com',
+  // Astro v5: former `output: "hybrid"` behavior is now the default (`static`).
+  adapter: node({ mode: 'standalone' }),
   integrations: [sitemap()],
   // Astro 5.4+ adds host allowlist checks (preview/dev).
   // Allow custom domain + Railway host headers to avoid "Blocked request".
