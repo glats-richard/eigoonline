@@ -13,6 +13,7 @@ type School = {
   priceText?: string | null;
   hoursText?: string | null;
   trialText?: string | null;
+  trialDetailText?: string | null;
   points?: string[];
   recommendedFor?: string[];
 };
@@ -51,6 +52,35 @@ const fmtScore = (v: number) => {
 };
 
 const gaugeWidthPct = (v: number) => Math.max(0, Math.min(100, (v / 5) * 100));
+
+const fmtYen = (yen: number) =>
+  new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 }).format(yen) + "円";
+
+const parseMinMonthlyYen = (s: string | null | undefined): number | null => {
+  if (!s) return null;
+  // Extract the first "xxxx円" amount as the minimum price.
+  // Examples: "月額1,210円から" / "7,425円" / "4,800円"
+  const m = s.replace(/,/g, "").match(/(\d{3,})\s*円/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+};
+
+const parseMaxDays = (a: string | null | undefined, b: string | null | undefined): number | null => {
+  const s = `${a ?? ""} ${b ?? ""}`;
+  const m = s.match(/(\d+)\s*日/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+};
+
+const parseMaxLessons = (a: string | null | undefined, b: string | null | undefined): number | null => {
+  const s = `${a ?? ""} ${b ?? ""}`;
+  const m = s.match(/(\d+)\s*回/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+};
 ---
 
 {variant === "stack" ? (
@@ -160,7 +190,12 @@ const gaugeWidthPct = (v: number) => Math.max(0, Math.min(100, (v / 5) * 100));
             </div>
             <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
               <div class="text-xs font-extrabold text-zinc-700">月額</div>
-              <div class="text-sm font-extrabold text-zinc-900">{x.data.priceText ?? "—"}</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {(() => {
+                  const v = parseMinMonthlyYen(x.data.priceText);
+                  return v == null ? "—" : fmtYen(v);
+                })()}
+              </div>
             </div>
             <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
               <div class="text-xs font-extrabold text-zinc-700">受講時間</div>
@@ -168,7 +203,18 @@ const gaugeWidthPct = (v: number) => Math.max(0, Math.min(100, (v / 5) * 100));
             </div>
             <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
               <div class="text-xs font-extrabold text-zinc-700">無料体験</div>
-              <div class="text-sm font-extrabold text-zinc-900">{x.data.trialText ?? "—"}</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {(() => {
+                  const days = parseMaxDays(x.data.trialText, x.data.trialDetailText);
+                  const lessons = parseMaxLessons(x.data.trialText, x.data.trialDetailText);
+                  return (
+                    <div class="space-y-1">
+                      <div class="text-sm font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
+                      <div class="text-xs font-extrabold text-zinc-700">{lessons == null ? "最大—回" : `最大${lessons}回`}</div>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
 
             <div class="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
@@ -326,9 +372,10 @@ const gaugeWidthPct = (v: number) => Math.max(0, Math.min(100, (v / 5) * 100));
           <th class={`sticky left-0 z-10 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>月額</th>
           {ranking.items.map((x, idx) => {
             const borderColor = colBorder(idx + 1);
+            const v = parseMinMonthlyYen(x.data.priceText);
             return (
               <td class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
-                {x.data.priceText ?? "—"}
+                {v == null ? "—" : fmtYen(v)}
               </td>
             );
           })}
@@ -348,9 +395,14 @@ const gaugeWidthPct = (v: number) => Math.max(0, Math.min(100, (v / 5) * 100));
           <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>無料体験</th>
           {ranking.items.map((x, idx) => {
             const borderColor = colBorder(idx + 1);
+            const days = parseMaxDays(x.data.trialText, x.data.trialDetailText);
+            const lessons = parseMaxLessons(x.data.trialText, x.data.trialDetailText);
             return (
               <td class="border-t border-zinc-200 px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
-                {x.data.trialText ?? "—"}
+                <div class="grid place-items-center gap-1">
+                  <div class="text-base font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
+                  <div class="text-xs font-extrabold text-zinc-700">{lessons == null ? "最大—回" : `最大${lessons}回`}</div>
+                </div>
               </td>
             );
           })}
