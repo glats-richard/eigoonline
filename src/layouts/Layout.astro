@@ -9,6 +9,8 @@ type Props = {
   robots?: string;
   ogImage?: string;
   showHeader?: boolean;
+  /** If true, header overlays hero (absolute + translucent). */
+  headerOverlay?: boolean;
 };
 
 const {
@@ -18,6 +20,7 @@ const {
   robots,
   ogImage = "/favicon.svg",
   showHeader = true,
+  headerOverlay = false,
 } = Astro.props satisfies Props;
 
 const siteUrl = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
@@ -105,7 +108,7 @@ const jsonLd = [
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
   </head>
   <body class="min-h-dvh overflow-x-hidden bg-white text-zinc-900 antialiased">
-    {showHeader ? <SiteHeader /> : null}
+    {showHeader ? <SiteHeader overlay={headerOverlay} /> : null}
     {buildId ? <span class="sr-only" data-build-id={buildId}>build:{buildId}</span> : null}
     <slot />
   </body>

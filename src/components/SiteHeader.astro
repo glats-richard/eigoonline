@@ -3,12 +3,21 @@ type Props = {
   /** Logo image path under /public */
   logoSrc?: string;
   logoAlt?: string;
+  /** If true, render as translucent overlay (for hero). */
+  overlay?: boolean;
 };
 
-const { logoSrc = "/eigoonline_logo.png", logoAlt = "eigoonline.com" } = Astro.props satisfies Props;
+const { logoSrc = "/eigoonline_logo.png", logoAlt = "eigoonline.com", overlay = false } = Astro.props satisfies Props;
 ---
 
-<header class="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+<header
+  class:list={[
+    "z-50 border-b backdrop-blur",
+    overlay
+      ? "absolute inset-x-0 top-0 border-white/20 bg-white/20"
+      : "sticky top-0 border-zinc-200 bg-white/90",
+  ]}
+>
   <div class="mx-auto w-full max-w-6xl px-4 py-3">
     <div class="flex items-center justify-between gap-3">
       <a href="/" class="flex shrink-0 items-center gap-3">
@@ -37,7 +46,10 @@ const { logoSrc = "/eigoonline_logo.png", logoAlt = "eigoonline.com" } = Astro.p
         <label
           for="mobile-nav"
           aria-label="メニューを開く"
-          class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-extrabold text-zinc-900 shadow-sm hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          class:list={[
+            "inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm font-extrabold text-zinc-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+            overlay ? "border-white/30 bg-white/60 hover:bg-white/80" : "border-zinc-200 bg-white hover:bg-zinc-50",
+          ]}
         >
           <span aria-hidden="true">☰</span>
         </label>

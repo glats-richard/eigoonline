@@ -96,12 +96,13 @@ const faqJsonLd = {
 	title="オンライン英会話 おすすめ比較・ランキング（総合・日常・ビジネス）"
 	description="オンライン英会話のおすすめを「総合 / 日常英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
 	ogImage="/eigoonline_logo.png"
+	headerOverlay
 >
 	<script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)}></script>
 	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
 
 	<main id="top" class="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10">
-		<section class="relative overflow-hidden rounded-3xl border border-zinc-200 bg-gradient-to-br from-sky-50 via-white to-emerald-50 p-6 sm:p-10">
+		<section class="relative overflow-hidden rounded-3xl border border-zinc-200 bg-gradient-to-br from-sky-50 via-white to-emerald-50 p-6 pt-16 sm:p-10 sm:pt-20">
 			<div class="absolute inset-0 opacity-80 [background:radial-gradient(800px_circle_at_20%_10%,rgba(56,189,248,0.22),transparent_55%),radial-gradient(800px_circle_at_80%_40%,rgba(52,211,153,0.18),transparent_55%)]"></div>
 
 			<div class="relative grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
@@ -120,13 +121,35 @@ const faqJsonLd = {
 				</div>
 
 				<div class="relative">
-					<div class="w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+					<!-- Hidden SVG filter used to create a subtle "liquid" wobble -->
+					<svg class="absolute h-0 w-0" aria-hidden="true" focusable="false">
+						<filter id="liquid">
+							<feTurbulence
+								type="fractalNoise"
+								baseFrequency="0.012 0.02"
+								numOctaves="2"
+								seed="2"
+								result="noise"
+							>
+								<animate
+									attributeName="baseFrequency"
+									dur="7s"
+									values="0.012 0.02; 0.02 0.012; 0.012 0.02"
+									repeatCount="indefinite"
+								/>
+							</feTurbulence>
+							<feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+						</filter>
+					</svg>
+
+					<div class="liquid-blob w-full overflow-hidden border border-zinc-200 bg-white shadow-sm">
 						<img
 							src="/fv_1.png"
 							alt="オンライン英会話 おすすめランキング"
 							loading="eager"
 							decoding="async"
 							class="h-auto w-full object-contain"
+							style="filter:url(#liquid)"
 						/>
 					</div>
 				</div>
