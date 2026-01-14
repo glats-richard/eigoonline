@@ -18,6 +18,8 @@
   },
   "hoursText": "朝9時～深夜24時",
   "teacherQuality": 2,
+  "materialQuality": 4,
+  "connectionQuality": 3.5,
   "trialDetailText": "1回",
   "planUrl": "https://www.cloudt.jp/",
   "editorialComments": [

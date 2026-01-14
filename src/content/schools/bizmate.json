@@ -17,7 +17,9 @@
     "note": "ページ内に「1位 Bizmate」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
   },
   "hoursText": "朝5時〜深夜25時",
-  "teacherQuality": null,
+  "teacherQuality": 4.5,
+  "materialQuality": 4,
+  "connectionQuality": 4,
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [],

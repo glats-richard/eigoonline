@@ -24,7 +24,9 @@
     "スキマ時間で学びたい",
     "料金を抑えて続けたい"
   ],
-  "teacherQuality": null,
+  "teacherQuality": 4,
+  "materialQuality": 3.5,
+  "connectionQuality": 4,
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [],

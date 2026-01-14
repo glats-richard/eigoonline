@@ -7,6 +7,9 @@ type School = {
   logoUrl?: string | null;
   officialUrl: string;
   rating?: number | null;
+  teacherQuality?: number | null;
+  materialQuality?: number | null;
+  connectionQuality?: number | null;
   priceText?: string | null;
   hoursText?: string | null;
   trialText?: string | null;
@@ -92,6 +95,36 @@ const labelBar = "bg-zinc-100 text-zinc-700";
 
           <div class="mt-4 grid gap-3">
             <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">講師の質</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {typeof x.data.teacherQuality === "number" && Number.isFinite(x.data.teacherQuality) ? (
+                  <StarRating value={x.data.teacherQuality} label="講師の質" showValue={false} size={16} />
+                ) : (
+                  <span class="text-zinc-500">—</span>
+                )}
+              </div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">教材の質</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {typeof x.data.materialQuality === "number" && Number.isFinite(x.data.materialQuality) ? (
+                  <StarRating value={x.data.materialQuality} label="教材の質" showValue={false} size={16} />
+                ) : (
+                  <span class="text-zinc-500">—</span>
+                )}
+              </div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">通信の質</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {typeof x.data.connectionQuality === "number" && Number.isFinite(x.data.connectionQuality) ? (
+                  <StarRating value={x.data.connectionQuality} label="通信の質" showValue={false} size={16} />
+                ) : (
+                  <span class="text-zinc-500">—</span>
+                )}
+              </div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
               <div class="text-xs font-extrabold text-zinc-700">月額</div>
               <div class="text-sm font-extrabold text-zinc-900">{x.data.priceText ?? "—"}</div>
             </div>
@@ -174,6 +207,57 @@ const labelBar = "bg-zinc-100 text-zinc-700";
         </tr>
       </thead>
       <tbody class="align-top">
+        <tr>
+          <th class={`sticky left-0 z-10 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>講師の質</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                <div class="flex justify-center">
+                  {typeof x.data.teacherQuality === "number" && Number.isFinite(x.data.teacherQuality) ? (
+                    <StarRating value={x.data.teacherQuality} label="講師の質" showValue={false} size={16} />
+                  ) : (
+                    <span class="text-sm font-semibold text-zinc-500">—</span>
+                  )}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>教材の質</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                <div class="flex justify-center">
+                  {typeof x.data.materialQuality === "number" && Number.isFinite(x.data.materialQuality) ? (
+                    <StarRating value={x.data.materialQuality} label="教材の質" showValue={false} size={16} />
+                  ) : (
+                    <span class="text-sm font-semibold text-zinc-500">—</span>
+                  )}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>通信の質</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                <div class="flex justify-center">
+                  {typeof x.data.connectionQuality === "number" && Number.isFinite(x.data.connectionQuality) ? (
+                    <StarRating value={x.data.connectionQuality} label="通信の質" showValue={false} size={16} />
+                  ) : (
+                    <span class="text-sm font-semibold text-zinc-500">—</span>
+                  )}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
         <tr>
           <th class={`sticky left-0 z-10 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>月額</th>
           {ranking.items.map((x, idx) => {

@@ -25,7 +25,9 @@
     "とにかく安く始めたい",
     "英語初心者で不安がある"
   ],
-  "teacherQuality": null,
+  "teacherQuality": 4,
+  "materialQuality": 4,
+  "connectionQuality": 4,
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [],

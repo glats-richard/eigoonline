@@ -17,6 +17,8 @@
   },
   "hoursText": "朝6時～深夜24時",
   "teacherQuality": 3,
+  "materialQuality": 4,
+  "connectionQuality": 4,
   "trialDetailText": "2回",
   "planUrl": "https://online.ecc.co.jp/",
   "editorialComments": [

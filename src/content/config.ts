@@ -22,6 +22,26 @@ const schools = defineCollection({
 			.refine((v) => v === null || Math.round(v * 2) / 2 === v, {
 				message: 'teacherQuality must be in 0.5 increments',
 			}),
+		/** Material quality score 0-5 in 0.5 steps (for the compare table). */
+		materialQuality: z
+			.number()
+			.min(0)
+			.max(5)
+			.nullable()
+			.optional()
+			.refine((v) => v === null || Math.round(v * 2) / 2 === v, {
+				message: 'materialQuality must be in 0.5 increments',
+			}),
+		/** Connection quality score 0-5 in 0.5 steps (for the compare table). */
+		connectionQuality: z
+			.number()
+			.min(0)
+			.max(5)
+			.nullable()
+			.optional()
+			.refine((v) => v === null || Math.round(v * 2) / 2 === v, {
+				message: 'connectionQuality must be in 0.5 increments',
+			}),
 		/** Free-trial detail text shown in the small table. */
 		trialDetailText: z.string().nullable().optional(),
 		/** Plan & price link (separate from officialUrl). */
