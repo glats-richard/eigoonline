@@ -159,7 +159,7 @@ const faqJsonLd = {
 					</div>
 				</div>
 
-				<div class="lg:col-span-1">
+				<div class="hidden lg:block lg:col-span-1">
 					<Sidebar
 						bannersTop={sidebarBannersTop}
 						bannersMid={[]}
@@ -342,6 +342,20 @@ const faqJsonLd = {
 				/>
 			</div>
 		</div>
+
+		<!-- Mobile: show hero sidebar blocks after main content -->
+		<section class="mt-10 lg:hidden">
+			<Sidebar
+				bannersTop={sidebarBannersTop}
+				bannersMid={[]}
+				bannersBottom={[]}
+				popular={[]}
+				categories={[
+					...catReco.map((c) => ({ title: c.title, href: c.href })),
+					...catLevel.map((c) => ({ title: c.title, href: c.href })),
+				]}
+			/>
+		</section>
 
 	</main>
 </Layout>
