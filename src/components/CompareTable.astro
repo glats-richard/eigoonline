@@ -31,7 +31,9 @@ type Props = {
 const { ranking, variant = "table" } = Astro.props satisfies Props;
 
 const cols = Math.max(1, ranking.items.length);
-const tableMinWidth = cols >= 4 ? "920px" : cols === 3 ? "720px" : cols === 2 ? "520px" : "0px";
+const firstColWidth = 140;
+const serviceColWidth = 220;
+const tableMinWidth = cols >= 2 ? `${firstColWidth + cols * serviceColWidth}px` : "0px";
 
 const colBorder = (rank: number) => {
   if (rank === 1) return "#f5c542";
@@ -170,12 +172,18 @@ const labelBar = "bg-zinc-100 text-zinc-700";
 ) : (
   <div class="scroll-x-contain mt-4 w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
     <table
-      class="w-full border-separate border-spacing-0"
+      class="w-full table-fixed border-separate border-spacing-0"
       style={tableMinWidth !== "0px" ? `min-width:${tableMinWidth}` : undefined}
     >
+      <colgroup>
+        <col style={`width:${firstColWidth}px`} />
+        {ranking.items.map(() => (
+          <col style={`width:${serviceColWidth}px`} />
+        ))}
+      </colgroup>
       <thead>
         <tr>
-          <th class="sticky left-0 z-10 w-[140px] bg-white"></th>
+          <th class="sticky left-0 z-10 bg-white" style={`width:${firstColWidth}px`}></th>
           {ranking.items.map((x, idx) => {
             const rank = idx + 1;
             const borderColor = colBorder(rank);
