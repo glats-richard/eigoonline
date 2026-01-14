@@ -121,10 +121,10 @@ const faqJsonLd = {
 	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
 
 	<main id="top" class="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 sm:pb-10 sm:pt-6">
-		<!-- Hero: 4 columns (FV 3 cols + sidebar 1 col) -->
+		<!-- Hero: 3 columns (FV 2 cols + sidebar 1 col) -->
 		<section class="pt-10 sm:pt-12">
 			<div class="grid gap-6 lg:grid-cols-3 lg:items-start">
-				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-2">
 					<picture>
 						<source srcset="/fv_1.webp" type="image/webp" />
 						<img
@@ -160,11 +160,25 @@ const faqJsonLd = {
 						</div>
 					</div>
 				</div>
+
+				<div class="hidden lg:block lg:col-span-1">
+					<Sidebar
+						bannersTop={sidebarBannersTop}
+						bannersMid={[]}
+						bannersBottom={[]}
+						popular={[]}
+						categories={[
+							...catReco.map((c) => ({ title: c.title, href: c.href })),
+							...catAge.map((c) => ({ title: c.title, href: c.href })),
+							...catLevel.map((c) => ({ title: c.title, href: c.href })),
+						]}
+					/>
+				</div>
 			</div>
 		</section>
 
-		<div class="mt-4 grid gap-6 sm:mt-6 lg:grid-cols-4 lg:items-start">
-			<div class="min-w-0 space-y-6 lg:col-span-3">
+		<div class="mt-4 grid gap-6 sm:mt-6 lg:grid-cols-3 lg:items-start">
+			<div class="min-w-0 space-y-6 lg:col-span-2">
 				<section id="ranking" class="w-full min-w-0">
 					<div class="mb-4">
 						<h2 class="text-xl font-extrabold text-zinc-900">目的別ランキング</h2>
@@ -323,15 +337,11 @@ const faqJsonLd = {
 
 			<div class="hidden lg:block lg:col-span-1">
 				<Sidebar
-					bannersTop={sidebarBannersTop}
+					bannersTop={[]}
 					bannersMid={sidebarBannersMid}
 					bannersBottom={sidebarBannersBottom}
 					popular={overallItems.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
-					categories={[
-						...catReco.map((c) => ({ title: c.title, href: c.href })),
-						...catAge.map((c) => ({ title: c.title, href: c.href })),
-						...catLevel.map((c) => ({ title: c.title, href: c.href })),
-					]}
+					categories={[]}
 				/>
 			</div>
 		</div>

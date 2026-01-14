@@ -77,7 +77,7 @@ const pageDesc =
   <main class="mx-auto w-full max-w-6xl px-4 pb-10 pt-4 sm:pb-12 sm:pt-6">
     <section class="pt-10 sm:pt-12">
       <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
-        <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+        <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-2">
           <picture>
             <source srcset="/fv_1.webp" type="image/webp" />
             <img
@@ -123,11 +123,25 @@ const pageDesc =
             </div>
           ) : null}
         </div>
+
+        <div class="hidden lg:block lg:col-span-1">
+          <Sidebar
+            bannersTop={sidebarBannersTop}
+            bannersMid={[]}
+            bannersBottom={[]}
+            popular={[]}
+            categories={[
+              ...catReco.map((c) => ({ title: c.title, href: c.href })),
+              ...catAge.map((c) => ({ title: c.title, href: c.href })),
+              ...catLevel.map((c) => ({ title: c.title, href: c.href })),
+            ]}
+          />
+        </div>
       </div>
     </section>
 
-    <div class="mt-4 grid gap-6 sm:mt-6 lg:grid-cols-4 lg:items-start">
-      <div class="min-w-0 space-y-6 lg:col-span-3">
+    <div class="mt-4 grid gap-6 sm:mt-6 lg:grid-cols-3 lg:items-start">
+      <div class="min-w-0 space-y-6 lg:col-span-2">
         <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
           <div class="flex items-end justify-between gap-4">
             <div>
@@ -180,7 +194,7 @@ const pageDesc =
 
       <div class="hidden lg:block lg:col-span-1">
         <Sidebar
-          bannersTop={sidebarBannersTop}
+          bannersTop={[]}
           bannersMid={sidebarBannersMid}
           bannersBottom={sidebarBannersBottom}
           popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
