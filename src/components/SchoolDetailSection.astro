@@ -3,6 +3,7 @@ import CTAButton from "./CTAButton.astro";
 import StarRating from "./StarRating.astro";
 import ReviewList from "./ReviewList.astro";
 import Countdown from "./Countdown.astro";
+import { getReviewStats } from "../utils/reviewStats";
 
 type Review = { age: string; rating: number; body: string };
 
@@ -37,6 +38,7 @@ const { rank, item, reviews = [] } = Astro.props satisfies Props;
 const quality = typeof item.teacherQuality === "number" ? item.teacherQuality : null;
 const planHref = item.planUrl || item.officialUrl;
 const bannerHref = item.bannerHref || planHref;
+const stats = getReviewStats(reviews);
 ---
 
 <section class="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
@@ -63,10 +65,11 @@ const bannerHref = item.bannerHref || planHref;
         </h3>
         <div class="mt-2 flex flex-wrap items-center gap-3">
           <span class="text-sm font-extrabold text-zinc-700">総合評価</span>
-          <StarRating value={item.rating ?? null} />
-          {typeof item.rating === "number" ? (
-            <span class="text-sm font-extrabold text-zinc-900">{item.rating.toFixed(1)}pt</span>
-          ) : null}
+          <StarRating value={stats.avg} />
+          {typeof stats.avg === "number" ? <span class="text-sm font-extrabold text-zinc-900">{stats.avg.toFixed(1)}pt</span> : null}
+          <span class="text-sm font-semibold text-zinc-500">
+            {stats.count ? `（口コミ${stats.count}件）` : "（口コミなし）"}
+          </span>
         </div>
       </div>
     </div>

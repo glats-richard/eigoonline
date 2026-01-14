@@ -10,6 +10,7 @@ import ArticleBanners from "../components/ArticleBanners.astro";
 import Sidebar from "../components/Sidebar.astro";
 import SidebarBanner from "../components/SidebarBanner.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
+import { getReviewStats } from "../utils/reviewStats";
 
 const schools = await getCollection("schools");
 const rankings = await getCollection("rankings");
@@ -43,6 +44,19 @@ const sidebarBannersMid = banners.filter((b) => b.data.placement === "sidebar_mi
 const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar_bottom").map((b) => b.data);
 
 const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
+const reviewStatsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, getReviewStats(r.data.items)] as const));
+
+const applyReviewRating = <T extends { id: string; data: Record<string, unknown> }>(xs: T[]) =>
+	xs.map((x) => {
+		const stats = reviewStatsBySchoolId.get(x.id);
+		// Only show a rating when it's backed by reviews.
+		const rating = stats?.count ? stats.avg : null;
+		return { ...x, data: { ...x.data, rating } };
+	});
+
+const overallItemsRated = applyReviewRating(overallItems);
+const dailyItemsRated = applyReviewRating(dailyItems);
+const businessItemsRated = applyReviewRating(businessItems);
 
 const base = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
 const pageUrl = new URL(Astro.url.pathname, base).toString();
@@ -118,7 +132,7 @@ const faqJsonLd = {
 					<!-- Service logos (top picks) -->
 					<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
 						<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto px-4 py-2 [-webkit-overflow-scrolling:touch]">
-							{overallItems.slice(0, 8).map((x) => (
+							{overallItemsRated.slice(0, 8).map((x) => (
 								x.data.logoUrl ? (
 									<a
 										href={`#school-${x.id}`}
@@ -203,7 +217,7 @@ const faqJsonLd = {
 						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/overall:block">
 							<p class="mb-3 text-sm text-zinc-600">{overall?.description}</p>
 							<div class="grid gap-4">
-								{overallItems.slice(0, 3).map((x, idx) => (
+								{overallItemsRated.slice(0, 3).map((x, idx) => (
 										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
@@ -212,7 +226,7 @@ const faqJsonLd = {
 						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/daily:block">
 							<p class="mb-3 text-sm text-zinc-600">{daily?.description}</p>
 							<div class="grid gap-4">
-								{dailyItems.slice(0, 3).map((x, idx) => (
+								{dailyItemsRated.slice(0, 3).map((x, idx) => (
 										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
@@ -221,7 +235,7 @@ const faqJsonLd = {
 						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/business:block">
 							<p class="mb-3 text-sm text-zinc-600">{business?.description}</p>
 							<div class="grid gap-4">
-								{businessItems.slice(0, 3).map((x, idx) => (
+								{businessItemsRated.slice(0, 3).map((x, idx) => (
 										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
@@ -237,9 +251,9 @@ const faqJsonLd = {
 
 					{overall && daily && business ? (
 						<CompareTableTabs
-							overall={{ title: overall.title, items: overallItems }}
-							daily={{ title: daily.title, items: dailyItems }}
-							business={{ title: business.title, items: businessItems }}
+							overall={{ title: overall.title, items: overallItemsRated }}
+							daily={{ title: daily.title, items: dailyItemsRated }}
+							business={{ title: business.title, items: businessItemsRated }}
 							columns={4}
 						/>
 					) : null}
@@ -257,7 +271,7 @@ const faqJsonLd = {
 						<p class="mt-1 text-sm text-zinc-600">PICKUPの下に、各社の詳細を順に掲載しています。</p>
 					</div>
 
-					{overallItems.map((x, idx) => (
+					{overallItemsRated.map((x, idx) => (
 						<div id={`school-${x.id}`} class="scroll-mt-24">
 							<SchoolDetailSection rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 						</div>
