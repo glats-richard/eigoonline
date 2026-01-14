@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* Prevent accidental page-level horizontal scrolling.
+   Nested scrollers (e.g. comparison table) can still scroll horizontally. */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
+.scroll-x-contain {
+  overscroll-behavior-x: contain;
+}
+
 /* Mobile hardening: ensure no horizontal overflow even when content is wide.
    This is an explicit media-query fallback in addition to Tailwind's responsive classes. */
 @media (max-width: 640px) {
