@@ -19,9 +19,13 @@ type Ranking = {
   items: { id: string; data: School }[];
 };
 
-type Props = { ranking: Ranking };
+type Props = {
+  ranking: Ranking;
+  /** "table" for desktop, "stack" for mobile */
+  variant?: "table" | "stack";
+};
 
-const { ranking } = Astro.props satisfies Props;
+const { ranking, variant = "table" } = Astro.props satisfies Props;
 
 const cols = Math.max(1, ranking.items.length);
 const tableMinWidth = cols >= 4 ? "920px" : cols === 3 ? "720px" : cols === 2 ? "520px" : "0px";
@@ -36,99 +40,232 @@ const colBorder = (rank: number) => {
 const labelBar = "bg-zinc-100 text-zinc-700";
 ---
 
-<div class="scroll-x-contain mt-4 w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
-  <div
-    class="grid gap-4 px-1 pb-1"
-    style={[
-      tableMinWidth !== "0px" ? `min-width:${tableMinWidth}` : "",
-      `grid-template-columns: repeat(${cols}, minmax(220px, 1fr));`,
-    ].filter(Boolean).join(";")}
-  >
+{variant === "stack" ? (
+  <div class="mt-4 grid gap-4">
     {ranking.items.map((x, idx) => {
       const rank = idx + 1;
       const borderColor = colBorder(rank);
       return (
-        <section class="rounded-xl border-2 bg-white shadow-sm" style={`border-color:${borderColor}`}>
-          <div class="px-3 pb-4 pt-3 text-center">
-            <div class="flex items-center justify-center">
+        <section class="rounded-2xl border-2 bg-white p-4 shadow-sm" style={`border-color:${borderColor}`}>
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex min-w-0 items-start gap-3">
               {rank <= 3 ? (
                 <img
                   src={`/rank${rank}.webp`}
                   alt={`${rank}位`}
-                  width="40"
-                  height="40"
+                  width="36"
+                  height="36"
                   loading="eager"
                   decoding="async"
-                  class="h-10 w-10 object-contain"
+                  class="h-9 w-9 shrink-0 object-contain"
                 />
               ) : (
-                <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-extrabold text-zinc-800 ring-1 ring-zinc-300">
+                <div class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-extrabold text-zinc-800 ring-1 ring-zinc-300">
                   {rank}
                 </div>
               )}
-            </div>
 
-            {x.data.logoUrl ? (
-              <div class="mt-2 flex items-center justify-center">
-                <img
-                  src={x.data.logoUrl}
-                  alt={`${x.data.name} ロゴ`}
-                  class="h-10 w-auto max-w-[200px] object-contain"
-                  loading="lazy"
-                  decoding="async"
-                />
+              <div class="min-w-0">
+                <div class="flex min-w-0 items-center gap-2">
+                  {x.data.logoUrl ? (
+                    <img
+                      src={x.data.logoUrl}
+                      alt={`${x.data.name} ロゴ`}
+                      class="h-7 w-auto max-w-[140px] object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : null}
+                </div>
+                <a href={`#school-${x.id}`} class="mt-2 block min-w-0 truncate text-base font-extrabold text-sky-800">
+                  {x.data.name}
+                </a>
+                <div class="mt-2">
+                  <StarRating value={x.data.rating ?? null} size={16} />
+                </div>
               </div>
-            ) : null}
-
-            <a
-              href={`#school-${x.id}`}
-              class="mt-2 block truncate text-sm font-extrabold text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800"
-            >
-              {x.data.name}
-            </a>
-
-            <div class="mt-2 flex items-center justify-center">
-              <StarRating value={x.data.rating ?? null} size={18} />
+            </div>
+            <div class="shrink-0">
+              <CTAButton href={x.data.officialUrl} label="公式サイトを見る" />
             </div>
           </div>
 
-          <div class={`px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>月額</div>
-          <div class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg">{x.data.priceText ?? "—"}</div>
+          <div class="mt-4 grid gap-3">
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">月額</div>
+              <div class="text-sm font-extrabold text-zinc-900">{x.data.priceText ?? "—"}</div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">受講時間</div>
+              <div class="text-sm font-extrabold text-zinc-900">{x.data.hoursText ?? "—"}</div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">無料体験</div>
+              <div class="text-sm font-extrabold text-zinc-900">{x.data.trialText ?? "—"}</div>
+            </div>
 
-          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>受講できる時間</div>
-          <div class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg">{x.data.hoursText ?? "—"}</div>
+            <div class="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">おすすめポイント</div>
+              {x.data.points?.length ? (
+                <ul class="mt-2 text-sm font-semibold text-zinc-900">
+                  {x.data.points.slice(0, 3).map((p) => (
+                    <li class="mb-1 last:mb-0">・{p}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div class="mt-2 text-sm font-semibold text-zinc-500">—</div>
+              )}
+            </div>
 
-          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>無料体験</div>
-          <div class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg">{x.data.trialText ?? "—"}</div>
-
-          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>おすすめポイント</div>
-          {x.data.points?.length ? (
-            <ul class="px-3 py-3 text-left text-sm font-semibold text-zinc-900">
-              {x.data.points.slice(0, 3).map((p) => (
-                <li class="mb-1 last:mb-0">・{p}</li>
-              ))}
-            </ul>
-          ) : (
-            <div class="px-3 py-3 text-center text-sm font-semibold text-zinc-500">—</div>
-          )}
-
-          <div class={`border-t border-zinc-200 px-2 py-2 text-center text-sm font-extrabold ${labelBar}`}>こんな人におすすめ</div>
-          {x.data.recommendedFor?.length ? (
-            <ul class="px-3 py-3 text-left text-sm font-semibold text-zinc-900">
-              {x.data.recommendedFor.slice(0, 3).map((p) => (
-                <li class="mb-1 last:mb-0">・{p}</li>
-              ))}
-            </ul>
-          ) : (
-            <div class="px-3 py-3 text-center text-sm font-semibold text-zinc-500">—</div>
-          )}
-
-          <div class="border-t border-zinc-200 p-3">
-            <CTAButton href={x.data.officialUrl} label="公式サイトを見る" fullWidth />
+            <div class="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">こんな人におすすめ</div>
+              {x.data.recommendedFor?.length ? (
+                <ul class="mt-2 text-sm font-semibold text-zinc-900">
+                  {x.data.recommendedFor.slice(0, 3).map((p) => (
+                    <li class="mb-1 last:mb-0">・{p}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div class="mt-2 text-sm font-semibold text-zinc-500">—</div>
+              )}
+            </div>
           </div>
         </section>
       );
     })}
   </div>
-</div>
+) : (
+  <div class="scroll-x-contain mt-4 w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
+    <table
+      class="w-full border-separate border-spacing-0"
+      style={tableMinWidth !== "0px" ? `min-width:${tableMinWidth}` : undefined}
+    >
+      <thead>
+        <tr>
+          <th class="sticky left-0 z-10 w-[140px] bg-white"></th>
+          {ranking.items.map((x, idx) => {
+            const rank = idx + 1;
+            const borderColor = colBorder(rank);
+            return (
+              <th class="px-3 pb-4 pt-3 text-center align-top" style={`border-top:2px solid ${borderColor}; border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor}; border-top-left-radius:12px; border-top-right-radius:12px;`}>
+                <div class="flex items-center justify-center">
+                  {rank <= 3 ? (
+                    <img src={`/rank${rank}.webp`} alt={`${rank}位`} width="40" height="40" loading="eager" decoding="async" class="h-10 w-10 object-contain" />
+                  ) : (
+                    <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-extrabold text-zinc-800 ring-1 ring-zinc-300">
+                      {rank}
+                    </div>
+                  )}
+                </div>
+                {x.data.logoUrl ? (
+                  <div class="mt-2 flex items-center justify-center">
+                    <img src={x.data.logoUrl} alt={`${x.data.name} ロゴ`} class="h-10 w-auto max-w-[200px] object-contain" loading="lazy" decoding="async" />
+                  </div>
+                ) : null}
+                <a href={`#school-${x.id}`} class="mt-2 block truncate text-sm font-extrabold text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800">
+                  {x.data.name}
+                </a>
+                <div class="mt-2 flex items-center justify-center">
+                  <StarRating value={x.data.rating ?? null} size={18} />
+                </div>
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
+      <tbody class="align-top">
+        <tr>
+          <th class={`sticky left-0 z-10 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>月額</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                {x.data.priceText ?? "—"}
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>受講できる時間</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                {x.data.hoursText ?? "—"}
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>無料体験</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                {x.data.trialText ?? "—"}
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>おすすめポイント</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3 text-left text-sm font-semibold text-zinc-900" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                {x.data.points?.length ? (
+                  <ul>
+                    {x.data.points.slice(0, 3).map((p) => (
+                      <li class="mb-1 last:mb-0">・{p}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div class="text-center text-sm font-semibold text-zinc-500">—</div>
+                )}
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>こんな人におすすめ</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3 text-left text-sm font-semibold text-zinc-900" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                {x.data.recommendedFor?.length ? (
+                  <ul>
+                    {x.data.recommendedFor.slice(0, 3).map((p) => (
+                      <li class="mb-1 last:mb-0">・{p}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div class="text-center text-sm font-semibold text-zinc-500">—</div>
+                )}
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class="sticky left-0 z-10 border-t border-zinc-200 bg-white"></th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            const isLastRow = true;
+            return (
+              <td
+                class="border-t border-zinc-200 p-3"
+                style={[
+                  `border-left:2px solid ${borderColor}`,
+                  `border-right:2px solid ${borderColor}`,
+                  isLastRow ? `border-bottom:2px solid ${borderColor}; border-bottom-left-radius:12px; border-bottom-right-radius:12px;` : "",
+                ].filter(Boolean).join(";")}
+              >
+                <CTAButton href={x.data.officialUrl} label="公式サイトを見る" fullWidth />
+              </td>
+            );
+          })}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+)}
 

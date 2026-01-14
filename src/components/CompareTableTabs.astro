@@ -91,26 +91,26 @@ const bDesktop = sliceCols(business, desktopCols);
 
   <div class="mt-4 hidden peer-checked/ct-overall:block">
     <div class="sm:hidden">
-      <CompareTable ranking={oMobile} />
+      <CompareTable ranking={oMobile} variant="stack" />
     </div>
     <div class="hidden sm:block">
-      <CompareTable ranking={oDesktop} />
+      <CompareTable ranking={oDesktop} variant="table" />
     </div>
   </div>
   <div class="mt-4 hidden peer-checked/ct-daily:block">
     <div class="sm:hidden">
-      <CompareTable ranking={dMobile} />
+      <CompareTable ranking={dMobile} variant="stack" />
     </div>
     <div class="hidden sm:block">
-      <CompareTable ranking={dDesktop} />
+      <CompareTable ranking={dDesktop} variant="table" />
     </div>
   </div>
   <div class="mt-4 hidden peer-checked/ct-business:block">
     <div class="sm:hidden">
-      <CompareTable ranking={bMobile} />
+      <CompareTable ranking={bMobile} variant="stack" />
     </div>
     <div class="hidden sm:block">
-      <CompareTable ranking={bDesktop} />
+      <CompareTable ranking={bDesktop} variant="table" />
     </div>
   </div>
 </section>
