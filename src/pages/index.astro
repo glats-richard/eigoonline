@@ -124,7 +124,7 @@ const faqJsonLd = {
 		<!-- Hero: 4 columns (FV 3 cols + sidebar 1 col) -->
 		<section class="pt-10 sm:pt-12">
 			<div class="grid gap-6 lg:grid-cols-4 lg:items-start">
-				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-4">
+				<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
 					<picture>
 						<source srcset="/fv_1.webp" type="image/webp" />
 						<img
@@ -160,6 +160,9 @@ const faqJsonLd = {
 						</div>
 					</div>
 				</div>
+
+				<!-- Keep 4-col grid alignment (intentionally empty on desktop) -->
+				<div class="hidden lg:block lg:col-span-1"></div>
 			</div>
 		</section>
 
