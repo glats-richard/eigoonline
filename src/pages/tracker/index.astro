@@ -19,6 +19,7 @@ type ConversionRow = {
   id?: string | number;
   created_at?: string | Date | null;
   offer_id?: string | number | null;
+  offer_uuid?: string | null;
   reward?: number | null;
   payout?: number | null;
   amount?: number | null;
@@ -26,6 +27,7 @@ type ConversionRow = {
   status?: string | null;
   ip?: string | null;
   ip_hash?: string | null;
+  ip_version?: number | null;
   country?: string | null;
   user_agent?: string | null;
   accept_language?: string | null;
@@ -94,6 +96,12 @@ function isSuspicious(cv: ConversionRow) {
   if (cv.origin && !ALLOWED_ORIGINS.has(cv.origin)) return true;
   if (!cv.origin) return true;
   return false;
+}
+
+function ipLabel(cv: ConversionRow) {
+  if (!cv.ip) return "—";
+  const v = cv.ip_version === 6 ? "IPv6" : cv.ip_version === 4 ? "IPv4" : "IP";
+  return `${v}`;
 }
 
 // Fetch latest logs first (we'll derive offers map from their offer_ids)
@@ -352,6 +360,7 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
               <tr>
                 <th class="px-4 py-3">日時</th>
                 <th class="px-4 py-3">案件</th>
+                <th class="px-4 py-3">UUID</th>
                 <th class="px-4 py-3">ステータス</th>
                 <th class="px-4 py-3">報酬</th>
                 <th class="px-4 py-3">国</th>
@@ -371,13 +380,23 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
                   <tr class="align-top">
                     <td class="px-4 py-3 whitespace-nowrap">{fmtDate(cv.created_at)}</td>
                     <td class="px-4 py-3 font-semibold text-zinc-900">{offerNameById(offersMap, cv.offer_id)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">{cv.offer_uuid ?? "—"}</td>
                     <td class="px-4 py-3">{cv.status ?? "—"}</td>
                     <td class="px-4 py-3 whitespace-nowrap">{v == null ? "—" : yen(v)}</td>
                     <td class="px-4 py-3 whitespace-nowrap">
                       {cv.country ?? cv.cf_ipcountry ?? "—"}
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">
-                      {cv.ip ? shortText(cv.ip, 24) : "—"}
+                      {cv.ip ? (
+                        <span title={cv.ip} class="inline-flex items-center gap-2">
+                          <span class="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-extrabold text-zinc-700">
+                            {ipLabel(cv)}
+                          </span>
+                          <span class="font-mono">{shortText(cv.ip, 36)}</span>
+                        </span>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td class="px-4 py-3 text-xs text-zinc-700">
                       <span class:list={[suspicious ? "font-extrabold text-rose-700" : "text-zinc-700"]}>
@@ -402,6 +421,10 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
                         </summary>
                         <div class="mt-2 space-y-2">
                           <div>
+                            <div class="text-[11px] font-extrabold text-zinc-500">ip（full）</div>
+                            <div class="break-all font-mono">{cv.ip ?? "—"}</div>
+                          </div>
+                          <div>
                             <div class="text-[11px] font-extrabold text-zinc-500">page_url</div>
                             <div class="break-all">{cv.page_url ?? "—"}</div>
                           </div>
@@ -424,7 +447,7 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
               })}
               {!conversions.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="11">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="12">
                     データなし
                   </td>
                 </tr>
@@ -461,7 +484,13 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
       <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
         <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`<script>
 (function () {
-  var payload = { offer_id: "kimini", status: "approved", reward: 1500 };
+  var payload = {
+    offer_id: "kimini",
+    offer_uuid: "YOUR_UUID_HERE", // 任意: 各サービスのUUIDなど
+    status: "approved",
+    reward: 1500,
+    page_url: location && location.href ? String(location.href) : null
+  };
   var url = "https://eigoonline.com/api/track/conversion";
   var body = JSON.stringify(payload);
 

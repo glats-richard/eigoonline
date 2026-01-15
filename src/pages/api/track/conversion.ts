@@ -6,6 +6,8 @@ import { dbEnvError, query } from "../../../lib/db";
 
 type ConversionPayload = {
   offer_id: string;
+  /** Optional: service UUID (for external integrations / mapping). */
+  offer_uuid?: string | null;
   status?: string | null;
   reward?: number | null;
   payout?: number | null;
@@ -90,6 +92,14 @@ function sha256Hex(s: string): string {
   return crypto.createHash("sha256").update(s).digest("hex");
 }
 
+function ipVersion(ip: string | null): 4 | 6 | null {
+  if (!ip) return null;
+  // IPv6 contains ":"; IPv4 contains "." (best-effort)
+  if (ip.includes(":")) return 6;
+  if (ip.includes(".")) return 4;
+  return null;
+}
+
 export const OPTIONS: APIRoute = async ({ request }) => {
   return new Response(null, {
     status: 204,
@@ -113,6 +123,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!offerId) {
     return json(400, { ok: false, error: "offer_id is required" }, corsHeaders(request));
   }
+  const offerUuid = (payload?.offer_uuid ?? "").trim() || null;
 
   const status = payload?.status ?? null;
   const reward = toFiniteNumber(payload?.reward);
@@ -139,6 +150,7 @@ export const POST: APIRoute = async ({ request }) => {
     firstForwardedIp(h.get("x-real-ip")) ??
     null;
   const ipHash = ip ? sha256Hex(ip) : null;
+  const ipVer = ipVersion(ip);
 
   const requestHeaders = pickHeaders(h);
 
@@ -147,16 +159,17 @@ export const POST: APIRoute = async ({ request }) => {
     try {
       r = await query<{ id: number | string }>(
         `insert into conversions (
-          offer_id, status, reward, payout, amount, commission,
-          ip, ip_hash, country, user_agent, accept_language, origin, referrer, page_url,
+          offer_id, offer_uuid, status, reward, payout, amount, commission,
+          ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
           cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
         ) values (
-          $1,$2,$3,$4,$5,$6,
-          $7,$8,$9,$10,$11,$12,$13,$14,
-          $15,$16,$17,$18,$19,$20
+          $1,$2,$3,$4,$5,$6,$7,
+          $8,$9,$10,$11,$12,$13,$14,$15,$16,
+          $17,$18,$19,$20,$21,$22
         ) returning id`,
         [
           offerId,
+          offerUuid,
           status,
           reward,
           payout,
@@ -164,6 +177,7 @@ export const POST: APIRoute = async ({ request }) => {
           commission,
           ip,
           ipHash,
+          ipVer,
           cfIpCountry,
           userAgent,
           acceptLanguage,

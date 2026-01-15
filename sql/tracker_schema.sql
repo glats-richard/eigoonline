@@ -23,6 +23,7 @@ create table if not exists conversions (
   id bigserial primary key,
   created_at timestamptz not null default now(),
   offer_id text references offers(id) on delete set null,
+  offer_uuid text,
   status text,
   reward numeric,
   payout numeric,
@@ -32,6 +33,7 @@ create table if not exists conversions (
   -- Fraud / audit metadata (captured server-side)
   ip text,
   ip_hash text,
+  ip_version smallint,
   country text,
   user_agent text,
   accept_language text,
@@ -54,8 +56,10 @@ create index if not exists conversions_offer_created_at_idx on conversions (offe
 
 -- If you already created tables, you can safely re-run this file.
 -- Postgres will keep existing columns; for schema drift, apply ALTERs below.
+alter table conversions add column if not exists offer_uuid text;
 alter table conversions add column if not exists ip text;
 alter table conversions add column if not exists ip_hash text;
+alter table conversions add column if not exists ip_version smallint;
 alter table conversions add column if not exists country text;
 alter table conversions add column if not exists user_agent text;
 alter table conversions add column if not exists accept_language text;
@@ -71,4 +75,5 @@ alter table conversions add column if not exists request_headers jsonb;
 
 -- Indexes that depend on newly-added columns must be created after ALTERs.
 create index if not exists conversions_ip_hash_created_at_idx on conversions (ip_hash, created_at desc);
+create index if not exists conversions_offer_uuid_created_at_idx on conversions (offer_uuid, created_at desc);
 
