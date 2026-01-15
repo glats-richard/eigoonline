@@ -89,8 +89,10 @@ const jsonLd = [
       })(window,document,'script','dataLayer','GTM-WN37MRC9');
     </script>
     <!-- End Google Tag Manager -->
-    <!-- Avoid leaking full referrer data to external sites -->
-    <meta name="referrer" content="no-referrer" />
+    <!-- Referrer policy:
+         - Same-origin requests (e.g. /tracker -> /api/tracker/*) include Referer
+         - Cross-origin requests do not leak Referer -->
+    <meta name="referrer" content="same-origin" />
     <!-- Disable legacy interest-cohort/FLoC-style tracking -->
     <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
 
