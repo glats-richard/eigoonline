@@ -6,7 +6,7 @@ import { dbEnvError, query } from "../../../lib/db";
 
 type ConversionPayload = {
   offer_id: string;
-  /** Optional: service UUID (for external integrations / mapping). */
+  /** Deprecated: kept for backward compatibility; ignored. */
   offer_uuid?: string | null;
   /** Optional: student/user identifier provided by partner (e.g. kimini student_id). */
   student_id?: string | null;
@@ -125,7 +125,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!offerId) {
     return json(400, { ok: false, error: "offer_id is required" }, corsHeaders(request));
   }
-  const offerUuid = (payload?.offer_uuid ?? "").trim() || null;
+  // offer_uuid is no longer used; keep accepting but ignore.
   const studentId = (payload?.student_id ?? "").trim().slice(0, 256) || null;
   const studentIdHash = studentId ? sha256Hex(studentId) : null;
 
@@ -163,17 +163,16 @@ export const POST: APIRoute = async ({ request }) => {
     try {
       r = await query<{ id: number | string }>(
         `insert into conversions (
-          offer_id, offer_uuid, student_id, student_id_hash, status, reward, payout, amount, commission,
+          offer_id, student_id, student_id_hash, status, reward, payout, amount, commission,
           ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
           cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
         ) values (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,
-          $10,$11,$12,$13,$14,$15,$16,$17,$18,
-          $19,$20,$21,$22,$23,$24
+          $1,$2,$3,$4,$5,$6,$7,$8,
+          $9,$10,$11,$12,$13,$14,$15,$16,$17,
+          $18,$19,$20,$21,$22,$23
         ) returning id`,
         [
           offerId,
-          offerUuid,
           studentId,
           studentIdHash,
           status,

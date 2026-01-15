@@ -65,7 +65,6 @@ on conflict (id) do nothing;`}</code></pre>
 
   var payload = {
     offer_id: "kimini",
-    offer_uuid: "YOUR_UUID_HERE", // 任意: 各サービスのUUIDなど
     student_id: getParam("student_id"), // 任意: ?student_id=... を受け取る
     status: "approved",
     reward: 1500,
@@ -86,7 +85,6 @@ on conflict (id) do nothing;`}</code></pre>
       </div>
       <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-zinc-700">
         <li><span class="font-semibold">offer_id</span> を案件IDに変更</li>
-        <li><span class="font-semibold">offer_uuid</span> は任意（各サービスのUUIDなど）</li>
         <li><span class="font-semibold">student_id</span> は任意（先方から <code class="font-semibold">?student_id=</code> で渡してもらう）</li>
         <li><span class="font-semibold">reward</span> は任意（円）</li>
       </ul>
