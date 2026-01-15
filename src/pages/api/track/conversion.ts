@@ -239,11 +239,9 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    // Only strong signals should force pending (to keep operational burden low).
-    const needsReview =
-      riskReasons.includes("ip_rate_1m_high") ||
-      riskReasons.includes("sec_fetch_site:cross-site") ||
-      riskReasons.includes("sec_fetch_site:none");
+    // Only strong signals should force manual review.
+    // NOTE: sec-fetch-site=cross-site is expected when the thank-you page lives on a different domain.
+    const needsReview = riskReasons.includes("ip_rate_1m_high");
 
     const risk =
       riskReasons.length > 0
