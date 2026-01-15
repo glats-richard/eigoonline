@@ -840,6 +840,7 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
       <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
         <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`<script>
 (function () {
+  var TTL_DAYS = 14;
   function getParam(name) {
     try {
       var qs = location && location.search ? location.search : "";
@@ -852,6 +853,27 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
       }
     } catch (e) {}
     return null;
+  }
+
+  function getCookie(name) {
+    try {
+      var prefix = name + "=";
+      var parts = (document.cookie || "").split("; ");
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i].indexOf(prefix) === 0) return decodeURIComponent(parts[i].slice(prefix.length));
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function readStoredClickId(offerId) {
+    var now = new Date().getTime();
+    try {
+      var ts = Number(localStorage.getItem("eo_click_ts:" + offerId) || "0");
+      var id = localStorage.getItem("eo_click_id:" + offerId);
+      if (id && ts && now - ts <= TTL_DAYS * 24 * 60 * 60 * 1000) return id;
+    } catch (e) {}
+    return getCookie("eo_click_id_" + offerId);
   }
 
   function genEventId() {
@@ -884,7 +906,7 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
   var offerId = "kimini";
   var clickId = getParam("click_id");
   if (!clickId) {
-    try { clickId = sessionStorage.getItem("eo_click_id:" + offerId); } catch (e) {}
+    clickId = readStoredClickId(offerId);
   }
   if (!clickId) return;
 

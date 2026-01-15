@@ -160,7 +160,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Require proof that the user came via eigoonline: click_id must exist (and match offer_id).
   try {
     const r = await query<{ offer_id: string | null }>(
-      "select offer_id::text as offer_id from clicks where click_id = $1 and created_at > now() - interval '30 days' limit 1",
+      "select offer_id::text as offer_id from clicks where click_id = $1 and created_at > now() - interval '14 days' limit 1",
       [clickId],
     );
     const clickOfferId = r.rows?.[0]?.offer_id ?? null;
