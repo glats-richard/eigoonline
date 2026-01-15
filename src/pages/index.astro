@@ -6,9 +6,6 @@ import Layout from "../layouts/Layout.astro";
 import RankingListItem from "../components/RankingListItem.astro";
 import CompareTableTabs from "../components/CompareTableTabs.astro";
 import PickupCard from "../components/PickupCard.astro";
-import SearchBox from "../components/SearchBox.astro";
-import CategoryGrid from "../components/CategoryGrid.astro";
-import ArticleBanners from "../components/ArticleBanners.astro";
 import Sidebar from "../components/Sidebar.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
 import { getReviewStats } from "../utils/reviewStats";
@@ -17,7 +14,6 @@ const schools = await getCollection("schools");
 const rankings = await getCollection("rankings");
 const categories = await getCollection("categories");
 const pickups = await getCollection("pickups");
-const articles = await getCollection("articles");
 const banners = await getCollection("banners");
 const reviews = await getCollection("reviews");
 
@@ -25,6 +21,7 @@ const schoolsById = new Map(schools.map((s) => [s.id, s.data] as const));
 const rankingByCategory = new Map(rankings.map((r) => [r.data.category, r.data] as const));
 
 const overall = rankingByCategory.get("overall");
+const exam = rankingByCategory.get("exam");
 const daily = rankingByCategory.get("daily");
 const business = rankingByCategory.get("business");
 
@@ -32,6 +29,7 @@ const resolveItems = (items: string[] | undefined) =>
 	(items ?? []).map((id) => ({ id, data: schoolsById.get(id) })).filter((x): x is { id: string; data: NonNullable<typeof x.data> } => Boolean(x.data));
 
 const overallItems = resolveItems(overall?.items);
+const examItems = resolveItems(exam?.items);
 const dailyItems = resolveItems(daily?.items);
 const businessItems = resolveItems(business?.items);
 
@@ -56,6 +54,7 @@ const applyReviewRating = <T extends { id: string; data: Record<string, unknown>
 	});
 
 const overallItemsRated = applyReviewRating(overallItems);
+const examItemsRated = applyReviewRating(examItems);
 const dailyItemsRated = applyReviewRating(dailyItems);
 const businessItemsRated = applyReviewRating(businessItems);
 
@@ -86,7 +85,7 @@ const faqJsonLd = {
 			acceptedAnswer: {
 				"@type": "Answer",
 				text:
-					"目的（総合/日常/ビジネス）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
+					"目的（総合/試験対策/日曜英会話/ビジネス英会話）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
 			},
 		},
 		{
@@ -109,8 +108,8 @@ const faqJsonLd = {
 };
 ---
 <Layout
-	title="オンライン英会話 おすすめ比較・ランキング（総合・日常・ビジネス）"
-	description="オンライン英会話のおすすめを「総合 / 日常英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
+	title="オンライン英会話 おすすめ比較・ランキング（総合・試験対策・日曜・ビジネス）"
+	description="オンライン英会話のおすすめを「総合 / 試験対策 / 日曜英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
 	ogImage="/eigoonline_logo.png"
 	headerOverlay
 >
@@ -168,17 +167,19 @@ const faqJsonLd = {
 						<p class="mt-1 text-sm text-zinc-600">タブを切り替えて、目的に合うスクールを比較できます。</p>
 					</div>
 
-					<div class="rounded-2xl border border-zinc-200 bg-white p-0 shadow-sm overflow-hidden">
+					<div class="rounded-2xl border-2 border-[#F49BB5] bg-white p-0 shadow-sm overflow-hidden">
 						<input class="peer/overall sr-only" type="radio" name="ranktab" id="tab-overall" checked />
+						<input class="peer/exam sr-only" type="radio" name="ranktab" id="tab-exam" />
 						<input class="peer/daily sr-only" type="radio" name="ranktab" id="tab-daily" />
 						<input class="peer/business sr-only" type="radio" name="ranktab" id="tab-business" />
 
 						<div class="rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4
 							peer-checked/overall:[&_.tab-overall]:relative peer-checked/overall:[&_.tab-overall]:z-10 peer-checked/overall:[&_.tab-overall]:h-full peer-checked/overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/overall:[&_.tab-overall]:text-white peer-checked/overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
+							peer-checked/exam:[&_.tab-exam]:relative peer-checked/exam:[&_.tab-exam]:z-10 peer-checked/exam:[&_.tab-exam]:h-full peer-checked/exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/exam:[&_.tab-exam]:text-white peer-checked/exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
 							peer-checked/daily:[&_.tab-daily]:relative peer-checked/daily:[&_.tab-daily]:z-10 peer-checked/daily:[&_.tab-daily]:h-full peer-checked/daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/daily:[&_.tab-daily]:text-white peer-checked/daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
 							peer-checked/business:[&_.tab-business]:relative peer-checked/business:[&_.tab-business]:z-10 peer-checked/business:[&_.tab-business]:h-full peer-checked/business:[&_.tab-business]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/business:[&_.tab-business]:text-white peer-checked/business:[&_.tab-business]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
 						">
-							<div class="grid h-[50px] w-full grid-cols-3 items-end gap-0.5 text-[#595959] sm:gap-[10px]">
+							<div class="grid h-[50px] w-full grid-cols-4 items-end gap-0.5 text-[#595959] sm:gap-[10px]">
 							<label
 								for="tab-overall"
 								class="tab tab-overall w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
@@ -191,12 +192,23 @@ const faqJsonLd = {
 								</div>
 							</label>
 							<label
+								for="tab-exam"
+								class="tab tab-exam w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
+							>
+								<div class="grid h-[80%] place-items-center">
+									<span class="grid grid-rows-2 leading-tight">
+										<span class="block">試験</span>
+										<span class="block">対策</span>
+									</span>
+								</div>
+							</label>
+							<label
 								for="tab-daily"
 								class="tab tab-daily w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
 							>
 								<div class="grid h-[80%] place-items-center">
 									<span class="grid grid-rows-2 leading-tight">
-										<span class="block">日常</span>
+										<span class="block">日曜</span>
 										<span class="block">英会話</span>
 									</span>
 								</div>
@@ -219,6 +231,15 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{overall?.description}</p>
 							<div class="grid gap-4">
 								{overallItemsRated.slice(0, 3).map((x, idx) => (
+										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+								))}
+							</div>
+						</section>
+
+						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/exam:block">
+							<p class="mb-3 text-sm text-zinc-600">{exam?.description}</p>
+							<div class="grid gap-4">
+								{examItemsRated.slice(0, 3).map((x, idx) => (
 										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
@@ -250,9 +271,10 @@ const faqJsonLd = {
 						<p class="mt-1 text-sm text-zinc-600">上位スクールを項目ごとに横並びで比較できます（横スクロール可）。</p>
 					</div>
 
-					{overall && daily && business ? (
+					{overall && exam && daily && business ? (
 						<CompareTableTabs
 							overall={{ title: overall.title, items: overallItemsRated }}
+							exam={{ title: exam.title, items: examItemsRated }}
 							daily={{ title: daily.title, items: dailyItemsRated }}
 							business={{ title: business.title, items: businessItemsRated }}
 							columns={4}
@@ -303,19 +325,6 @@ const faqJsonLd = {
 					</div>
 				</section>
 
-				<section id="search">
-					<SearchBox />
-				</section>
-
-				<section id="categories" class="grid gap-4 sm:grid-cols-2">
-					<CategoryGrid heading="レベル別ランキング" items={catLevel} />
-					<CategoryGrid heading="年代別ランキング" items={catAge} />
-					<CategoryGrid heading="おすすめランキング" items={catReco} />
-				</section>
-
-				<section id="articles">
-					<ArticleBanners heading="オンライン英会話ガイド・コラム" items={articles.map((a) => a.data)} />
-				</section>
 				</div>
 
 				<!-- Desktop sidebar -->

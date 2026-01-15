@@ -77,6 +77,7 @@ const schools = defineCollection({
 const rankingCategory = z.enum([
 	// Home tabs
 	'overall',
+	'exam',
 	'daily',
 	'business',
 	// Category pages (/ranking/*)

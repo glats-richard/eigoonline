@@ -1,0 +1,11 @@
+{
+  "category": "exam",
+  "title": "試験対策",
+  "description": "TOEIC・英検などの試験対策を重視して選びたい人向けのランキング。",
+  "items": ["kimini", "dmm", "rarejob", "berlitz", "ecc", "nativecamp", "bizmate", "clouty"],
+  "source": {
+    "url": "https://eigoonline.com/",
+    "note": "当サイト内基準で、試験対策向けとして表示順を調整（暫定）"
+  }
+}
+

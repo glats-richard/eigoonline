@@ -1,5 +1,84 @@
 @import "tailwindcss";
 
+/* --- Theme: pastel gradient spheres (site-wide) -------------------------- */
+:root {
+  /* Ink */
+  --ink: #1f2430;
+  --muted: #5f6675;
+
+  /* Brand accents (pastel) */
+  --brand-blue: #7ac6ff;
+  --brand-pink: #ff7ab6;
+  --brand-purple: #b6a7ff;
+  --brand-link: #4f6edb;
+  --brand-link-hover: #3e57c8;
+
+  /* Surfaces */
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: rgba(255, 255, 255, 0.9);
+  --surface-border: rgba(70, 90, 170, 0.16);
+}
+
+html {
+  color: var(--ink);
+  background: #fbfbff;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(1100px 700px at 18% 14%, color-mix(in oklab, var(--brand-blue) 40%, transparent) 0%, transparent 60%),
+    radial-gradient(900px 700px at 78% 22%, color-mix(in oklab, var(--brand-pink) 35%, transparent) 0%, transparent 58%),
+    radial-gradient(900px 700px at 45% 92%, color-mix(in oklab, var(--brand-purple) 32%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, #fbfbff 0%, #ffffff 40%, #fbfbff 100%);
+}
+
+/* Common surfaces */
+.surface {
+  background-color: var(--surface);
+  border-color: var(--surface-border);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.surface-strong {
+  background-color: var(--surface-strong);
+  border-color: var(--surface-border);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.link-brand {
+  color: var(--brand-link);
+  /* Fallback */
+  text-decoration-color: rgba(79, 110, 219, 0.35);
+}
+.link-brand:hover {
+  color: var(--brand-link-hover);
+}
+
+@supports (color: color-mix(in oklab, white, black)) {
+  .link-brand {
+    text-decoration-color: color-mix(in oklab, var(--brand-link) 35%, transparent);
+  }
+}
+
+.btn-brand {
+  /* Keep CTA buttons orange (legacy) */
+  background-color: #f97316; /* tailwind orange-500 */
+  box-shadow:
+    0 14px 30px rgba(249, 115, 22, 0.18),
+    0 10px 22px rgba(249, 115, 22, 0.12);
+}
+.btn-brand:hover {
+  background-color: #fb923c; /* tailwind orange-400 */
+  filter: none;
+}
+.btn-brand:active {
+  background-color: #f97316;
+  filter: none;
+}
+
 /* Prevent accidental page-level horizontal scrolling.
    Nested scrollers (e.g. comparison table) can still scroll horizontally. */
 html,

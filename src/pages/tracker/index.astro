@@ -2,12 +2,12 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
-import { supabase } from "../../lib/supabase";
+import { dbEnvError, query } from "../../lib/db";
 
 type Offer = { id: string | number; name?: string | null; title?: string | null };
 type ClickRow = {
   id?: string | number;
-  created_at?: string | null;
+  created_at?: string | Date | null;
   offer_id?: string | number | null;
   url?: string | null;
   referrer?: string | null;
@@ -16,7 +16,7 @@ type ClickRow = {
 };
 type ConversionRow = {
   id?: string | number;
-  created_at?: string | null;
+  created_at?: string | Date | null;
   offer_id?: string | number | null;
   reward?: number | null;
   payout?: number | null;
@@ -48,9 +48,9 @@ function getTokyoMonthRange(now = new Date()) {
   };
 }
 
-function fmtDate(iso?: string | null) {
+function fmtDate(iso?: string | Date | null) {
   if (!iso) return "—";
-  const d = new Date(iso);
+  const d = iso instanceof Date ? iso : new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString("ja-JP");
 }
@@ -67,48 +67,65 @@ function rewardValue(r: ConversionRow) {
 }
 
 // Fetch latest logs first (we'll derive offers map from their offer_ids)
-const { data: clicksRaw, error: clicksErr } = await supabase
-  .from("clicks")
-  .select("*")
-  .order("created_at", { ascending: false })
-  .limit(10);
-
-const { data: convRaw, error: convErr } = await supabase
-  .from("conversions")
-  .select("*")
-  .order("created_at", { ascending: false })
-  .limit(10);
+let clicksErr: Error | null = null;
+let convErr: Error | null = null;
+let clicksRaw: ClickRow[] = [];
+let convRaw: ConversionRow[] = [];
+try {
+  const r = await query<ClickRow>("select * from clicks order by created_at desc limit 10");
+  clicksRaw = r.rows ?? [];
+} catch (e: any) {
+  clicksErr = e;
+}
+try {
+  const r = await query<ConversionRow>("select * from conversions order by created_at desc limit 10");
+  convRaw = r.rows ?? [];
+} catch (e: any) {
+  convErr = e;
+}
 
 // Monthly conversions per offer (JST month)
 const { label: monthLabel, startIso: monthStartIso, endIso: monthEndIso } = getTokyoMonthRange();
 const MONTHLY_LIMIT = 5000;
-const { data: monthlyConvRaw, error: monthlyConvErr } = await supabase
-  .from("conversions")
-  .select("id,offer_id,reward,payout,amount,commission,created_at")
-  .gte("created_at", monthStartIso)
-  .lt("created_at", monthEndIso)
-  .limit(MONTHLY_LIMIT);
+let monthlyConvErr: Error | null = null;
+let monthlyConvRaw: ConversionRow[] = [];
+try {
+  const r = await query<ConversionRow>(
+    "select id, offer_id, reward, payout, amount, commission, created_at from conversions where created_at >= $1 and created_at < $2 order by created_at desc limit $3",
+    [monthStartIso, monthEndIso, MONTHLY_LIMIT],
+  );
+  monthlyConvRaw = r.rows ?? [];
+} catch (e: any) {
+  monthlyConvErr = e;
+}
 
 // Summary counts (exact count via head request)
-const { count: totalClicks, error: totalClicksErr } = await supabase
-  .from("clicks")
-  .select("id", { head: true, count: "exact" });
-
-const { count: totalConversions, error: totalConvErr } = await supabase
-  .from("conversions")
-  .select("id", { head: true, count: "exact" });
+let totalClicksErr: Error | null = null;
+let totalConvErr: Error | null = null;
+let totalClicks: number | null = null;
+let totalConversions: number | null = null;
+try {
+  const r = await query<{ count: number }>("select count(*)::bigint as count from clicks");
+  totalClicks = r.rows?.[0]?.count ?? 0;
+} catch (e: any) {
+  totalClicksErr = e;
+  totalClicks = 0;
+}
+try {
+  const r = await query<{ count: number }>("select count(*)::bigint as count from conversions");
+  totalConversions = r.rows?.[0]?.count ?? 0;
+} catch (e: any) {
+  totalConvErr = e;
+  totalConversions = 0;
+}
 
 // Sum rewards (best-effort across common column names)
 // Prefer server-side sum if a 'reward' column exists; otherwise we fall back to summing latest 10 only.
 let totalRewardYen: number | null = null;
 try {
-  const { data: sumData } = await supabase
-    // If your schema uses a different numeric column, adjust below (reward/payout/amount/commission)
-    .from("conversions")
-    // Supabase supports aggregates like sum() in select
-    .select("reward:sum(reward)");
-  const v = (sumData as any)?.[0]?.reward;
-  if (typeof v === "number" && Number.isFinite(v)) totalRewardYen = v;
+  const r = await query<{ reward: number | null }>("select sum(reward) as reward from conversions");
+  const v = r.rows?.[0]?.reward;
+  totalRewardYen = typeof v === "number" && Number.isFinite(v) ? v : null;
 } catch {
   totalRewardYen = null;
 }
@@ -124,8 +141,15 @@ for (const c of monthlyConversions) if (c.offer_id != null) offerIds.add(String(
 
 let offersMap = new Map<string, Offer>();
 if (offerIds.size) {
-  const { data: offersRaw } = await supabase.from("offers").select("id,name,title").in("id", Array.from(offerIds));
-  for (const o of (offersRaw ?? []) as Offer[]) offersMap.set(String(o.id), o);
+  try {
+    const r = await query<Offer>(
+      "select id::text as id, name, title from offers where id::text = any($1::text[])",
+      [Array.from(offerIds)],
+    );
+    for (const o of (r.rows ?? []) as Offer[]) offersMap.set(String(o.id), o);
+  } catch {
+    // If offers table doesn't exist yet, we still want the page to render.
+  }
 }
 
 const monthlyAggMap = new Map<string, { count: number; rewardSum: number }>();
@@ -149,6 +173,7 @@ const monthlyAgg = Array.from(monthlyAggMap.entries())
 const monthlyLimitHit = monthlyConversions.length >= MONTHLY_LIMIT;
 
 const errors: string[] = [];
+if (dbEnvError) errors.push(dbEnvError);
 if (clicksErr) errors.push(`clicks: ${clicksErr.message}`);
 if (convErr) errors.push(`conversions: ${convErr.message}`);
 if (monthlyConvErr) errors.push(`monthlyConversions: ${monthlyConvErr.message}`);
@@ -232,7 +257,7 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
       </div>
 
       {monthlyLimitHit ? (
-        <div class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div class="mt-3 rounded-2xl border border-[#c9d4ff] bg-[#eef3ff] p-4 text-sm text-[#2f46b6]">
           <div class="font-extrabold">注意</div>
           <p class="mt-1">
             当月データが {MONTHLY_LIMIT} 件以上あるため、集計は先頭 {MONTHLY_LIMIT} 件で打ち切っています。
@@ -330,8 +355,10 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
     <section class="mt-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 text-sm text-zinc-700">
       <div class="font-extrabold text-zinc-900">環境変数（サーバー）</div>
       <ul class="mt-2 list-disc pl-5">
-        <li><span class="font-semibold">SUPABASE_URL</span></li>
-        <li><span class="font-semibold">SUPABASE_SERVICE_ROLE_KEY</span>（推奨）または <span class="font-semibold">SUPABASE_ANON_KEY</span></li>
+        <li><span class="font-semibold">DATABASE_URL</span></li>
+        <li>
+          （必要な場合のみ）<span class="font-semibold">PGSSLMODE</span>=require
+        </li>
       </ul>
     </section>
   </main>

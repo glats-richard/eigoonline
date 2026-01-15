@@ -23,7 +23,7 @@ const { item, rank, reviews = [] } = Astro.props satisfies Props;
 const stats = getReviewStats(reviews);
 ---
 
-<article class="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+<article class="surface rounded-2xl border border-white/30 shadow-sm">
   <div class="grid grid-cols-[96px_1fr] gap-3 p-3 sm:grid-cols-[140px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
     <div class="flex h-16 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 p-2 sm:h-auto sm:p-3">
       {item.logoUrl ? (
@@ -52,11 +52,11 @@ const stats = getReviewStats(reviews);
             class="h-9 w-9 shrink-0 object-contain"
           />
         ) : (
-          <div class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-50 text-xs font-extrabold text-amber-700 ring-1 ring-amber-200">
+          <div class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f4f0ff] text-xs font-extrabold text-[#6a56d6] ring-1 ring-[#d8ceff]">
             {rank}
           </div>
         )}
-        <h3 class="min-w-0 truncate text-base font-extrabold text-sky-800 sm:text-lg">{item.name}</h3>
+        <h3 class="min-w-0 truncate text-base font-extrabold text-[color:var(--brand-link-hover)] sm:text-lg">{item.name}</h3>
         <span class="inline-flex shrink-0 items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700">↗</span>
       </div>
 
@@ -83,8 +83,8 @@ const stats = getReviewStats(reviews);
       </div>
 
       {item.benefitText ? (
-        <div class="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 ring-1 ring-amber-200">
-          <span class="inline-flex items-center rounded-md bg-amber-500 px-2 py-1 text-xs font-extrabold text-white">特典</span>
+        <div class="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-[#ffe8f2] px-3 py-2 ring-1 ring-[#ffc3dd]">
+          <span class="inline-flex items-center rounded-md bg-[#ff7ab6] px-2 py-1 text-xs font-extrabold text-white">特典</span>
           <span class="text-sm font-semibold text-zinc-800">{item.benefitText}</span>
         </div>
       ) : null}
@@ -98,7 +98,7 @@ const stats = getReviewStats(reviews);
   {reviews.length ? (
     <div class="border-t border-zinc-200 p-4">
       <details>
-        <summary class="cursor-pointer select-none text-sm font-extrabold text-sky-800">
+        <summary class="cursor-pointer select-none text-sm font-extrabold text-[color:var(--brand-link-hover)]">
           {item.name}の口コミ・評判を見る
           <span class="ml-2 text-xs font-semibold text-zinc-500">（{Math.min(3, reviews.length)}件表示）</span>
         </summary>

@@ -16,31 +16,31 @@ const catReco = categories.filter((c) => c.data.group === "recommend").map((c) =
     <p class="mt-2 text-sm font-semibold text-zinc-600">目的別・カテゴリ別にランキングページへ移動できます。</p>
 
     <section class="mt-8 grid gap-6 lg:grid-cols-3">
-      <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="surface rounded-2xl border border-white/30 p-5 shadow-sm">
         <h2 class="text-lg font-extrabold text-zinc-900">おすすめ</h2>
         <div class="mt-4 grid gap-2">
           {catReco.map((c) => (
-            <a class="rounded-xl bg-zinc-50 px-4 py-3 text-sm font-extrabold text-sky-800 ring-1 ring-zinc-200 hover:bg-white" href={c.href}>
+            <a class="rounded-xl bg-white/50 px-4 py-3 text-sm font-extrabold text-[color:var(--brand-link-hover)] ring-1 ring-white/40 hover:bg-white/70" href={c.href}>
               {c.title} →
             </a>
           ))}
         </div>
       </div>
-      <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="surface rounded-2xl border border-white/30 p-5 shadow-sm">
         <h2 class="text-lg font-extrabold text-zinc-900">年代・属性</h2>
         <div class="mt-4 grid gap-2">
           {catAge.map((c) => (
-            <a class="rounded-xl bg-zinc-50 px-4 py-3 text-sm font-extrabold text-sky-800 ring-1 ring-zinc-200 hover:bg-white" href={c.href}>
+            <a class="rounded-xl bg-white/50 px-4 py-3 text-sm font-extrabold text-[color:var(--brand-link-hover)] ring-1 ring-white/40 hover:bg-white/70" href={c.href}>
               {c.title} →
             </a>
           ))}
         </div>
       </div>
-      <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="surface rounded-2xl border border-white/30 p-5 shadow-sm">
         <h2 class="text-lg font-extrabold text-zinc-900">レベル</h2>
         <div class="mt-4 grid gap-2">
           {catLevel.map((c) => (
-            <a class="rounded-xl bg-zinc-50 px-4 py-3 text-sm font-extrabold text-sky-800 ring-1 ring-zinc-200 hover:bg-white" href={c.href}>
+            <a class="rounded-xl bg-white/50 px-4 py-3 text-sm font-extrabold text-[color:var(--brand-link-hover)] ring-1 ring-white/40 hover:bg-white/70" href={c.href}>
               {c.title} →
             </a>
           ))}
@@ -49,7 +49,7 @@ const catReco = categories.filter((c) => c.data.group === "recommend").map((c) =
     </section>
 
     <div class="mt-10">
-      <a class="inline-flex items-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-extrabold text-white" href="/">
+      <a class="btn-brand inline-flex items-center rounded-xl px-4 py-2 text-sm font-extrabold text-white" href="/">
         トップへ戻る
       </a>
     </div>

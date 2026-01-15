@@ -168,16 +168,16 @@ const stats = getReviewStats(reviews);
   {(item.campaignText || (item.campaignBullets && item.campaignBullets.length) || item.campaignEndsAt) ? (
     <div class="mt-5 grid gap-3">
       <Countdown endsAt={item.campaignEndsAt ?? null} />
-      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-        <div class="text-sm font-extrabold text-amber-900">期間限定キャンペーン</div>
+      <div class="rounded-2xl border border-[#c9d4ff] bg-[#eef3ff] p-4">
+        <div class="text-sm font-extrabold text-[#2f46b6]">期間限定キャンペーン</div>
         {item.campaignBullets?.length ? (
-          <ul class="mt-2 list-disc pl-5 text-sm text-amber-950/90">
+          <ul class="mt-2 list-disc pl-5 text-sm text-[#2f46b6]/90">
             {item.campaignBullets.slice(0, 6).map((t) => (
               <li>{t}</li>
             ))}
           </ul>
         ) : item.campaignText ? (
-          <p class="mt-2 text-sm text-amber-950/90">{item.campaignText}</p>
+          <p class="mt-2 text-sm text-[#2f46b6]/90">{item.campaignText}</p>
         ) : null}
         <div class="mt-4">
           <CTAButton href={item.officialUrl} label="無料体験レッスンを受ける" />
@@ -205,7 +205,7 @@ const stats = getReviewStats(reviews);
     position: relative;
     z-index: 1;
     transform: scale(1.08);
-    filter: drop-shadow(0 6px 14px rgba(255, 215, 0, 0.45)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+    filter: none;
   }
 
   .rank-card--sparkle {

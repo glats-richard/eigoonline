@@ -128,7 +128,10 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                     />
                   ) : null}
                 </div>
-                <a href={`#school-${x.id}`} class="mt-2 block min-w-0 truncate text-base font-extrabold text-sky-800">
+                <a
+                  href={`#school-${x.id}`}
+                  class="mt-2 block min-w-0 truncate text-base font-extrabold text-[color:var(--brand-link-hover)]"
+                >
                   {x.data.name}
                 </a>
                 <div class="mt-2">
@@ -146,7 +149,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                   <div class="flex items-center gap-3">
                     <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
                       <div
-                        class="h-full rounded-full bg-gradient-to-r from-amber-400 to-rose-500"
+                        class="h-full rounded-full bg-gradient-to-r from-[#7ac6ff] to-[#ff7ab6]"
                         style={`width:${gaugeWidthPct(x.data.teacherQuality)}%`}
                       />
                     </div>
@@ -164,7 +167,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                   <div class="flex items-center gap-3">
                     <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
                       <div
-                        class="h-full rounded-full bg-gradient-to-r from-fuchsia-400 to-indigo-500"
+                        class="h-full rounded-full bg-gradient-to-r from-[#ff7ab6] to-[#b6a7ff]"
                         style={`width:${gaugeWidthPct(x.data.materialQuality)}%`}
                       />
                     </div>
@@ -182,7 +185,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                   <div class="flex items-center gap-3">
                     <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
                       <div
-                        class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-sky-500"
+                        class="h-full rounded-full bg-gradient-to-r from-[#6ee7d8] to-[#7ac6ff]"
                         style={`width:${gaugeWidthPct(x.data.connectionQuality)}%`}
                       />
                     </div>
@@ -300,7 +303,10 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                     <img src={x.data.logoUrl} alt={`${x.data.name} ロゴ`} class="h-10 w-auto max-w-[200px] object-contain" loading="lazy" decoding="async" />
                   </div>
                 ) : null}
-                <a href={`#school-${x.id}`} class="mt-2 block truncate text-sm font-extrabold text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-800">
+                        <a
+                          href={`#school-${x.id}`}
+                          class="mt-2 block truncate text-sm font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+                        >
                   {x.data.name}
                 </a>
                 <div class="mt-2 flex items-center justify-center">
@@ -323,7 +329,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                     <>
                       <div class="h-2.5 w-[140px] overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
                         <div
-                          class="h-full rounded-full bg-gradient-to-r from-amber-400 to-rose-500"
+                          class="h-full rounded-full bg-gradient-to-r from-[#7ac6ff] to-[#ff7ab6]"
                           style={`width:${gaugeWidthPct(x.data.teacherQuality)}%`}
                         />
                       </div>
@@ -348,7 +354,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                     <>
                       <div class="h-2.5 w-[140px] overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
                         <div
-                          class="h-full rounded-full bg-gradient-to-r from-fuchsia-400 to-indigo-500"
+                          class="h-full rounded-full bg-gradient-to-r from-[#ff7ab6] to-[#b6a7ff]"
                           style={`width:${gaugeWidthPct(x.data.materialQuality)}%`}
                         />
                       </div>
@@ -373,7 +379,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                     <>
                       <div class="h-2.5 w-[140px] overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
                         <div
-                          class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-sky-500"
+                          class="h-full rounded-full bg-gradient-to-r from-[#6ee7d8] to-[#7ac6ff]"
                           style={`width:${gaugeWidthPct(x.data.connectionQuality)}%`}
                         />
                       </div>

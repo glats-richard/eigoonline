@@ -1,0 +1,363 @@
+---
+export const prerender = true;
+
+import Layout from "../layouts/Layout.astro";
+import Sidebar from "../components/Sidebar.astro";
+
+type AiApp = {
+  id: string;
+  name: string;
+  logoSrc?: string | null;
+  officialUrl: string;
+  summary: string;
+  priceText?: string | null;
+  trialText?: string | null;
+  benefitText?: string | null;
+  points?: string[];
+  recommendedFor?: string[];
+};
+
+const aiRanking: AiApp[] = [
+  {
+    id: "kimini-ai",
+    name: "Kimini AI",
+    logoSrc: "/logos/company-30.webp",
+    officialUrl: "https://br.glats.online/",
+    summary: "学習カリキュラムとAI練習を組み合わせて、基礎から継続しやすいAI英会話。",
+    priceText: "—",
+    trialText: "—",
+    points: ["学習ステップが分かりやすい", "継続しやすいUI", "学校・教材系の文脈に強い"],
+    recommendedFor: ["試験対策も含めて基礎から積み上げたい", "学習習慣を作りたい"],
+  },
+  {
+    id: "dmm-ai",
+    name: "DMM英会話（アプリ）",
+    logoSrc: "/logos/company-39.webp",
+    officialUrl: "https://eikaiwa.dmm.com/",
+    summary: "アプリ学習とオンライン英会話を併用しやすい。教材の種類が多く、目的別に学びやすい。",
+    priceText: "4,800円〜",
+    trialText: "7日間",
+    points: ["教材が豊富", "ニュース教材などで続けやすい", "目的別に選びやすい"],
+    recommendedFor: ["試験対策も日常も幅広く学びたい", "教材重視で選びたい"],
+  },
+  {
+    id: "speak",
+    name: "スピーク（Speak）",
+    logoSrc: "https://www.speak.com/favicon.ico",
+    officialUrl: "https://www.speak.com/",
+    summary: "AIと会話しながらスピーキング量を増やしやすい、アウトプット重視の英会話アプリ。",
+    priceText: "—",
+    trialText: "—",
+    points: ["発話量を増やしやすい", "会話形式で続けやすい", "アウトプット重視"],
+    recommendedFor: ["とにかく話す量を増やしたい", "会話で慣れたい"],
+  },
+  {
+    id: "elsa",
+    name: "ELSA Speak",
+    logoSrc: "https://elsaspeak.com/favicon.ico",
+    officialUrl: "https://elsaspeak.com/",
+    summary: "発音矯正とフィードバックに強い。発音の癖を細かく改善したい人向け。",
+    priceText: "—",
+    trialText: "—",
+    points: ["発音の改善に強い", "フィードバックが細かい", "弱点が見えやすい"],
+    recommendedFor: ["発音を集中的に直したい", "スコアで改善を管理したい"],
+  },
+  {
+    id: "speakbuddy",
+    name: "スピークバディ",
+    logoSrc: "https://www.speakbuddy.jp/favicon.ico",
+    officialUrl: "https://www.speakbuddy.jp/",
+    summary: "日常・旅行・ビジネスなど幅広いシーンで、AI相手に練習しやすい。",
+    priceText: "—",
+    trialText: "—",
+    points: ["シーンが豊富", "AI相手で気軽", "継続しやすい設計"],
+    recommendedFor: ["日常会話を習慣化したい", "気軽に練習したい"],
+  },
+];
+
+const compareTop = aiRanking.slice(0, 4);
+
+// Reuse existing sidebar PR banners + categories like home
+import { getCollection } from "astro:content";
+const categories = await getCollection("categories");
+const banners = await getCollection("banners");
+const catLevel = categories.filter((c) => c.data.group === "level").map((c) => c.data);
+const catAge = categories.filter((c) => c.data.group === "age").map((c) => c.data);
+const catReco = categories.filter((c) => c.data.group === "recommend").map((c) => c.data);
+const sidebarBannersTop = banners.filter((b) => ["sidebar", "sidebar_top"].includes(b.data.placement)).map((b) => b.data);
+const sidebarBannersMid = banners.filter((b) => b.data.placement === "sidebar_mid").map((b) => b.data);
+const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar_bottom").map((b) => b.data);
+---
+
+<Layout
+  title="AI英会話アプリ おすすめ比較・ランキング"
+  description="AI英会話アプリを比較して、自分に合う学習スタイルを選べるようにまとめたページです。"
+  ogImage="/eigoonline_logo.png"
+  headerOverlay
+>
+  <Fragment slot="head">
+    <link rel="preload" as="image" href="/fv_1.webp" fetchpriority="high" />
+  </Fragment>
+
+  <main id="top" class="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 sm:pb-10 sm:pt-6">
+    <section class="pt-10 sm:pt-12">
+      <div class="mt-3 grid gap-6 sm:mt-4 lg:grid-cols-3 lg:items-start">
+        <div class="min-w-0 space-y-6 lg:col-span-2">
+          <!-- Hero -->
+          <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <picture>
+              <source srcset="/fv_1.webp" type="image/webp" />
+              <img
+                src="/fv_1.jpg"
+                alt="AI英会話アプリ 比較・ランキング"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+                class="block h-auto w-full object-cover"
+              />
+            </picture>
+            <div class="absolute inset-x-0 top-0 bg-gradient-to-b from-black/55 to-transparent px-5 pb-6 pt-5">
+              <h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">AI英会話アプリ おすすめ比較</h1>
+              <p class="mt-2 max-w-2xl text-sm font-semibold text-white/90 sm:text-base">
+                AI英会話アプリを「試験対策」「日常会話」「発音改善」などの観点で比較。まずは上位のおすすめからチェックできます。
+              </p>
+            </div>
+          </div>
+
+          <!-- Ranking -->
+          <section id="ranking" class="w-full min-w-0">
+            <div class="mb-4">
+              <h2 class="text-xl font-extrabold text-zinc-900">AI英会話アプリ おすすめランキング</h2>
+              <p class="mt-1 text-sm text-zinc-600">
+                参考記事をベースに、学習の続けやすさ・用途の広さを軸に編集部で整理しました。
+              </p>
+              <p class="mt-2 text-xs font-semibold text-zinc-500">
+                参考: <a class="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-700" href="https://www.aspicjapan.org/asu/article/86541" target="_blank" rel="nofollow noopener noreferrer">AI英会話アプリおすすめ（ASPIC）</a>
+              </p>
+            </div>
+
+            <div class="grid gap-4">
+              {aiRanking.map((app, idx) => (
+                <article class="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+                  <div class="grid grid-cols-[96px_1fr] gap-3 p-3 sm:grid-cols-[140px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
+                    <div class="flex h-16 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 p-2 sm:h-auto sm:p-3">
+                      {app.logoSrc ? (
+                        <img
+                          src={app.logoSrc}
+                          alt={`${app.name} ロゴ`}
+                          loading="lazy"
+                          decoding="async"
+                          class="h-10 w-auto max-w-[120px] object-contain sm:h-12 sm:max-w-[160px]"
+                        />
+                      ) : (
+                        <div class="text-sm font-extrabold text-zinc-800">{app.name}</div>
+                      )}
+                    </div>
+
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        {idx + 1 <= 3 ? (
+                          <img
+                            src={`/rank${idx + 1}.webp`}
+                            alt={`${idx + 1}位`}
+                            width="36"
+                            height="36"
+                            loading="eager"
+                            decoding="async"
+                            class="h-9 w-9 shrink-0 object-contain"
+                          />
+                        ) : (
+                          <div class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f4f0ff] text-xs font-extrabold text-[#6a56d6] ring-1 ring-[#d8ceff]">
+                            {idx + 1}
+                          </div>
+                        )}
+                        <h3 class="min-w-0 truncate text-base font-extrabold text-[color:var(--brand-link-hover)] sm:text-lg">{app.name}</h3>
+                        <span class="inline-flex shrink-0 items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700">↗</span>
+                      </div>
+
+                      <p class="mt-2 text-sm leading-relaxed text-zinc-700">{app.summary}</p>
+
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-700">無料</span>
+                        <span class="inline-flex max-w-full items-center rounded-md bg-white px-2 py-1 text-xs font-semibold text-zinc-900 ring-1 ring-zinc-200">
+                          <span class="break-words">{app.trialText ?? "—"}</span>
+                        </span>
+
+                        <span class="ml-1 inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-700">料金</span>
+                        <span class="inline-flex max-w-full items-center rounded-md bg-white px-2 py-1 text-xs font-semibold text-zinc-900 ring-1 ring-zinc-200">
+                          <span class="break-words">{app.priceText ?? "—"}</span>
+                        </span>
+                      </div>
+
+                      {app.points?.length ? (
+                        <div class="mt-3 rounded-xl bg-zinc-50 px-3 py-2 ring-1 ring-zinc-200">
+                          <div class="text-xs font-extrabold text-zinc-700">ポイント</div>
+                          <ul class="mt-2 text-sm font-semibold text-zinc-900">
+                            {app.points.slice(0, 3).map((p) => (
+                              <li class="mb-1 last:mb-0">・{p}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div class="col-span-2 sm:col-span-1 sm:py-2">
+                      <a
+                        class="btn-brand cta-sweep group relative isolate inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-center text-base font-extrabold text-white transition will-change-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        href={app.officialUrl}
+                        target="_blank"
+                        rel="nofollow sponsored noopener noreferrer"
+                        referrerpolicy="no-referrer"
+                      >
+                        <span class="cta-sweep__content inline-flex items-center gap-2">
+                          <span>公式サイトを見る</span>
+                          <span aria-hidden="true">→</span>
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <!-- Compare -->
+          <section id="compare">
+            <div class="mb-4">
+              <h2 class="text-xl font-extrabold text-zinc-900">比較表</h2>
+              <p class="mt-1 text-sm text-zinc-600">上位アプリを項目ごとに横並びで比較できます（横スクロール可）。</p>
+            </div>
+
+            <div class="scroll-x-contain w-full max-w-full overflow-x-auto rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm [-webkit-overflow-scrolling:touch] sm:p-4">
+              <table class="w-full table-fixed border-separate border-spacing-0" style={`min-width:${140 + compareTop.length * 220}px`}>
+                <colgroup>
+                  <col style="width:140px" />
+                  {compareTop.map(() => (
+                    <col style="width:220px" />
+                  ))}
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="sticky left-0 z-10 bg-white"></th>
+                    {compareTop.map((x, idx) => (
+                      <th class="px-3 pb-4 pt-3 text-center align-top" style={`border-top:2px solid ${idx === 0 ? "#f5c542" : idx === 1 ? "#bdbdbd" : idx === 2 ? "#c79a6b" : "#9fd6ff"}; border-left:2px solid ${idx === 0 ? "#f5c542" : idx === 1 ? "#bdbdbd" : idx === 2 ? "#c79a6b" : "#9fd6ff"}; border-right:2px solid ${idx === 0 ? "#f5c542" : idx === 1 ? "#bdbdbd" : idx === 2 ? "#c79a6b" : "#9fd6ff"}; border-top-left-radius:12px; border-top-right-radius:12px;`}>
+                        <div class="flex items-center justify-center">
+                          {idx + 1 <= 3 ? (
+                            <img src={`/rank${idx + 1}.webp`} alt={`${idx + 1}位`} width="40" height="40" loading="eager" decoding="async" class="h-10 w-10 object-contain" />
+                          ) : (
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-extrabold text-zinc-800 ring-1 ring-zinc-300">
+                              {idx + 1}
+                            </div>
+                          )}
+                        </div>
+                        {x.logoSrc ? (
+                          <div class="mt-2 flex items-center justify-center">
+                            <img
+                              src={x.logoSrc}
+                              alt={`${x.name} ロゴ`}
+                              loading="lazy"
+                              decoding="async"
+                              class="h-8 w-auto max-w-[140px] object-contain"
+                            />
+                          </div>
+                        ) : null}
+                        <a href={x.officialUrl} target="_blank" rel="nofollow sponsored noopener noreferrer" referrerpolicy="no-referrer" class="mt-2 block truncate text-sm font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]">
+                          {x.name}
+                        </a>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody class="align-top">
+                  {[
+                    {
+                      label: "料金目安",
+                      value: (x: AiApp) => x.priceText ?? "—",
+                    },
+                    {
+                      label: "無料/体験",
+                      value: (x: AiApp) => x.trialText ?? "—",
+                    },
+                    {
+                      label: "おすすめポイント",
+                      value: (x: AiApp) => (x.points?.length ? x.points.slice(0, 2).join(" / ") : "—"),
+                    },
+                    {
+                      label: "こんな人におすすめ",
+                      value: (x: AiApp) => (x.recommendedFor?.length ? x.recommendedFor.slice(0, 2).join(" / ") : "—"),
+                    },
+                  ].map((row, rowIdx) => (
+                    <tr>
+                      <th class={`sticky left-0 z-10 ${rowIdx ? "border-t border-zinc-200 " : ""} bg-zinc-100 px-3 py-3 text-left text-sm font-extrabold text-zinc-700`}>
+                        {row.label}
+                      </th>
+                      {compareTop.map((x, idx) => {
+                        const borderColor = idx === 0 ? "#f5c542" : idx === 1 ? "#bdbdbd" : idx === 2 ? "#c79a6b" : "#9fd6ff";
+                        return (
+                          <td class={`${rowIdx ? "border-t border-zinc-200 " : ""} px-3 py-3 text-left text-sm font-semibold text-zinc-900`} style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                            {row.value(x)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                  <tr>
+                    <th class="sticky left-0 z-10 border-t border-zinc-200 bg-white"></th>
+                    {compareTop.map((x, idx) => {
+                      const borderColor = idx === 0 ? "#f5c542" : idx === 1 ? "#bdbdbd" : idx === 2 ? "#c79a6b" : "#9fd6ff";
+                      return (
+                        <td class="border-t border-zinc-200 p-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor}; border-bottom:2px solid ${borderColor}; border-bottom-left-radius:12px; border-bottom-right-radius:12px;`}>
+                          <a
+                            class="btn-brand cta-sweep group relative isolate inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-center text-base font-extrabold text-white transition will-change-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            href={x.officialUrl}
+                            target="_blank"
+                            rel="nofollow sponsored noopener noreferrer"
+                            referrerpolicy="no-referrer"
+                          >
+                            <span class="cta-sweep__content inline-flex items-center gap-2">
+                              <span>公式サイトを見る</span>
+                              <span aria-hidden="true">→</span>
+                            </span>
+                          </a>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="hidden lg:block lg:col-span-1">
+          <Sidebar
+            bannersTop={sidebarBannersTop}
+            bannersMid={sidebarBannersMid}
+            bannersBottom={sidebarBannersBottom}
+            popular={[]}
+            categories={[
+              ...catReco.map((c) => ({ title: c.title, href: c.href })),
+              ...catAge.map((c) => ({ title: c.title, href: c.href })),
+              ...catLevel.map((c) => ({ title: c.title, href: c.href })),
+            ]}
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10 lg:hidden">
+      <Sidebar
+        bannersTop={sidebarBannersTop}
+        bannersMid={sidebarBannersMid}
+        bannersBottom={sidebarBannersBottom}
+        popular={[]}
+        categories={[
+          ...catReco.map((c) => ({ title: c.title, href: c.href })),
+          ...catAge.map((c) => ({ title: c.title, href: c.href })),
+          ...catLevel.map((c) => ({ title: c.title, href: c.href })),
+        ]}
+      />
+    </section>
+  </main>
+</Layout>
+

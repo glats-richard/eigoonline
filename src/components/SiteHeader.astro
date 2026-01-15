@@ -14,8 +14,8 @@ const { logoSrc = "/eigoonline_logo.webp", logoAlt = "eigoonline.com", overlay =
   class:list={[
     "z-50 border-b backdrop-blur",
     overlay
-      ? "absolute inset-x-0 top-0 border-white/20 bg-white/20"
-      : "sticky top-0 border-zinc-200 bg-white/90",
+      ? "absolute inset-x-0 top-0 border-white/20 bg-white/15"
+      : "surface-strong sticky top-0 border-white/30",
   ]}
 >
   <div class="mx-auto w-full max-w-6xl px-4 py-3">
@@ -35,9 +35,10 @@ const { logoSrc = "/eigoonline_logo.webp", logoAlt = "eigoonline.com", overlay =
 
       <!-- Desktop nav -->
       <nav class="hidden items-center gap-3 text-sm font-semibold text-zinc-800 sm:flex">
-        <a class="rounded-lg px-3 py-2 hover:bg-zinc-100" href="/">TOP</a>
-        <a class="rounded-lg px-3 py-2 hover:bg-zinc-100" href="/ranking/list">ランキング</a>
-        <a class="rounded-lg px-3 py-2 hover:bg-zinc-100" href="/article/list">コラム</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-white/50" href="/">TOP</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-white/50" href="/ranking/list">ランキング</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-white/50" href="/ai">AI英会話</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-white/50" href="/article/list">コラム</a>
       </nav>
 
       <!-- Mobile hamburger (CSS-only via checkbox) -->
@@ -47,8 +48,9 @@ const { logoSrc = "/eigoonline_logo.webp", logoAlt = "eigoonline.com", overlay =
           for="mobile-nav"
           aria-label="メニューを開く"
           class:list={[
-            "inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm font-extrabold text-zinc-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-            overlay ? "border-white/30 bg-white/60 hover:bg-white/80" : "border-zinc-200 bg-white hover:bg-zinc-50",
+            "inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm font-extrabold text-zinc-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+            "focus-visible:ring-orange-300",
+            overlay ? "border-white/30 bg-white/55 hover:bg-white/70" : "border-white/40 bg-white/80 hover:bg-white/90",
           ]}
         >
           <span aria-hidden="true">☰</span>
@@ -56,10 +58,11 @@ const { logoSrc = "/eigoonline_logo.webp", logoAlt = "eigoonline.com", overlay =
 
         <label for="mobile-nav" aria-label="メニューを閉じる" class="fixed inset-0 z-40 hidden bg-black/20 peer-checked:block"></label>
 
-        <div class="absolute right-0 z-50 mt-2 hidden w-48 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg peer-checked:block">
-          <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-zinc-50" href="/">TOP</a>
-          <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-zinc-50" href="/ranking/list">ランキング</a>
-          <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-zinc-50" href="/article/list">コラム</a>
+            <div class="surface-strong absolute right-0 z-50 mt-2 hidden w-48 overflow-hidden rounded-2xl border border-white/40 shadow-lg peer-checked:block">
+              <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-white/60" href="/">TOP</a>
+              <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-white/60" href="/ranking/list">ランキング</a>
+              <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-white/60" href="/ai">AI英会話</a>
+              <a class="block px-4 py-3 text-sm font-semibold text-zinc-800 hover:bg-white/60" href="/article/list">コラム</a>
         </div>
       </div>
     </div>
