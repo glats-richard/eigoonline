@@ -19,6 +19,8 @@ function riskCommentFromReasons(reasons: string[]) {
 
 type ConversionPayload = {
   offer_id: string;
+  /** Required: click identifier issued by eigoonline (/api/track/click). */
+  click_id?: string | null;
   /** Deprecated: kept for backward compatibility; ignored. */
   offer_uuid?: string | null;
   /** Optional: student/user identifier provided by partner (e.g. kimini student_id). */
@@ -149,6 +151,33 @@ export const POST: APIRoute = async ({ request }) => {
   if (!offerId) {
     return json(400, { ok: false, error: "offer_id is required" }, corsHeaders(request));
   }
+
+  const clickId = (payload?.click_id ?? "").trim().slice(0, 128) || null;
+  if (!clickId) {
+    return json(400, { ok: false, error: "click_id is required" }, corsHeaders(request));
+  }
+
+  // Require proof that the user came via eigoonline: click_id must exist (and match offer_id).
+  try {
+    const r = await query<{ offer_id: string | null }>(
+      "select offer_id::text as offer_id from clicks where click_id = $1 and created_at > now() - interval '30 days' limit 1",
+      [clickId],
+    );
+    const clickOfferId = r.rows?.[0]?.offer_id ?? null;
+    if (!clickOfferId) {
+      return json(403, { ok: false, error: "Invalid click_id" }, corsHeaders(request));
+    }
+    if (String(clickOfferId) !== offerId) {
+      return json(403, { ok: false, error: "click_id does not match offer_id" }, corsHeaders(request));
+    }
+  } catch (e: any) {
+    // clicks.click_id might not exist yet (schema not applied).
+    if (e?.code === "42703" || e?.code === "42P01") {
+      return json(500, { ok: false, error: "Tracker DB schema is not up to date (missing clicks/click_id)" }, corsHeaders(request));
+    }
+    return json(500, { ok: false, error: e?.message ?? String(e) }, corsHeaders(request));
+  }
+
   // offer_uuid is no longer used; keep accepting but ignore.
   const studentId = (payload?.student_id ?? "").trim().slice(0, 256) || null;
   const studentIdHash = studentId ? sha256Hex(studentId) : null;
@@ -255,16 +284,17 @@ export const POST: APIRoute = async ({ request }) => {
     try {
       r = await query<{ id: number | string }>(
         `insert into conversions (
-          offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, review_comment, status, reward, payout, amount, commission,
+          offer_id, click_id, student_id, student_id_hash, event_id, client_ts_ms, risk, review_comment, status, reward, payout, amount, commission,
           ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
           cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
         ) values (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
-          $13,$14,$15,$16,$17,$18,$19,$20,$21,
-          $22,$23,$24,$25,$26,$27
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,
+          $14,$15,$16,$17,$18,$19,$20,$21,$22,
+          $23,$24,$25,$26,$27,$28
         ) ${eventId ? "on conflict (event_id) do nothing" : ""} returning id`,
         [
           offerId,
+          clickId,
           studentId,
           studentIdHash,
           eventId,
@@ -303,26 +333,21 @@ export const POST: APIRoute = async ({ request }) => {
         return json(200, { ok: true, id: existingId, deduped: true }, corsHeaders(request));
       }
     } catch (e: any) {
-      // Backward compatibility: if columns don't exist yet, fall back to minimal insert.
-      if (e?.code === "42703") {
-        r = await query<{ id: number | string }>(
-          "insert into conversions (offer_id, status, reward, payout, amount, commission) values ($1, $2, $3, $4, $5, $6) returning id",
-          [offerId, status, reward, payout, amount, commission],
-        );
-      } else if (e?.code === "42P10") {
+      if (e?.code === "42P10") {
         // ON CONFLICT requires a unique index/constraint. If not present yet, fall back.
         r = await query<{ id: number | string }>(
           `insert into conversions (
-            offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, review_comment, status, reward, payout, amount, commission,
+            offer_id, click_id, student_id, student_id_hash, event_id, client_ts_ms, risk, review_comment, status, reward, payout, amount, commission,
             ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
             cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
           ) values (
-            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
-            $13,$14,$15,$16,$17,$18,$19,$20,$21,
-            $22,$23,$24,$25,$26,$27
+            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,
+            $14,$15,$16,$17,$18,$19,$20,$21,$22,
+            $23,$24,$25,$26,$27,$28
           ) returning id`,
           [
             offerId,
+            clickId,
             studentId,
             studentIdHash,
             eventId,
@@ -351,6 +376,9 @@ export const POST: APIRoute = async ({ request }) => {
             requestHeaders,
           ],
         );
+      } else if (e?.code === "42703") {
+        // Schema not applied yet (e.g. conversions.click_id missing).
+        return json(500, { ok: false, error: "Tracker DB schema is not up to date (missing conversions.click_id)" }, corsHeaders(request));
       } else {
         throw e;
       }

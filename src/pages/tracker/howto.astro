@@ -41,10 +41,48 @@ on conflict (id) do nothing;`}</code></pre>
     </section>
 
     <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-      <h2 class="text-lg font-extrabold text-zinc-900">3. 成果発生ページにGTMタグを設置</h2>
+      <h2 class="text-lg font-extrabold text-zinc-900">3. GTMタグを設置（click_id必須）</h2>
       <p class="mt-2 text-sm text-zinc-700">
-        成果が発生したページ（例: <code class="font-semibold">https://br.glats.online/</code> 側の完了ページ）で、
-        GTMの「カスタムHTML」で下記を発火させます。
+        このトラッキングは <span class="font-semibold">eigoonline経由のクリック証跡（click_id）</span> がある成果のみをカウントします。
+        そのためGTMは <span class="font-semibold">2つ</span> 設置します。
+      </p>
+
+      <div class="mt-4 text-sm font-extrabold text-zinc-900">3-1. 先方サイトの全ページで click_id を保存（常時発火）</div>
+      <p class="mt-2 text-sm text-zinc-700">
+        先方サイト（例: <code class="font-semibold">br.glats.online</code>）の全ページで、URLの
+        <code class="font-semibold">?click_id=...</code> を <code class="font-semibold">sessionStorage</code> に保存します。
+      </p>
+      <div class="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+        <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`<script>
+(function () {
+  function getParam(name) {
+    try {
+      var qs = location && location.search ? location.search : "";
+      if (!qs) return null;
+      var pairs = qs.replace(/^\\?/, "").split("&");
+      for (var i = 0; i < pairs.length; i++) {
+        var p = pairs[i].split("=");
+        var k = decodeURIComponent((p[0] || "").replace(/\\+/g, " "));
+        if (k === name) return decodeURIComponent(((p[1] || "") + "").replace(/\\+/g, " "));
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  var offerId = "kimini";
+  var clickId = getParam("click_id");
+  if (!clickId) return;
+  try {
+    sessionStorage.setItem("eo_click_id:" + offerId, clickId);
+  } catch (e) {}
+})();
+</script>`}</code></pre>
+      </div>
+
+      <div class="mt-5 text-sm font-extrabold text-zinc-900">3-2. 成果発生ページで CV を送信（完了ページのみ発火）</div>
+      <p class="mt-2 text-sm text-zinc-700">
+        成果が発生したページ（完了ページ）で、保存済みの <code class="font-semibold">click_id</code> を付けて送信します。
+        <code class="font-semibold">click_id</code> が取れない場合は送信しません。
       </p>
       <div class="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
         <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`<script>
@@ -90,8 +128,16 @@ on conflict (id) do nothing;`}</code></pre>
     return "e-" + String(new Date().getTime()) + "-" + String(Math.random()).slice(2);
   }
 
+  var offerId = "kimini";
+  var clickId = getParam("click_id");
+  if (!clickId) {
+    try { clickId = sessionStorage.getItem("eo_click_id:" + offerId); } catch (e) {}
+  }
+  if (!clickId) return;
+
   var payload = {
-    offer_id: "kimini",
+    offer_id: offerId,
+    click_id: clickId,
     student_id: getParam("student_id"), // 任意: ?student_id=... を受け取る
     status: "pending",
     reward: 1500,
@@ -124,6 +170,7 @@ on conflict (id) do nothing;`}</code></pre>
       </div>
       <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-zinc-700">
         <li><span class="font-semibold">offer_id</span> を案件IDに変更</li>
+        <li><span class="font-semibold">click_id</span> は必須（eigoonline経由のクリック証跡）</li>
         <li><span class="font-semibold">student_id</span> は任意（先方から <code class="font-semibold">?student_id=</code> で渡してもらう）</li>
         <li><span class="font-semibold">reward</span> は任意（円）</li>
       </ul>
@@ -142,12 +189,20 @@ on conflict (id) do nothing;`}</code></pre>
 
     <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <h2 class="text-lg font-extrabold text-zinc-900">5. 動作確認</h2>
-      <p class="mt-2 text-sm text-zinc-700">手元からAPIを叩いて、200が返ることを確認できます。</p>
+      <p class="mt-2 text-sm text-zinc-700">
+        <code class="font-semibold">click_id</code> が必須なので、まずDBにテスト用のクリックを作ってからAPIを叩きます。
+      </p>
       <div class="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
-        <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`curl -i -X POST "https://eigoonline.com/api/track/conversion" \\
+        <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`# 1) DBにテスト用 click_id を作成（psqlで実行）
+insert into clicks (offer_id, click_id, url)
+values ('kimini', 'test_click_id_001', 'https://br.glats.online/')
+returning id;
+
+# 2) CVを送信
+curl -i -X POST "https://eigoonline.com/api/track/conversion" \\
   -H "Origin: https://br.glats.online" \\
   -H "Content-Type: application/json" \\
-  --data '{"offer_id":"kimini","status":"approved","reward":1500}'`}</code></pre>
+  --data '{"offer_id":"kimini","click_id":"test_click_id_001","status":"approved","reward":1500}'`}</code></pre>
       </div>
       <p class="mt-3 text-sm text-zinc-700">
         反映後、<a class="font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="/tracker">/tracker</a>

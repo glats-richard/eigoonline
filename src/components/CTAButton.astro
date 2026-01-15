@@ -1,11 +1,19 @@
 ---
 type Props = {
   href: string;
+  /** If provided, external clicks are routed via /api/track/click to issue click_id. */
+  offerId?: string;
   label?: string;
   fullWidth?: boolean;
 };
 
-const { href, label = "公式サイトを見る", fullWidth = false } = Astro.props satisfies Props;
+const { href, offerId, label = "公式サイトを見る", fullWidth = false } = Astro.props satisfies Props;
+
+const isExternal = href.startsWith("http://") || href.startsWith("https://");
+const trackedHref =
+  isExternal && offerId
+    ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
+    : href;
 ---
 
 <a
@@ -13,7 +21,7 @@ const { href, label = "公式サイトを見る", fullWidth = false } = Astro.pr
     "btn-brand cta-sweep group relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-center text-base font-extrabold text-white transition will-change-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
     fullWidth ? "w-full" : "w-full sm:w-auto",
   ]}
-  href={href}
+  href={trackedHref}
   target="_blank"
   rel="nofollow sponsored noopener noreferrer"
   referrerpolicy="no-referrer"

@@ -140,7 +140,7 @@ const pageDesc =
 
             <div class="mt-4 grid gap-4">
               {itemsRated.slice(0, 8).map((x, idx) => (
-                <RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+                <RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
               ))}
             </div>
           </section>
@@ -171,7 +171,7 @@ const pageDesc =
 
             {itemsRated.map((x, idx) => (
               <div id={`school-${x.id}`} class="scroll-mt-24">
-                <SchoolDetailSection rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+                <SchoolDetailSection offerId={x.id} rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
               </div>
             ))}
           </section>
@@ -183,7 +183,7 @@ const pageDesc =
             bannersTop={sidebarBannersTop}
             bannersMid={sidebarBannersMid}
             bannersBottom={sidebarBannersBottom}
-            popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
+            popular={itemsRated.slice(0, 8).map((x) => ({ offerId: x.id, name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
             categories={[
               ...catReco.map((c) => ({ title: c.title, href: c.href })),
               ...catAge.map((c) => ({ title: c.title, href: c.href })),
@@ -199,7 +199,7 @@ const pageDesc =
         bannersTop={sidebarBannersTop}
         bannersMid={sidebarBannersMid}
         bannersBottom={sidebarBannersBottom}
-        popular={itemsRated.slice(0, 8).map((x) => ({ name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
+        popular={itemsRated.slice(0, 8).map((x) => ({ offerId: x.id, name: x.data.name, officialUrl: x.data.officialUrl, logoUrl: x.data.logoUrl }))}
         categories={[
           ...catReco.map((c) => ({ title: c.title, href: c.href })),
           ...catAge.map((c) => ({ title: c.title, href: c.href })),

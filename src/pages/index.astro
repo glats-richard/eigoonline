@@ -231,7 +231,7 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{overall?.description}</p>
 							<div class="grid gap-4">
 								{overallItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
 						</section>
@@ -240,7 +240,7 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{exam?.description}</p>
 							<div class="grid gap-4">
 								{examItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
 						</section>
@@ -249,7 +249,7 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{daily?.description}</p>
 							<div class="grid gap-4">
 								{dailyItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
 						</section>
@@ -258,7 +258,7 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{business?.description}</p>
 							<div class="grid gap-4">
 								{businessItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 								))}
 							</div>
 						</section>
@@ -283,8 +283,15 @@ const faqJsonLd = {
 				</section>
 
 				<section id="pickup">
-					{pickupTop ? (
-						<PickupCard title={pickupTop.title} label={pickupTop.label} body={pickupTop.body} ctaHref={pickupTop.ctaHref} ctaLabel={pickupTop.ctaLabel} />
+					{pickupTop?.schoolId ? (
+						<PickupCard
+              title={pickupTop.title}
+              label={pickupTop.label}
+              body={pickupTop.body}
+              offerId={pickupTop.schoolId}
+              ctaHref={pickupTop.ctaHref}
+              ctaLabel={pickupTop.ctaLabel}
+            />
 					) : null}
 				</section>
 
@@ -296,7 +303,7 @@ const faqJsonLd = {
 
 					{overallItemsRated.map((x, idx) => (
 						<div id={`school-${x.id}`} class="scroll-mt-24">
-							<SchoolDetailSection rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+							<SchoolDetailSection offerId={x.id} rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
 						</div>
 					))}
 				</section>
@@ -334,6 +341,7 @@ const faqJsonLd = {
 						bannersMid={sidebarBannersMid}
 						bannersBottom={sidebarBannersBottom}
 						popular={overallItems.slice(0, 8).map((x) => ({
+              offerId: x.id,
 							name: x.data.name,
 							officialUrl: x.data.officialUrl,
 							logoUrl: x.data.logoUrl,
@@ -355,6 +363,7 @@ const faqJsonLd = {
 				bannersMid={sidebarBannersMid}
 				bannersBottom={sidebarBannersBottom}
 				popular={overallItems.slice(0, 8).map((x) => ({
+          offerId: x.id,
 					name: x.data.name,
 					officialUrl: x.data.officialUrl,
 					logoUrl: x.data.logoUrl,

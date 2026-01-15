@@ -15,11 +15,12 @@ type Item = {
 
 type Props = {
   item: Item;
+  offerId: string;
   rank: number;
   reviews?: { age: string; rating: number; body: string }[];
 };
 
-const { item, rank, reviews = [] } = Astro.props satisfies Props;
+const { item, offerId, rank, reviews = [] } = Astro.props satisfies Props;
 const stats = getReviewStats(reviews);
 ---
 
@@ -91,7 +92,7 @@ const stats = getReviewStats(reviews);
     </div>
 
     <div class="col-span-2 sm:col-span-1 sm:py-2">
-      <CTAButton href={item.officialUrl} label="公式サイトを見る" fullWidth />
+      <CTAButton href={item.officialUrl} offerId={offerId} label="公式サイトを見る" fullWidth />
     </div>
   </div>
 

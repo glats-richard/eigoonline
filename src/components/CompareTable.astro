@@ -263,7 +263,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
           </div>
 
           <div class="mt-4 border-t border-zinc-200 pt-4">
-            <CTAButton href={x.data.officialUrl} label="公式サイトを見る" fullWidth />
+            <CTAButton href={x.data.officialUrl} offerId={x.id} label="公式サイトを見る" fullWidth />
           </div>
         </section>
       );
@@ -494,7 +494,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                   isLastRow ? `border-bottom:2px solid ${borderColor}; border-bottom-left-radius:12px; border-bottom-right-radius:12px;` : "",
                 ].filter(Boolean).join(";")}
               >
-                <CTAButton href={x.data.officialUrl} label="公式サイトを見る" fullWidth />
+                <CTAButton href={x.data.officialUrl} offerId={x.id} label="公式サイトを見る" fullWidth />
               </td>
             );
           })}

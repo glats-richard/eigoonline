@@ -13,16 +13,20 @@ create table if not exists clicks (
   id bigserial primary key,
   created_at timestamptz not null default now(),
   offer_id text references offers(id) on delete set null,
+  click_id text,
   url text,
   referrer text,
   user_agent text,
-  ip text
+  ip text,
+  ip_hash text,
+  ip_version smallint
 );
 
 create table if not exists conversions (
   id bigserial primary key,
   created_at timestamptz not null default now(),
   offer_id text references offers(id) on delete set null,
+  click_id text,
   student_id text,
   student_id_hash text,
   -- Idempotency / fraud signals
@@ -62,6 +66,10 @@ create index if not exists conversions_offer_created_at_idx on conversions (offe
 
 -- If you already created tables, you can safely re-run this file.
 -- Postgres will keep existing columns; for schema drift, apply ALTERs below.
+alter table clicks add column if not exists click_id text;
+alter table clicks add column if not exists ip_hash text;
+alter table clicks add column if not exists ip_version smallint;
+alter table conversions add column if not exists click_id text;
 alter table conversions add column if not exists student_id text;
 alter table conversions add column if not exists student_id_hash text;
 alter table conversions add column if not exists event_id text;
@@ -85,6 +93,8 @@ alter table conversions add column if not exists request_id text;
 alter table conversions add column if not exists request_headers jsonb;
 
 -- Indexes that depend on newly-added columns must be created after ALTERs.
+create unique index if not exists clicks_click_id_uniq on clicks (click_id) where click_id is not null;
+create index if not exists conversions_click_id_created_at_idx on conversions (click_id, created_at desc);
 create unique index if not exists conversions_event_id_uniq on conversions (event_id) where event_id is not null;
 create index if not exists conversions_ip_hash_created_at_idx on conversions (ip_hash, created_at desc);
 create index if not exists conversions_student_id_hash_created_at_idx on conversions (student_id_hash, created_at desc);

@@ -10,15 +10,19 @@ type ClickRow = {
   id?: string | number;
   created_at?: string | Date | null;
   offer_id?: string | number | null;
+  click_id?: string | null;
   url?: string | null;
   referrer?: string | null;
   user_agent?: string | null;
   ip?: string | null;
+  ip_hash?: string | null;
+  ip_version?: number | null;
 };
 type ConversionRow = {
   id?: string | number;
   created_at?: string | Date | null;
   offer_id?: string | number | null;
+  click_id?: string | null;
   student_id?: string | null;
   student_id_hash?: string | null;
   event_id?: string | null;
@@ -528,6 +532,7 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
               <tr>
                 <th class="px-4 py-3">日時</th>
                 <th class="px-4 py-3">案件</th>
+                <th class="px-4 py-3">click_id</th>
                 <th class="px-4 py-3">URL</th>
                 <th class="px-4 py-3">Referrer</th>
                 <th class="px-4 py-3">IP</th>
@@ -538,6 +543,7 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
                 <tr class="align-top">
                   <td class="px-4 py-3 whitespace-nowrap">{fmtDate(c.created_at)}</td>
                   <td class="px-4 py-3 font-semibold text-zinc-900">{offerNameById(offersMap, c.offer_id)}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-mono text-zinc-700">{c.click_id ?? "—"}</td>
                   <td class="px-4 py-3">
                     {c.url ? <span class="break-all text-xs text-zinc-700">{c.url}</span> : <span class="text-zinc-400">—</span>}
                   </td>
@@ -548,12 +554,23 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
                       <span class="text-zinc-400">—</span>
                     )}
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap">{c.ip ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">
+                    {c.ip ? (
+                      <span title={c.ip} class="inline-flex items-center gap-2">
+                        <span class="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-extrabold text-zinc-700">
+                          {c.ip_version === 6 ? "IPv6" : c.ip_version === 4 ? "IPv4" : "IP"}
+                        </span>
+                        <span class="font-mono">{shortText(c.ip, 36)}</span>
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                 </tr>
               ))}
               {!clicks.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="5">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="6">
                     データなし
                   </td>
                 </tr>
@@ -736,6 +753,10 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
                         </summary>
                         <div class="mt-2 space-y-2">
                           <div>
+                            <div class="text-[11px] font-extrabold text-zinc-500">click_id</div>
+                            <div class="break-all font-mono">{cv.click_id ?? "—"}</div>
+                          </div>
+                          <div>
                             <div class="text-[11px] font-extrabold text-zinc-500">student_id / hash</div>
                             <div class="break-all font-mono">{cv.student_id ?? "—"}</div>
                             <div class="break-all font-mono text-zinc-500">{cv.student_id_hash ?? "—"}</div>
@@ -860,8 +881,16 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
     return "e-" + String(new Date().getTime()) + "-" + String(Math.random()).slice(2);
   }
 
+  var offerId = "kimini";
+  var clickId = getParam("click_id");
+  if (!clickId) {
+    try { clickId = sessionStorage.getItem("eo_click_id:" + offerId); } catch (e) {}
+  }
+  if (!clickId) return;
+
   var payload = {
-    offer_id: "kimini",
+    offer_id: offerId,
+    click_id: clickId,
     student_id: getParam("student_id"), // 任意: ?student_id=... を受け取る
     status: "approved",
     reward: 1500,
