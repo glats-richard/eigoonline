@@ -24,6 +24,8 @@ create table if not exists conversions (
   created_at timestamptz not null default now(),
   offer_id text references offers(id) on delete set null,
   offer_uuid text,
+  student_id text,
+  student_id_hash text,
   status text,
   reward numeric,
   payout numeric,
@@ -57,6 +59,8 @@ create index if not exists conversions_offer_created_at_idx on conversions (offe
 -- If you already created tables, you can safely re-run this file.
 -- Postgres will keep existing columns; for schema drift, apply ALTERs below.
 alter table conversions add column if not exists offer_uuid text;
+alter table conversions add column if not exists student_id text;
+alter table conversions add column if not exists student_id_hash text;
 alter table conversions add column if not exists ip text;
 alter table conversions add column if not exists ip_hash text;
 alter table conversions add column if not exists ip_version smallint;
@@ -76,4 +80,5 @@ alter table conversions add column if not exists request_headers jsonb;
 -- Indexes that depend on newly-added columns must be created after ALTERs.
 create index if not exists conversions_ip_hash_created_at_idx on conversions (ip_hash, created_at desc);
 create index if not exists conversions_offer_uuid_created_at_idx on conversions (offer_uuid, created_at desc);
+create index if not exists conversions_student_id_hash_created_at_idx on conversions (student_id_hash, created_at desc);
 
