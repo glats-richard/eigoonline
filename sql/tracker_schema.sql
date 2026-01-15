@@ -29,6 +29,7 @@ create table if not exists conversions (
   event_id text,
   client_ts_ms bigint,
   risk jsonb,
+  review_comment text,
   status text,
   reward numeric,
   payout numeric,
@@ -66,6 +67,7 @@ alter table conversions add column if not exists student_id_hash text;
 alter table conversions add column if not exists event_id text;
 alter table conversions add column if not exists client_ts_ms bigint;
 alter table conversions add column if not exists risk jsonb;
+alter table conversions add column if not exists review_comment text;
 alter table conversions add column if not exists ip text;
 alter table conversions add column if not exists ip_hash text;
 alter table conversions add column if not exists ip_version smallint;

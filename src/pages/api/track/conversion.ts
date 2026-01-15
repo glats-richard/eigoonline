@@ -4,7 +4,19 @@ import type { APIRoute } from "astro";
 import crypto from "node:crypto";
 import { dbEnvError, query } from "../../../lib/db";
 
-const STATUS_ALLOWED = new Set(["pending", "approved", "rejected"]);
+const STATUS_ALLOWED = new Set(["pending", "check", "approved", "rejected"]);
+
+function riskCommentFromReasons(reasons: string[]) {
+  if (!reasons.length) return null;
+  const labels = reasons.map((r) => {
+    if (r === "ip_rate_1m_high") return "短時間に同一IPからのCVが多い";
+    if (r === "missing_referer") return "Refererが無い";
+    if (r === "missing_user_agent") return "User-Agentが無い";
+    if (r.startsWith("sec_fetch_site:")) return `sec-fetch-site=${r.replace(/^sec_fetch_site:/, "")}`;
+    return r;
+  });
+  return labels.join(" / ");
+}
 
 type ConversionPayload = {
   offer_id: string;
@@ -244,19 +256,20 @@ export const POST: APIRoute = async ({ request }) => {
         : null;
 
     // If needs_review, force manual review workflow.
-    const status = needsReview ? "pending" : requestedStatus === "approved" ? "approved" : "pending";
+    const reviewComment = riskCommentFromReasons(riskReasons);
+    const status = needsReview ? "check" : requestedStatus === "approved" ? "approved" : requestedStatus;
 
     let r;
     try {
       r = await query<{ id: number | string }>(
         `insert into conversions (
-          offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, status, reward, payout, amount, commission,
+          offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, review_comment, status, reward, payout, amount, commission,
           ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
           cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
         ) values (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
-          $12,$13,$14,$15,$16,$17,$18,$19,$20,
-          $21,$22,$23,$24,$25,$26
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+          $13,$14,$15,$16,$17,$18,$19,$20,$21,
+          $22,$23,$24,$25,$26,$27
         ) ${eventId ? "on conflict (event_id) do nothing" : ""} returning id`,
         [
           offerId,
@@ -265,6 +278,7 @@ export const POST: APIRoute = async ({ request }) => {
           eventId,
           clientTsMs,
           risk,
+          reviewComment,
           status,
           reward,
           payout,
@@ -307,13 +321,13 @@ export const POST: APIRoute = async ({ request }) => {
         // ON CONFLICT requires a unique index/constraint. If not present yet, fall back.
         r = await query<{ id: number | string }>(
           `insert into conversions (
-            offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, status, reward, payout, amount, commission,
+            offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, review_comment, status, reward, payout, amount, commission,
             ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
             cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
           ) values (
-            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
-            $12,$13,$14,$15,$16,$17,$18,$19,$20,
-            $21,$22,$23,$24,$25,$26
+            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+            $13,$14,$15,$16,$17,$18,$19,$20,$21,
+            $22,$23,$24,$25,$26,$27
           ) returning id`,
           [
             offerId,
@@ -322,6 +336,7 @@ export const POST: APIRoute = async ({ request }) => {
             eventId,
             clientTsMs,
             risk,
+            reviewComment,
             status,
             reward,
             payout,

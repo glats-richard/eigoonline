@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { dbEnvError, query } from "../../../lib/db";
 
-const ALLOWED = new Set(["pending", "approved", "rejected"]);
+const ALLOWED = new Set(["pending", "check", "approved", "rejected"]);
 
 function redirect303(location: string) {
   return new Response(null, { status: 303, headers: { Location: location } });

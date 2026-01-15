@@ -24,6 +24,7 @@ type ConversionRow = {
   event_id?: string | null;
   client_ts_ms?: number | null;
   risk?: Record<string, any> | null;
+  review_comment?: string | null;
   reward?: number | null;
   payout?: number | null;
   amount?: number | null;
@@ -168,7 +169,9 @@ const ALLOWED_ORIGINS = new Set(["https://eigoonline.com", "https://www.eigoonli
 
 function isSuspicious(cv: ConversionRow) {
   // Heuristics (best-effort): missing/unknown origin or country, very long UA, etc.
+  if ((cv.status ?? "") === "check") return true;
   if (cv.risk && cv.risk.needs_review === true) return true;
+  if (cv.review_comment) return true;
   if (cv.origin && !ALLOWED_ORIGINS.has(cv.origin)) return true;
   if (!cv.origin) return true;
   return false;
@@ -615,13 +618,14 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
 
       <div class="mt-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[1360px] text-left text-sm">
+          <table class="w-full min-w-[1540px] text-left text-sm">
             <thead class="bg-zinc-50 text-xs font-extrabold text-zinc-600">
               <tr>
                 <th class="px-4 py-3">日時</th>
                 <th class="px-4 py-3">案件</th>
                 <th class="px-4 py-3">student_id</th>
                 <th class="px-4 py-3">ステータス</th>
+                <th class="px-4 py-3">コメント</th>
                 <th class="px-4 py-3">報酬</th>
                 <th class="px-4 py-3">国</th>
                 <th class="px-4 py-3">IP</th>
@@ -655,6 +659,7 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
                           onchange="this.form.submit()"
                         >
                           <option value="pending" selected={(cv.status ?? "pending") === "pending"}>pending</option>
+                          <option value="check" selected={(cv.status ?? "") === "check"}>check</option>
                           <option value="approved" selected={(cv.status ?? "") === "approved"}>approved</option>
                           <option value="rejected" selected={(cv.status ?? "") === "rejected"}>rejected</option>
                         </select>
@@ -664,6 +669,15 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
                           </button>
                         </noscript>
                       </form>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-zinc-700">
+                      {cv.review_comment ? (
+                        <span class="inline-block max-w-[220px] truncate align-top" title={cv.review_comment}>
+                          {cv.review_comment}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap">{v == null ? "—" : yen(v)}</td>
                     <td class="px-4 py-3 whitespace-nowrap">
@@ -738,6 +752,10 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
                             </pre>
                           </div>
                           <div>
+                            <div class="text-[11px] font-extrabold text-zinc-500">comment</div>
+                            <div class="break-words">{cv.review_comment ?? "—"}</div>
+                          </div>
+                          <div>
                             <div class="text-[11px] font-extrabold text-zinc-500">ip（full）</div>
                             <div class="break-all font-mono">{cv.ip ?? "—"}</div>
                           </div>
@@ -764,7 +782,7 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
               })}
               {!conversions.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="12">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="13">
                     データなし
                   </td>
                 </tr>
