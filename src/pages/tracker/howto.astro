@@ -63,6 +63,33 @@ on conflict (id) do nothing;`}</code></pre>
     return null;
   }
 
+  function genEventId() {
+    // UUIDv4-like (best-effort). Uses crypto.getRandomValues when available.
+    try {
+      var c = (window && (window.crypto || window.msCrypto)) || null;
+      if (c && c.getRandomValues) {
+        var b = new Uint8Array(16);
+        c.getRandomValues(b);
+        b[6] = (b[6] & 0x0f) | 0x40; // version 4
+        b[8] = (b[8] & 0x3f) | 0x80; // variant
+        var hex = [];
+        for (var i = 0; i < b.length; i++) hex.push((b[i] + 256).toString(16).slice(1));
+        return (
+          hex.slice(0, 4).join("") +
+          "-" +
+          hex.slice(4, 6).join("") +
+          "-" +
+          hex.slice(6, 8).join("") +
+          "-" +
+          hex.slice(8, 10).join("") +
+          "-" +
+          hex.slice(10, 16).join("")
+        );
+      }
+    } catch (e) {}
+    return "e-" + String(new Date().getTime()) + "-" + String(Math.random()).slice(2);
+  }
+
   var payload = {
     offer_id: "kimini",
     student_id: getParam("student_id"), // 任意: ?student_id=... を受け取る
@@ -70,6 +97,18 @@ on conflict (id) do nothing;`}</code></pre>
     reward: 1500,
     page_url: location && location.href ? String(location.href) : null
   };
+  // Idempotency key: reuse within the same browser session to avoid double counting
+  try {
+    var key = "eo_cv_event_id:" + String(payload.offer_id || "") + ":" + String((location && location.pathname) || "");
+    var eid = null;
+    try { eid = sessionStorage.getItem(key); } catch (e) {}
+    if (!eid) {
+      eid = genEventId();
+      try { sessionStorage.setItem(key, eid); } catch (e) {}
+    }
+    payload.event_id = eid;
+  } catch (e) {}
+  payload.client_ts_ms = new Date().getTime();
   var url = "https://eigoonline.com/api/track/conversion";
   var body = JSON.stringify(payload);
 

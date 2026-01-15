@@ -25,6 +25,10 @@ create table if not exists conversions (
   offer_id text references offers(id) on delete set null,
   student_id text,
   student_id_hash text,
+  -- Idempotency / fraud signals
+  event_id text,
+  client_ts_ms bigint,
+  risk jsonb,
   status text,
   reward numeric,
   payout numeric,
@@ -59,6 +63,9 @@ create index if not exists conversions_offer_created_at_idx on conversions (offe
 -- Postgres will keep existing columns; for schema drift, apply ALTERs below.
 alter table conversions add column if not exists student_id text;
 alter table conversions add column if not exists student_id_hash text;
+alter table conversions add column if not exists event_id text;
+alter table conversions add column if not exists client_ts_ms bigint;
+alter table conversions add column if not exists risk jsonb;
 alter table conversions add column if not exists ip text;
 alter table conversions add column if not exists ip_hash text;
 alter table conversions add column if not exists ip_version smallint;
@@ -76,6 +83,7 @@ alter table conversions add column if not exists request_id text;
 alter table conversions add column if not exists request_headers jsonb;
 
 -- Indexes that depend on newly-added columns must be created after ALTERs.
+create unique index if not exists conversions_event_id_uniq on conversions (event_id) where event_id is not null;
 create index if not exists conversions_ip_hash_created_at_idx on conversions (ip_hash, created_at desc);
 create index if not exists conversions_student_id_hash_created_at_idx on conversions (student_id_hash, created_at desc);
 

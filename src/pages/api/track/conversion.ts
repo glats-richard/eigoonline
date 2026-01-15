@@ -12,6 +12,10 @@ type ConversionPayload = {
   offer_uuid?: string | null;
   /** Optional: student/user identifier provided by partner (e.g. kimini student_id). */
   student_id?: string | null;
+  /** Optional: idempotency key (recommended). Send same value on retries to avoid double counting. */
+  event_id?: string | null;
+  /** Optional: client timestamp in milliseconds since epoch (recommended). */
+  client_ts_ms?: number | string | null;
   status?: string | null;
   reward?: number | null;
   payout?: number | null;
@@ -25,6 +29,13 @@ function toFiniteNumber(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+function toFiniteInt(v: unknown): number | null {
+  const n = toFiniteNumber(v);
+  if (n === null) return null;
+  const i = Math.floor(n);
+  return Number.isFinite(i) ? i : null;
 }
 
 function json(status: number, body: unknown, extraHeaders?: Record<string, string>) {
@@ -131,8 +142,17 @@ export const POST: APIRoute = async ({ request }) => {
   const studentId = (payload?.student_id ?? "").trim().slice(0, 256) || null;
   const studentIdHash = studentId ? sha256Hex(studentId) : null;
 
+  const eventId = (payload?.event_id ?? "").trim().slice(0, 128) || null;
+  const clientTsMsRaw = toFiniteInt(payload?.client_ts_ms);
+  const nowMs = Date.now();
+  // Accept timestamps within a reasonable window (prevents garbage/overflow).
+  const clientTsMs =
+    clientTsMsRaw != null && clientTsMsRaw > 0 && clientTsMsRaw < nowMs + 24 * 60 * 60 * 1000
+      ? clientTsMsRaw
+      : null;
+
   const statusRaw = (payload?.status ?? "pending").trim();
-  const status = STATUS_ALLOWED.has(statusRaw) ? statusRaw : "pending";
+  const requestedStatus = STATUS_ALLOWED.has(statusRaw) ? statusRaw : "pending";
   const reward = toFiniteNumber(payload?.reward);
   const payout = toFiniteNumber(payload?.payout);
   const amount = toFiniteNumber(payload?.amount);
@@ -144,6 +164,12 @@ export const POST: APIRoute = async ({ request }) => {
   const referrer = h.get("referer");
   const userAgent = h.get("user-agent");
   const acceptLanguage = h.get("accept-language");
+  const secFetchSite = h.get("sec-fetch-site");
+
+  // If the browser sent an Origin header, enforce allowlist strictly.
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    return json(403, { ok: false, error: "Origin is not allowed" }, corsHeaders(request));
+  }
 
   const cfRay = h.get("cf-ray");
   const cfConnectingIp = h.get("cf-connecting-ip");
@@ -162,22 +188,83 @@ export const POST: APIRoute = async ({ request }) => {
   const requestHeaders = pickHeaders(h);
 
   try {
+    // Idempotency: if event_id already exists, treat as same conversion.
+    if (eventId) {
+      try {
+        const existing = await query<{ id: number | string }>(
+          "select id from conversions where event_id = $1 limit 1",
+          [eventId],
+        );
+        const existingId = existing.rows?.[0]?.id ?? null;
+        if (existingId != null) {
+          return json(200, { ok: true, id: existingId, deduped: true }, corsHeaders(request));
+        }
+      } catch (e: any) {
+        // If event_id column doesn't exist yet, we'll fall back to normal insert below.
+        if (e?.code !== "42703") throw e;
+      }
+    }
+
+    const riskReasons: string[] = [];
+    if (!referrer) riskReasons.push("missing_referer");
+    if (!userAgent) riskReasons.push("missing_user_agent");
+    if (secFetchSite && secFetchSite !== "same-origin" && secFetchSite !== "same-site") {
+      riskReasons.push(`sec_fetch_site:${secFetchSite}`);
+    }
+
+    // Best-effort rate heuristic: same IP hashing too many conversions in 1 minute.
+    if (ipHash) {
+      try {
+        const rr = await query<{ count: number }>(
+          "select count(*)::bigint as count from conversions where ip_hash = $1 and created_at > now() - interval '1 minute'",
+          [ipHash],
+        );
+        const c = rr.rows?.[0]?.count ?? 0;
+        if (c >= 5) riskReasons.push("ip_rate_1m_high");
+      } catch (e: any) {
+        // If ip_hash column doesn't exist yet, ignore.
+        if (e?.code !== "42703") throw e;
+      }
+    }
+
+    // Only strong signals should force pending (to keep operational burden low).
+    const needsReview =
+      riskReasons.includes("ip_rate_1m_high") ||
+      riskReasons.includes("sec_fetch_site:cross-site") ||
+      riskReasons.includes("sec_fetch_site:none");
+
+    const risk =
+      riskReasons.length > 0
+        ? {
+            score: riskReasons.length,
+            reasons: riskReasons,
+            needs_review: needsReview,
+            computed_at_ms: nowMs,
+          }
+        : null;
+
+    // If needs_review, force manual review workflow.
+    const status = needsReview ? "pending" : requestedStatus === "approved" ? "approved" : "pending";
+
     let r;
     try {
       r = await query<{ id: number | string }>(
         `insert into conversions (
-          offer_id, student_id, student_id_hash, status, reward, payout, amount, commission,
+          offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, status, reward, payout, amount, commission,
           ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
           cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
         ) values (
-          $1,$2,$3,$4,$5,$6,$7,$8,
-          $9,$10,$11,$12,$13,$14,$15,$16,$17,
-          $18,$19,$20,$21,$22,$23
-        ) returning id`,
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+          $12,$13,$14,$15,$16,$17,$18,$19,$20,
+          $21,$22,$23,$24,$25,$26
+        ) ${eventId ? "on conflict (event_id) do nothing" : ""} returning id`,
         [
           offerId,
           studentId,
           studentIdHash,
+          eventId,
+          clientTsMs,
+          risk,
           status,
           reward,
           payout,
@@ -200,12 +287,62 @@ export const POST: APIRoute = async ({ request }) => {
           requestHeaders,
         ],
       );
+      // If ON CONFLICT DO NOTHING fired, fetch existing id (idempotency).
+      if (eventId && !(r.rows?.[0]?.id ?? null)) {
+        const existing = await query<{ id: number | string }>(
+          "select id from conversions where event_id = $1 limit 1",
+          [eventId],
+        );
+        const existingId = existing.rows?.[0]?.id ?? null;
+        return json(200, { ok: true, id: existingId, deduped: true }, corsHeaders(request));
+      }
     } catch (e: any) {
       // Backward compatibility: if columns don't exist yet, fall back to minimal insert.
       if (e?.code === "42703") {
         r = await query<{ id: number | string }>(
           "insert into conversions (offer_id, status, reward, payout, amount, commission) values ($1, $2, $3, $4, $5, $6) returning id",
           [offerId, status, reward, payout, amount, commission],
+        );
+      } else if (e?.code === "42P10") {
+        // ON CONFLICT requires a unique index/constraint. If not present yet, fall back.
+        r = await query<{ id: number | string }>(
+          `insert into conversions (
+            offer_id, student_id, student_id_hash, event_id, client_ts_ms, risk, status, reward, payout, amount, commission,
+            ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url,
+            cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers
+          ) values (
+            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+            $12,$13,$14,$15,$16,$17,$18,$19,$20,
+            $21,$22,$23,$24,$25,$26
+          ) returning id`,
+          [
+            offerId,
+            studentId,
+            studentIdHash,
+            eventId,
+            clientTsMs,
+            risk,
+            status,
+            reward,
+            payout,
+            amount,
+            commission,
+            ip,
+            ipHash,
+            ipVer,
+            cfIpCountry,
+            userAgent,
+            acceptLanguage,
+            origin,
+            referrer,
+            pageUrl,
+            cfRay,
+            cfConnectingIp,
+            cfIpCountry,
+            xForwardedFor,
+            requestId,
+            requestHeaders,
+          ],
         );
       } else {
         throw e;
