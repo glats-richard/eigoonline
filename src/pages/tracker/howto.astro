@@ -66,7 +66,7 @@ on conflict (id) do nothing;`}</code></pre>
   var payload = {
     offer_id: "kimini",
     student_id: getParam("student_id"), // 任意: ?student_id=... を受け取る
-    status: "approved",
+    status: "pending",
     reward: 1500,
     page_url: location && location.href ? String(location.href) : null
   };

@@ -66,6 +66,77 @@ function getTokyoMonthRange(now = new Date()) {
   };
 }
 
+function getTokyoTodayYmd(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const y = Number(parts.find((p) => p.type === "year")?.value ?? now.getUTCFullYear());
+  const mo = Number(parts.find((p) => p.type === "month")?.value ?? now.getUTCMonth() + 1);
+  const d = Number(parts.find((p) => p.type === "day")?.value ?? now.getUTCDate());
+  const ymd = `${String(y).padStart(4, "0")}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  return { y, mo, d, ymd };
+}
+
+function parseYmd(s?: string | null) {
+  if (!s) return null;
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
+  if (mo < 1 || mo > 12) return null;
+  if (d < 1 || d > 31) return null;
+  return { y, mo, d, ymd: `${m[1]}-${m[2]}-${m[3]}` };
+}
+
+function getTokyoDateRange(fromYmd?: string | null, toYmd?: string | null) {
+  const from = parseYmd(fromYmd);
+  const to = parseYmd(toYmd);
+  if (!from && !to) return null;
+
+  // JST midnight == UTC-9h. Use [start, end) with end = next-day JST midnight.
+  const startUtc = from ? new Date(Date.UTC(from.y, from.mo - 1, from.d, -9, 0, 0)) : null;
+  const endUtcExclusive = to ? new Date(Date.UTC(to.y, to.mo - 1, to.d + 1, -9, 0, 0)) : null;
+
+  const label = from && to ? `${from.ymd}〜${to.ymd}` : from ? `${from.ymd}〜` : `〜${to!.ymd}`;
+  return {
+    label,
+    fromYmd: from?.ymd ?? null,
+    toYmd: to?.ymd ?? null,
+    startIso: startUtc ? startUtc.toISOString() : null,
+    endIso: endUtcExclusive ? endUtcExclusive.toISOString() : null,
+  };
+}
+
+function getTokyoLastNDaysRange(nDays: number, now = new Date()) {
+  const today = getTokyoTodayYmd(now);
+  const endUtcExclusive = new Date(Date.UTC(today.y, today.mo - 1, today.d + 1, -9, 0, 0));
+  const startUtc = new Date(Date.UTC(today.y, today.mo - 1, today.d - (nDays - 1), -9, 0, 0));
+
+  const fromParts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(startUtc);
+  const toParts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(endUtcExclusive.getTime() - 1));
+  const fromY = fromParts.find((p) => p.type === "year")?.value ?? String(today.y).padStart(4, "0");
+  const fromM = fromParts.find((p) => p.type === "month")?.value ?? String(today.mo).padStart(2, "0");
+  const fromD = fromParts.find((p) => p.type === "day")?.value ?? String(today.d).padStart(2, "0");
+  const toY = toParts.find((p) => p.type === "year")?.value ?? String(today.y).padStart(4, "0");
+  const toM = toParts.find((p) => p.type === "month")?.value ?? String(today.mo).padStart(2, "0");
+  const toD = toParts.find((p) => p.type === "day")?.value ?? String(today.d).padStart(2, "0");
+  const fromYmd = `${fromY}-${fromM}-${fromD}`;
+  const toYmd = `${toY}-${toM}-${toD}`;
+
+  return {
+    label: `直近${nDays}日`,
+    fromYmd,
+    toYmd,
+    startIso: startUtc.toISOString(),
+    endIso: endUtcExclusive.toISOString(),
+  };
+}
+
 function fmtDate(iso?: string | Date | null) {
   if (!iso) return "—";
   const d = iso instanceof Date ? iso : new Date(iso);
@@ -112,33 +183,78 @@ function maskId(s?: string | null) {
   return `${t.slice(0, 4)}…${t.slice(-4)}`;
 }
 
+function sqlWhereCreatedAtRange(startIso: string | null, endIso: string | null, startIndex = 1) {
+  const conds: string[] = [];
+  const params: any[] = [];
+  if (startIso) {
+    params.push(startIso);
+    conds.push(`created_at >= $${startIndex + params.length - 1}`);
+  }
+  if (endIso) {
+    params.push(endIso);
+    conds.push(`created_at < $${startIndex + params.length - 1}`);
+  }
+  const whereSql = conds.length ? `where ${conds.join(" and ")}` : "";
+  return { whereSql, params };
+}
+
+const searchParams = Astro.url.searchParams;
+const range = getTokyoDateRange(searchParams.get("from"), searchParams.get("to")) ?? getTokyoLastNDaysRange(30);
+const todayYmd = getTokyoTodayYmd().ymd;
+const last7 = getTokyoLastNDaysRange(7);
+const returnTo = `${Astro.url.pathname}${Astro.url.search}`;
+
+const pageSizeRaw = searchParams.get("per") ?? "10";
+const pageSize = pageSizeRaw === "100" ? 100 : pageSizeRaw === "50" ? 50 : 10;
+const pageRaw = Number(searchParams.get("page") ?? "1");
+const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
+const offset = (page - 1) * pageSize;
+
+function buildHref(next: Record<string, string | number | null | undefined>) {
+  const p = new URLSearchParams(searchParams);
+  for (const [k, v] of Object.entries(next)) {
+    if (v === null || v === undefined || v === "") p.delete(k);
+    else p.set(k, String(v));
+  }
+  const qs = p.toString();
+  return qs ? `/tracker?${qs}` : "/tracker";
+}
+
 // Fetch latest logs first (we'll derive offers map from their offer_ids)
 let clicksErr: Error | null = null;
 let convErr: Error | null = null;
 let clicksRaw: ClickRow[] = [];
 let convRaw: ConversionRow[] = [];
 try {
-  const r = await query<ClickRow>("select * from clicks order by created_at desc limit 10");
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const r = await query<ClickRow>(`select * from clicks ${w.whereSql} order by created_at desc limit 10`, w.params);
   clicksRaw = r.rows ?? [];
 } catch (e: any) {
   clicksErr = e;
 }
 try {
-  const r = await query<ConversionRow>("select * from conversions order by created_at desc limit 10");
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const r = await query<ConversionRow>(
+    `select * from conversions ${w.whereSql} order by created_at desc limit $${w.params.length + 1} offset $${w.params.length + 2}`,
+    [...w.params, pageSize, offset],
+  );
   convRaw = r.rows ?? [];
 } catch (e: any) {
   convErr = e;
 }
 
-// Monthly conversions per offer (JST month)
-const { label: monthLabel, startIso: monthStartIso, endIso: monthEndIso } = getTokyoMonthRange();
+// Period conversions per offer: default is current JST month, override via ?from=YYYY-MM-DD&to=YYYY-MM-DD
+const period = range ?? getTokyoMonthRange();
+const periodLabel = period.label;
+const periodStartIso = period.startIso;
+const periodEndIso = period.endIso;
 const MONTHLY_LIMIT = 5000;
 let monthlyConvErr: Error | null = null;
 let monthlyConvRaw: ConversionRow[] = [];
 try {
   const r = await query<ConversionRow>(
-    "select id, offer_id, reward, payout, amount, commission, created_at from conversions where created_at >= $1 and created_at < $2 order by created_at desc limit $3",
-    [monthStartIso, monthEndIso, MONTHLY_LIMIT],
+    "select id, offer_id, reward, payout, amount, commission, status, created_at, ip, ip_hash, ip_version, country, user_agent, accept_language, origin, referrer, page_url, cf_ray, cf_connecting_ip, cf_ipcountry, x_forwarded_for, request_id, request_headers, student_id, student_id_hash from conversions where created_at >= $1 and created_at < $2 and status = 'approved' order by created_at desc limit $3",
+    [periodStartIso, periodEndIso, MONTHLY_LIMIT],
   );
   monthlyConvRaw = r.rows ?? [];
 } catch (e: any) {
@@ -150,26 +266,41 @@ let totalClicksErr: Error | null = null;
 let totalConvErr: Error | null = null;
 let totalClicks: number | null = null;
 let totalConversions: number | null = null;
+let approvedConvErr: Error | null = null;
+let approvedConversions: number | null = null;
 try {
-  const r = await query<{ count: number }>("select count(*)::bigint as count from clicks");
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const r = await query<{ count: number }>(`select count(*)::bigint as count from clicks ${w.whereSql}`, w.params);
   totalClicks = r.rows?.[0]?.count ?? 0;
 } catch (e: any) {
   totalClicksErr = e;
   totalClicks = 0;
 }
 try {
-  const r = await query<{ count: number }>("select count(*)::bigint as count from conversions");
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const r = await query<{ count: number }>(`select count(*)::bigint as count from conversions ${w.whereSql}`, w.params);
   totalConversions = r.rows?.[0]?.count ?? 0;
 } catch (e: any) {
   totalConvErr = e;
   totalConversions = 0;
+}
+try {
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const statusSql = w.whereSql ? `${w.whereSql} and status = 'approved'` : "where status = 'approved'";
+  const r = await query<{ count: number }>(`select count(*)::bigint as count from conversions ${statusSql}`, w.params);
+  approvedConversions = r.rows?.[0]?.count ?? 0;
+} catch (e: any) {
+  approvedConvErr = e;
+  approvedConversions = 0;
 }
 
 // Sum rewards (best-effort across common column names)
 // Prefer server-side sum if a 'reward' column exists; otherwise we fall back to summing latest 10 only.
 let totalRewardYen: number | null = null;
 try {
-  const r = await query<{ reward: number | null }>("select sum(reward) as reward from conversions");
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const statusSql = w.whereSql ? `${w.whereSql} and status = 'approved'` : "where status = 'approved'";
+  const r = await query<{ reward: number | null }>(`select sum(reward) as reward from conversions ${statusSql}`, w.params);
   const v = r.rows?.[0]?.reward;
   totalRewardYen = typeof v === "number" && Number.isFinite(v) ? v : null;
 } catch {
@@ -225,6 +356,12 @@ if (convErr) errors.push(`conversions: ${convErr.message}`);
 if (monthlyConvErr) errors.push(`monthlyConversions: ${monthlyConvErr.message}`);
 if (totalClicksErr) errors.push(`totalClicks: ${totalClicksErr.message}`);
 if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
+if (approvedConvErr) errors.push(`approvedConversions: ${approvedConvErr.message}`);
+
+const totalPages = Math.max(1, Math.ceil((totalConversions ?? 0) / pageSize));
+const pageClamped = Math.min(page, totalPages);
+const showingFrom = (totalConversions ?? 0) === 0 ? 0 : (pageClamped - 1) * pageSize + 1;
+const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
 ---
 
 <Layout title="Tracker" description="Affiliate tracker admin" robots="noindex,nofollow" showHeader={false}>
@@ -237,6 +374,60 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
       </div>
       <div class="text-xs text-zinc-500">更新: {new Date().toLocaleString("ja-JP")}</div>
     </div>
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div class="text-xs font-extrabold text-zinc-500">表示期間</div>
+          <div class="mt-1 text-base font-extrabold text-zinc-900">
+            {searchParams.get("from") || searchParams.get("to") ? `期間指定（${range.label}）` : `デフォルト（${range.label}）`}
+          </div>
+        </div>
+        <a class="text-sm font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="/tracker">
+          クリア
+        </a>
+      </div>
+
+      <form method="get" class="mt-4 flex flex-wrap items-end gap-3">
+        <label class="block">
+          <div class="text-xs font-extrabold text-zinc-500">開始日</div>
+          <input
+            type="date"
+            name="from"
+            value={range?.fromYmd ?? ""}
+            class="mt-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
+          />
+        </label>
+        <label class="block">
+          <div class="text-xs font-extrabold text-zinc-500">終了日</div>
+          <input
+            type="date"
+            name="to"
+            value={range?.toYmd ?? ""}
+            class="mt-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
+          />
+        </label>
+        <input type="hidden" name="per" value={String(pageSize)} />
+        <button
+          type="submit"
+          class="btn-brand inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-extrabold text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        >
+          絞り込む
+        </button>
+      </form>
+
+      <div class="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+        <a class="rounded-full bg-zinc-100 px-3 py-1 text-zinc-700 hover:bg-zinc-200" href={`/tracker?from=${todayYmd}&to=${todayYmd}`}>
+          今日
+        </a>
+        <a
+          class="rounded-full bg-zinc-100 px-3 py-1 text-zinc-700 hover:bg-zinc-200"
+          href={`/tracker?from=${last7.fromYmd}&to=${last7.toYmd}`}
+        >
+          直近7日
+        </a>
+      </div>
+    </section>
 
     {errors.length ? (
       <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
@@ -255,11 +446,12 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
         <div class="mt-2 text-3xl font-extrabold text-zinc-900">{totalClicks ?? 0}</div>
       </div>
       <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <div class="text-xs font-extrabold text-zinc-500">総コンバージョン数</div>
-        <div class="mt-2 text-3xl font-extrabold text-zinc-900">{totalConversions ?? 0}</div>
+        <div class="text-xs font-extrabold text-zinc-500">承認コンバージョン数（請求対象）</div>
+        <div class="mt-2 text-3xl font-extrabold text-zinc-900">{approvedConversions ?? 0}</div>
+        <div class="mt-1 text-xs text-zinc-500">全ステータス: {totalConversions ?? 0}</div>
       </div>
       <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <div class="text-xs font-extrabold text-zinc-500">合計報酬額</div>
+        <div class="text-xs font-extrabold text-zinc-500">合計報酬額（承認のみ）</div>
         <div class="mt-2 text-3xl font-extrabold text-zinc-900">
           {totalRewardYen == null ? "—" : yen(totalRewardYen)}
         </div>
@@ -270,11 +462,13 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
     <section class="mt-10">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 class="text-lg font-extrabold text-zinc-900">{monthLabel} のコンバージョン数（案件別）</h2>
-          <p class="mt-1 text-sm text-zinc-600">当月（JST）の成果件数を案件ごとに集計します。</p>
+          <h2 class="text-lg font-extrabold text-zinc-900">{periodLabel} のコンバージョン数（案件別）</h2>
+          <p class="mt-1 text-sm text-zinc-600">
+            {range ? "指定期間の成果件数を案件ごとに集計します（承認のみ）。" : "当月（JST）の成果件数を案件ごとに集計します（承認のみ）。"}
+          </p>
         </div>
         <div class="text-xs text-zinc-500">
-          期間: {fmtDate(monthStartIso)} 〜 {fmtDate(monthEndIso)}
+          期間: {fmtDate(periodStartIso)} 〜 {fmtDate(periodEndIso)}
         </div>
       </div>
 
@@ -360,7 +554,57 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
     </section>
 
     <section class="mt-10">
-      <h2 class="text-lg font-extrabold text-zinc-900">成果一覧（最新10件）</h2>
+      <h2 class="text-lg font-extrabold text-zinc-900">成果一覧</h2>
+      <div class="mt-2 flex flex-wrap items-end justify-between gap-3">
+        <div class="text-xs font-semibold text-zinc-500">
+          {showingFrom}–{showingTo} / {totalConversions ?? 0} 件（{range.label}）
+        </div>
+
+        <div class="flex items-center gap-2">
+          <form method="get" class="flex items-center gap-2">
+            <input type="hidden" name="from" value={searchParams.get("from") ?? ""} />
+            <input type="hidden" name="to" value={searchParams.get("to") ?? ""} />
+            <input type="hidden" name="page" value="1" />
+            <label class="inline-flex items-center gap-2">
+              <span class="text-xs font-extrabold text-zinc-500">表示件数</span>
+              <select
+                name="per"
+                class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-semibold text-zinc-900 shadow-sm"
+                onchange="this.form.submit()"
+              >
+                <option value="10" selected={pageSize === 10}>10</option>
+                <option value="50" selected={pageSize === 50}>50</option>
+                <option value="100" selected={pageSize === 100}>100</option>
+              </select>
+            </label>
+          </form>
+
+          <div class="flex items-center gap-1">
+            <a
+              class:list={[
+                "rounded-lg border px-3 py-1 text-xs font-extrabold shadow-sm",
+                pageClamped <= 1 ? "pointer-events-none border-zinc-200 bg-zinc-100 text-zinc-400" : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
+              ]}
+              href={buildHref({ page: pageClamped - 1 })}
+            >
+              前へ
+            </a>
+            <span class="px-2 text-xs font-semibold text-zinc-500">
+              {pageClamped} / {totalPages}
+            </span>
+            <a
+              class:list={[
+                "rounded-lg border px-3 py-1 text-xs font-extrabold shadow-sm",
+                pageClamped >= totalPages ? "pointer-events-none border-zinc-200 bg-zinc-100 text-zinc-400" : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
+              ]}
+              href={buildHref({ page: pageClamped + 1 })}
+            >
+              次へ
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="mt-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
           <table class="w-full min-w-[1360px] text-left text-sm">
@@ -393,7 +637,26 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
                         <span class="font-mono" title={cv.student_id ?? ""}>{maskId(cv.student_id)}</span>
                       </span>
                     </td>
-                    <td class="px-4 py-3">{cv.status ?? "—"}</td>
+                    <td class="px-4 py-3">
+                      <form method="post" action="/api/tracker/conversion-status" class="flex items-center gap-2">
+                        <input type="hidden" name="id" value={String(cv.id ?? "")} />
+                        <input type="hidden" name="returnTo" value={returnTo} />
+                        <select
+                          name="status"
+                          class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-900 shadow-sm"
+                          onchange="this.form.submit()"
+                        >
+                          <option value="pending" selected={(cv.status ?? "pending") === "pending"}>pending</option>
+                          <option value="approved" selected={(cv.status ?? "") === "approved"}>approved</option>
+                          <option value="rejected" selected={(cv.status ?? "") === "rejected"}>rejected</option>
+                        </select>
+                        <noscript>
+                          <button type="submit" class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-800 hover:bg-zinc-50">
+                            更新
+                          </button>
+                        </noscript>
+                      </form>
+                    </td>
                     <td class="px-4 py-3 whitespace-nowrap">{v == null ? "—" : yen(v)}</td>
                     <td class="px-4 py-3 whitespace-nowrap">
                       {cv.country ?? cv.cf_ipcountry ?? "—"}

@@ -4,6 +4,8 @@ import type { APIRoute } from "astro";
 import crypto from "node:crypto";
 import { dbEnvError, query } from "../../../lib/db";
 
+const STATUS_ALLOWED = new Set(["pending", "approved", "rejected"]);
+
 type ConversionPayload = {
   offer_id: string;
   /** Deprecated: kept for backward compatibility; ignored. */
@@ -129,7 +131,8 @@ export const POST: APIRoute = async ({ request }) => {
   const studentId = (payload?.student_id ?? "").trim().slice(0, 256) || null;
   const studentIdHash = studentId ? sha256Hex(studentId) : null;
 
-  const status = payload?.status ?? null;
+  const statusRaw = (payload?.status ?? "pending").trim();
+  const status = STATUS_ALLOWED.has(statusRaw) ? statusRaw : "pending";
   const reward = toFiniteNumber(payload?.reward);
   const payout = toFiniteNumber(payload?.payout);
   const amount = toFiniteNumber(payload?.amount);
