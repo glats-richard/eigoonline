@@ -12,7 +12,6 @@ function riskCommentFromReasons(reasons: string[]) {
     if (r === "ip_rate_1m_high") return "短時間に同一IPからのCVが多い";
     if (r === "missing_referer") return "Refererが無い";
     if (r === "missing_user_agent") return "User-Agentが無い";
-    if (r.startsWith("sec_fetch_site:")) return `sec-fetch-site=${r.replace(/^sec_fetch_site:/, "")}`;
     return r;
   });
   return labels.join(" / ");
@@ -176,7 +175,6 @@ export const POST: APIRoute = async ({ request }) => {
   const referrer = h.get("referer");
   const userAgent = h.get("user-agent");
   const acceptLanguage = h.get("accept-language");
-  const secFetchSite = h.get("sec-fetch-site");
 
   // If the browser sent an Origin header, enforce allowlist strictly.
   if (origin && !ALLOWED_ORIGINS.has(origin)) {
@@ -220,9 +218,6 @@ export const POST: APIRoute = async ({ request }) => {
     const riskReasons: string[] = [];
     if (!referrer) riskReasons.push("missing_referer");
     if (!userAgent) riskReasons.push("missing_user_agent");
-    if (secFetchSite && secFetchSite !== "same-origin" && secFetchSite !== "same-site") {
-      riskReasons.push(`sec_fetch_site:${secFetchSite}`);
-    }
 
     // Best-effort rate heuristic: same IP hashing too many conversions in 1 minute.
     if (ipHash) {
@@ -240,7 +235,6 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Only strong signals should force manual review.
-    // NOTE: sec-fetch-site=cross-site is expected when the thank-you page lives on a different domain.
     const needsReview = riskReasons.includes("ip_rate_1m_high");
 
     const risk =
