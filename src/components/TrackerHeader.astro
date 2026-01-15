@@ -1,0 +1,27 @@
+---
+type Props = {
+  title?: string;
+};
+
+const { title = "成果トラッカー" } = Astro.props satisfies Props;
+---
+
+<header class="sticky top-0 z-50 border-b border-white/30 bg-white/70 backdrop-blur">
+  <div class="mx-auto w-full max-w-5xl px-4 py-3">
+    <div class="flex items-center justify-between gap-3">
+      <a href="/tracker" class="flex items-center gap-2">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white text-lg font-extrabold text-zinc-900 ring-1 ring-white/40 shadow-sm">
+          T
+        </span>
+        <span class="text-sm font-extrabold text-zinc-900">{title}</span>
+      </a>
+
+      <nav class="flex items-center gap-2 text-sm font-semibold text-zinc-800">
+        <a class="rounded-lg px-3 py-2 hover:bg-white/70" href="/tracker">ダッシュボード</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-white/70" href="/tracker/howto">成果発生までの手順</a>
+        <a class="rounded-lg px-3 py-2 hover:bg-white/70" href="/">サイトへ戻る</a>
+      </nav>
+    </div>
+  </div>
+</header>
+

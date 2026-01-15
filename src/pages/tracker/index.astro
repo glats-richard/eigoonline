@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
 import { dbEnvError, query } from "../../lib/db";
+import TrackerHeader from "../../components/TrackerHeader.astro";
 
 type Offer = { id: string | number; name?: string | null; title?: string | null };
 type ClickRow = {
@@ -23,6 +24,20 @@ type ConversionRow = {
   amount?: number | null;
   commission?: number | null;
   status?: string | null;
+  ip?: string | null;
+  ip_hash?: string | null;
+  country?: string | null;
+  user_agent?: string | null;
+  accept_language?: string | null;
+  origin?: string | null;
+  referrer?: string | null;
+  page_url?: string | null;
+  cf_ray?: string | null;
+  cf_connecting_ip?: string | null;
+  cf_ipcountry?: string | null;
+  x_forwarded_for?: string | null;
+  request_id?: string | null;
+  request_headers?: Record<string, any> | null;
 };
 
 function yen(n: number) {
@@ -64,6 +79,21 @@ function offerNameById(offers: Map<string, Offer>, id: string | number | null | 
 function rewardValue(r: ConversionRow) {
   const v = r.reward ?? r.payout ?? r.amount ?? r.commission;
   return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+function shortText(s?: string | null, max = 64) {
+  if (!s) return "—";
+  const t = String(s);
+  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+}
+
+const ALLOWED_ORIGINS = new Set(["https://eigoonline.com", "https://www.eigoonline.com", "https://br.glats.online"]);
+
+function isSuspicious(cv: ConversionRow) {
+  // Heuristics (best-effort): missing/unknown origin or country, very long UA, etc.
+  if (cv.origin && !ALLOWED_ORIGINS.has(cv.origin)) return true;
+  if (!cv.origin) return true;
+  return false;
 }
 
 // Fetch latest logs first (we'll derive offers map from their offer_ids)
@@ -181,7 +211,8 @@ if (totalClicksErr) errors.push(`totalClicks: ${totalClicksErr.message}`);
 if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
 ---
 
-<Layout title="Tracker" description="Affiliate tracker admin" robots="noindex,nofollow" showHeader={true}>
+<Layout title="Tracker" description="Affiliate tracker admin" robots="noindex,nofollow" showHeader={false}>
+  <TrackerHeader />
   <main class="mx-auto w-full max-w-5xl px-4 pb-14 pt-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -316,32 +347,84 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
       <h2 class="text-lg font-extrabold text-zinc-900">成果一覧（最新10件）</h2>
       <div class="mt-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[760px] text-left text-sm">
+          <table class="w-full min-w-[1100px] text-left text-sm">
             <thead class="bg-zinc-50 text-xs font-extrabold text-zinc-600">
               <tr>
                 <th class="px-4 py-3">日時</th>
                 <th class="px-4 py-3">案件</th>
                 <th class="px-4 py-3">ステータス</th>
                 <th class="px-4 py-3">報酬</th>
+                <th class="px-4 py-3">国</th>
+                <th class="px-4 py-3">IP</th>
+                <th class="px-4 py-3">Origin</th>
+                <th class="px-4 py-3">Referrer</th>
+                <th class="px-4 py-3">UA</th>
+                <th class="px-4 py-3">詳細</th>
                 <th class="px-4 py-3">ID</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-zinc-200">
               {conversions.map((cv) => {
                 const v = rewardValue(cv);
+                const suspicious = isSuspicious(cv);
                 return (
                   <tr class="align-top">
                     <td class="px-4 py-3 whitespace-nowrap">{fmtDate(cv.created_at)}</td>
                     <td class="px-4 py-3 font-semibold text-zinc-900">{offerNameById(offersMap, cv.offer_id)}</td>
                     <td class="px-4 py-3">{cv.status ?? "—"}</td>
                     <td class="px-4 py-3 whitespace-nowrap">{v == null ? "—" : yen(v)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      {cv.country ?? cv.cf_ipcountry ?? "—"}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">
+                      {cv.ip ? shortText(cv.ip, 24) : "—"}
+                    </td>
+                    <td class="px-4 py-3 text-xs text-zinc-700">
+                      <span class:list={[suspicious ? "font-extrabold text-rose-700" : "text-zinc-700"]}>
+                        {cv.origin ?? "—"}
+                      </span>
+                      {suspicious ? (
+                        <span class="ml-2 inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-extrabold text-rose-700 ring-1 ring-rose-200">
+                          要確認
+                        </span>
+                      ) : null}
+                    </td>
+                    <td class="px-4 py-3 text-xs text-zinc-700">
+                      {cv.referrer ? <span class="break-all">{shortText(cv.referrer, 80)}</span> : "—"}
+                    </td>
+                    <td class="px-4 py-3 text-xs text-zinc-700">
+                      {cv.user_agent ? <span class="break-all">{shortText(cv.user_agent, 90)}</span> : "—"}
+                    </td>
+                    <td class="px-4 py-3 text-xs text-zinc-700">
+                      <details>
+                        <summary class="cursor-pointer select-none font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]">
+                          表示
+                        </summary>
+                        <div class="mt-2 space-y-2">
+                          <div>
+                            <div class="text-[11px] font-extrabold text-zinc-500">page_url</div>
+                            <div class="break-all">{cv.page_url ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div class="text-[11px] font-extrabold text-zinc-500">cf_ray / request_id</div>
+                            <div class="break-all">{cv.cf_ray ?? "—"} / {cv.request_id ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div class="text-[11px] font-extrabold text-zinc-500">headers</div>
+                            <pre class="max-w-[520px] overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-[11px] leading-relaxed text-zinc-800">
+{cv.request_headers ? JSON.stringify(cv.request_headers, null, 2) : "—"}
+                            </pre>
+                          </div>
+                        </div>
+                      </details>
+                    </td>
                     <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-600">{cv.id ?? "—"}</td>
                   </tr>
                 );
               })}
               {!conversions.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="5">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="11">
                     データなし
                   </td>
                 </tr>
@@ -360,6 +443,42 @@ if (totalConvErr) errors.push(`totalConversions: ${totalConvErr.message}`);
           （必要な場合のみ）<span class="font-semibold">PGSSLMODE</span>=require
         </li>
       </ul>
+    </section>
+
+    <section class="mt-10 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-extrabold text-zinc-900">GTM（成果発生ページ）テンプレ</h2>
+          <p class="mt-1 text-sm text-zinc-600">
+            成果が発生したページ（例: <code class="font-semibold">br.glats.online</code> の完了ページ）に貼る用です。
+          </p>
+        </div>
+        <a class="text-sm font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="/tracker/howto">
+          手順ページへ →
+        </a>
+      </div>
+
+      <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+        <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`<script>
+(function () {
+  var payload = { offer_id: "kimini", status: "approved", reward: 1500 };
+  var url = "https://eigoonline.com/api/track/conversion";
+  var body = JSON.stringify(payload);
+
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.withCredentials = false; // これを明示
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(body);
+  } catch (e) {}
+})();
+</script>`}</code></pre>
+      </div>
+
+      <div class="mt-3 text-xs text-zinc-500">
+        <span class="font-semibold">ポイント:</span> <code class="font-semibold">offer_id</code> は <code class="font-semibold">offers.id</code> に存在する値にしてください（FK制約）。
+      </div>
     </section>
   </main>
 </Layout>
