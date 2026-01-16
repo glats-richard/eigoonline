@@ -12,6 +12,13 @@ const schoolsList = schools
 const submitted = Astro.url.searchParams.get("submitted") === "true";
 const preselectedSchoolId = Astro.url.searchParams.get("school_id")?.trim() || "";
 const RATING_VALUES = [1, 2, 3, 4, 5];
+
+const recaptchaSiteKey =
+  (typeof process !== "undefined" && process.env && process.env.RECAPTCHA_SITE_KEY) ||
+  ((import.meta as any).env?.RECAPTCHA_SITE_KEY as string | undefined) ||
+  "";
+const enableRecaptcha = Boolean(recaptchaSiteKey);
+const recaptchaAction = "review_submit";
 ---
 
 <Layout title="体験談を投稿" description="オンライン英会話サービスの体験談を投稿できます">
@@ -47,7 +54,15 @@ const RATING_VALUES = [1, 2, 3, 4, 5];
         </a>
       </div>
     ) : (
-      <form method="post" action="/api/review/submit" class="space-y-6">
+      <>
+        {enableRecaptcha ? (
+          <script src={`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(recaptchaSiteKey)}`} async defer></script>
+        ) : null}
+
+        <form id="review-submit-form" method="post" action="/api/review/submit" class="space-y-6">
+          <input type="hidden" name="recaptcha_token" value="" />
+          <input type="hidden" name="recaptcha_action" value={recaptchaAction} />
+
         <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <label class="block">
             <div class="text-sm font-extrabold text-zinc-700">サービス <span class="text-rose-600">*</span></div>
@@ -221,12 +236,73 @@ const RATING_VALUES = [1, 2, 3, 4, 5];
         <div class="flex justify-end gap-3">
           <button
             type="submit"
+            id="review-submit-button"
             class="btn-brand inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             投稿する
           </button>
         </div>
-      </form>
+        </form>
+
+        {enableRecaptcha ? (
+          <script is:inline>
+            {String.raw`(function () {
+  var siteKey = ${JSON.stringify(recaptchaSiteKey)};
+  var action = ${JSON.stringify(recaptchaAction)};
+  var form = document.getElementById("review-submit-form");
+  if (!form) return;
+  var tokenInput = form.querySelector('input[name="recaptcha_token"]');
+  var actionInput = form.querySelector('input[name="recaptcha_action"]');
+  var submitBtn = document.getElementById("review-submit-button");
+  var inFlight = false;
+
+  function setBusy(busy) {
+    if (!submitBtn) return;
+    submitBtn.disabled = !!busy;
+    submitBtn.style.opacity = busy ? "0.7" : "";
+    submitBtn.style.pointerEvents = busy ? "none" : "";
+  }
+
+  form.addEventListener("submit", function (e) {
+    if (inFlight) return;
+    // If token already set, allow normal submission.
+    if (tokenInput && tokenInput.value) return;
+
+    // If grecaptcha isn't available, let the server handle the error.
+    if (!window.grecaptcha || !siteKey) return;
+
+    e.preventDefault();
+    inFlight = true;
+    setBusy(true);
+
+    try {
+      window.grecaptcha.ready(function () {
+        window.grecaptcha
+          .execute(siteKey, { action: action })
+          .then(function (token) {
+            if (tokenInput) tokenInput.value = token || "";
+            if (actionInput) actionInput.value = action;
+            inFlight = false;
+            setBusy(false);
+            form.submit();
+          })
+          .catch(function () {
+            // Fall back: allow submit (server will reject if required)
+            inFlight = false;
+            setBusy(false);
+            form.submit();
+          });
+      });
+    } catch (err) {
+      inFlight = false;
+      setBusy(false);
+      form.submit();
+    }
+  });
+})();`}
+          </script>
+        ) : null}
+      </>
     )}
   </main>
 </Layout>

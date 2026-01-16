@@ -33,6 +33,80 @@ function validateRating(rating: number | null): boolean {
   return Math.floor(rating) === rating;
 }
 
+function readRecaptchaSecret() {
+  return process.env.RECAPTCHA_SECRET_KEY ?? (import.meta as any).env?.RECAPTCHA_SECRET_KEY ?? undefined;
+}
+
+function readRecaptchaMinScore() {
+  const raw = process.env.RECAPTCHA_MIN_SCORE ?? (import.meta as any).env?.RECAPTCHA_MIN_SCORE ?? "0.5";
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.5;
+}
+
+function isAllowedRecaptchaHost(hostname: string | undefined | null): boolean {
+  if (!hostname) return false;
+  const h = String(hostname).toLowerCase();
+  if (process.env.NODE_ENV !== "production" && (h === "localhost" || h === "127.0.0.1")) return true;
+  // Allow eigoonline.com and subdomains by default.
+  return h === "eigoonline.com" || h.endsWith(".eigoonline.com");
+}
+
+async function verifyRecaptchaV3(opts: { token: string; action: string; ip: string | null }) {
+  const secret = readRecaptchaSecret();
+  if (!secret) {
+    return { skipped: true as const };
+  }
+
+  const minScore = readRecaptchaMinScore();
+  if (!opts.token) {
+    return { ok: false as const, status: 400, error: "Missing reCAPTCHA token" };
+  }
+
+  const body = new URLSearchParams();
+  body.set("secret", secret);
+  body.set("response", opts.token);
+  if (opts.ip) body.set("remoteip", opts.ip);
+
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), 4000);
+
+  let data: any = null;
+  try {
+    const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+      signal: ac.signal,
+    });
+    data = await res.json();
+  } catch (e: any) {
+    clearTimeout(t);
+    return { ok: false as const, status: 502, error: "reCAPTCHA verification failed" };
+  } finally {
+    clearTimeout(t);
+  }
+
+  if (!data || data.success !== true) {
+    return { ok: false as const, status: 403, error: "reCAPTCHA failed" };
+  }
+
+  // v3 fields: score, action, hostname
+  if (data.action && String(data.action) !== opts.action) {
+    return { ok: false as const, status: 403, error: "reCAPTCHA action mismatch" };
+  }
+
+  if (!isAllowedRecaptchaHost(data.hostname)) {
+    return { ok: false as const, status: 403, error: "reCAPTCHA hostname mismatch" };
+  }
+
+  const score = typeof data.score === "number" ? data.score : Number(data.score ?? NaN);
+  if (!Number.isFinite(score) || score < minScore) {
+    return { ok: false as const, status: 403, error: "reCAPTCHA score too low" };
+  }
+
+  return { ok: true as const, score };
+}
+
 export const POST: APIRoute = async ({ request, redirect }) => {
   if (dbEnvError) {
     return new Response(JSON.stringify({ ok: false, error: dbEnvError }), {
@@ -50,6 +124,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const body = String(formData.get("body") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().slice(0, 255) || null;
   const age = String(formData.get("age") ?? "").trim().slice(0, 20) || null;
+  const recaptchaToken = String(formData.get("recaptcha_token") ?? "").trim();
+  const recaptchaAction = String(formData.get("recaptcha_action") ?? "").trim() || "review_submit";
 
   // Validate school_id exists
   if (!schoolId) {
@@ -122,6 +198,17 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const ip = cfConnectingIp ?? firstForwardedIp(xForwardedFor) ?? firstForwardedIp(h.get("x-real-ip")) ?? null;
   const ipHash = ip ? sha256Hex(ip) : null;
   const ipVer = ipVersion(ip);
+
+  // reCAPTCHA v3 verification (fraud prevention)
+  const recaptchaRes = await verifyRecaptchaV3({ token: recaptchaToken, action: recaptchaAction, ip });
+  if ("skipped" in recaptchaRes && recaptchaRes.skipped) {
+    // If not configured, allow submission (best-effort).
+  } else if ("ok" in recaptchaRes && !recaptchaRes.ok) {
+    return new Response(JSON.stringify({ ok: false, error: recaptchaRes.error }), {
+      status: recaptchaRes.status,
+      headers: { "content-type": "application/json" },
+    });
+  }
 
   // Rate limiting: Check if same IP submitted more than 3 reviews in the last hour
   try {
