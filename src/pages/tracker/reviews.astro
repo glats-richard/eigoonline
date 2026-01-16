@@ -1,0 +1,542 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import { dbEnvError, query } from "../../lib/db";
+import TrackerHeader from "../../components/TrackerHeader.astro";
+import { getCollection } from "astro:content";
+
+type ReviewRow = {
+  id?: string | number;
+  created_at?: string | Date | null;
+  school_id?: string | null;
+  status?: string | null;
+  overall_rating?: number | null;
+  teacher_quality?: number | null;
+  material_quality?: number | null;
+  connection_quality?: number | null;
+  body?: string | null;
+  age?: string | null;
+  ip?: string | null;
+  ip_hash?: string | null;
+  ip_version?: number | null;
+  user_agent?: string | null;
+  referrer?: string | null;
+  review_comment?: string | null;
+};
+
+function yen(n: number) {
+  return new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", maximumFractionDigits: 0 }).format(n);
+}
+
+function getTokyoDateRange(fromYmd?: string | null, toYmd?: string | null) {
+  const parseYmd = (s?: string | null) => {
+    if (!s) return null;
+    const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    const d = Number(m[3]);
+    if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
+    if (mo < 1 || mo > 12) return null;
+    if (d < 1 || d > 31) return null;
+    return { y, mo, d, ymd: `${m[1]}-${m[2]}-${m[3]}` };
+  };
+
+  const from = parseYmd(fromYmd);
+  const to = parseYmd(toYmd);
+  if (!from && !to) return null;
+
+  const startUtc = from ? new Date(Date.UTC(from.y, from.mo - 1, from.d, -9, 0, 0)) : null;
+  const endUtcExclusive = to ? new Date(Date.UTC(to.y, to.mo - 1, to.d + 1, -9, 0, 0)) : null;
+
+  const label = from && to ? `${from.ymd}〜${to.ymd}` : from ? `${from.ymd}〜` : `〜${to!.ymd}`;
+  return {
+    label,
+    fromYmd: from?.ymd ?? null,
+    toYmd: to?.ymd ?? null,
+    startIso: startUtc ? startUtc.toISOString() : null,
+    endIso: endUtcExclusive ? endUtcExclusive.toISOString() : null,
+  };
+}
+
+function getTokyoLastNDaysRange(nDays: number, now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const year = Number(parts.find((p) => p.type === "year")?.value ?? now.getUTCFullYear());
+  const month = Number(parts.find((p) => p.type === "month")?.value ?? now.getUTCMonth() + 1);
+  const day = Number(parts.find((p) => p.type === "day")?.value ?? now.getUTCDate());
+  const endUtcExclusive = new Date(Date.UTC(year, month - 1, day + 1, -9, 0, 0));
+  const startUtc = new Date(Date.UTC(year, month - 1, day - (nDays - 1), -9, 0, 0));
+
+  const fromParts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(startUtc);
+  const toParts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(endUtcExclusive.getTime() - 1));
+  const fromY = fromParts.find((p) => p.type === "year")?.value ?? String(year).padStart(4, "0");
+  const fromM = fromParts.find((p) => p.type === "month")?.value ?? String(month).padStart(2, "0");
+  const fromD = fromParts.find((p) => p.type === "day")?.value ?? String(day).padStart(2, "0");
+  const toY = toParts.find((p) => p.type === "year")?.value ?? String(year).padStart(4, "0");
+  const toM = toParts.find((p) => p.type === "month")?.value ?? String(month).padStart(2, "0");
+  const toD = toParts.find((p) => p.type === "day")?.value ?? String(day).padStart(2, "0");
+  const fromYmd = `${fromY}-${fromM}-${fromD}`;
+  const toYmd = `${toY}-${toM}-${toD}`;
+
+  return {
+    label: `直近${nDays}日`,
+    fromYmd,
+    toYmd,
+    startIso: startUtc.toISOString(),
+    endIso: endUtcExclusive.toISOString(),
+  };
+}
+
+function fmtDate(iso?: string | Date | null) {
+  if (!iso) return "—";
+  const d = iso instanceof Date ? iso : new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("ja-JP");
+}
+
+function shortText(s?: string | null, max = 64) {
+  if (!s) return "—";
+  const t = String(s);
+  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+}
+
+function sqlWhereCreatedAtRange(startIso: string | null, endIso: string | null, statuses: string[] | null = null, schoolId: string | null = null, startIndex = 1) {
+  const conds: string[] = [];
+  const params: any[] = [];
+  if (startIso) {
+    params.push(startIso);
+    conds.push(`created_at >= $${startIndex + params.length - 1}`);
+  }
+  if (endIso) {
+    params.push(endIso);
+    conds.push(`created_at < $${startIndex + params.length - 1}`);
+  }
+  if (statuses && statuses.length > 0) {
+    params.push(statuses);
+    conds.push(`status = any($${startIndex + params.length - 1}::text[])`);
+  }
+  if (schoolId) {
+    params.push(schoolId);
+    conds.push(`school_id = $${startIndex + params.length - 1}`);
+  }
+  const whereSql = conds.length ? `where ${conds.join(" and ")}` : "";
+  return { whereSql, params };
+}
+
+function getTokyoTodayYmd(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const y = Number(parts.find((p) => p.type === "year")?.value ?? now.getUTCFullYear());
+  const mo = Number(parts.find((p) => p.type === "month")?.value ?? now.getUTCMonth() + 1);
+  const d = Number(parts.find((p) => p.type === "day")?.value ?? now.getUTCDate());
+  const ymd = `${String(y).padStart(4, "0")}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  return { y, mo, d, ymd };
+}
+
+const searchParams = Astro.url.searchParams;
+const range = getTokyoDateRange(searchParams.get("from"), searchParams.get("to")) ?? getTokyoLastNDaysRange(30);
+const todayYmd = getTokyoTodayYmd().ymd;
+const last7 = getTokyoLastNDaysRange(7);
+
+const statusFilterRaw = searchParams.getAll("status");
+const ALLOWED_STATUSES = new Set(["pending", "approved", "rejected"]);
+const statusFilter = statusFilterRaw.filter((s) => ALLOWED_STATUSES.has(s));
+const hasStatusFilter = statusFilter.length > 0;
+const defaultStatusFilter = statusFilter.length > 0 ? statusFilter : ["pending"];
+
+const schoolIdFilter = searchParams.get("school_id")?.trim() || null;
+
+const pageSizeRaw = searchParams.get("per") ?? "10";
+const pageSize = pageSizeRaw === "100" ? 100 : pageSizeRaw === "50" ? 50 : 10;
+const pageRaw = Number(searchParams.get("page") ?? "1");
+const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
+const offset = (page - 1) * pageSize;
+
+function buildHref(next: Record<string, string | number | null | undefined>) {
+  const p = new URLSearchParams(searchParams);
+  for (const [k, v] of Object.entries(next)) {
+    if (v === null || v === undefined || v === "") p.delete(k);
+    else if (Array.isArray(v)) {
+      p.delete(k);
+      for (const item of v) p.append(k, String(item));
+    } else p.set(k, String(v));
+  }
+  const qs = p.toString();
+  return qs ? `/tracker/reviews?${qs}` : "/tracker/reviews";
+}
+
+const returnTo = `${Astro.url.pathname}${Astro.url.search}`;
+
+// Fetch schools for dropdown
+let schoolsMap = new Map<string, { id: string; name: string }>();
+try {
+  const schools = await getCollection("schools");
+  schoolsMap = new Map(schools.map((s) => [s.id, { id: s.id, name: s.data.name }]));
+} catch {
+  // If schools collection fails, continue
+}
+
+function schoolNameById(id: string | null | undefined) {
+  if (id === null || id === undefined) return "—";
+  const s = schoolsMap.get(String(id));
+  return s?.name ?? `school:${id}`;
+}
+
+// Fetch reviews
+let reviewsErr: Error | null = null;
+let reviewsRaw: ReviewRow[] = [];
+try {
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null, defaultStatusFilter, schoolIdFilter);
+  const r = await query<ReviewRow>(
+    `select * from reviews ${w.whereSql} order by created_at desc limit $${w.params.length + 1} offset $${w.params.length + 2}`,
+    [...w.params, pageSize, offset],
+  );
+  reviewsRaw = r.rows ?? [];
+} catch (e: any) {
+  reviewsErr = e;
+}
+
+// Count total
+let totalReviews: number | null = null;
+let totalReviewsErr: Error | null = null;
+try {
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null, defaultStatusFilter, schoolIdFilter);
+  const r = await query<{ count: number }>(`select count(*)::bigint as count from reviews ${w.whereSql}`, w.params);
+  totalReviews = r.rows?.[0]?.count ?? 0;
+} catch (e: any) {
+  totalReviewsErr = e;
+  totalReviews = 0;
+}
+
+const reviews = (reviewsRaw ?? []) as ReviewRow[];
+const totalPages = Math.max(1, Math.ceil((totalReviews ?? 0) / pageSize));
+const pageClamped = Math.min(page, totalPages);
+const showingFrom = (totalReviews ?? 0) === 0 ? 0 : (pageClamped - 1) * pageSize + 1;
+const showingTo = Math.min((totalReviews ?? 0), pageClamped * pageSize);
+
+const errors: string[] = [];
+if (dbEnvError) errors.push(dbEnvError);
+if (reviewsErr) errors.push(`reviews: ${reviewsErr.message}`);
+if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
+---
+
+<Layout title="レビュー管理" description="ユーザー体験談の承認・却下" robots="noindex,nofollow" showHeader={false}>
+  <TrackerHeader />
+  <main class="mx-auto w-full max-w-6xl px-4 pb-14 pt-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-extrabold text-zinc-900">レビュー管理</h1>
+        <p class="mt-1 text-sm text-zinc-600">/tracker/reviews（Basic認証保護）</p>
+      </div>
+      <div class="text-xs text-zinc-500">更新: {new Date().toLocaleString("ja-JP")}</div>
+    </div>
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div class="text-xs font-extrabold text-zinc-500">表示期間</div>
+          <div class="mt-1 text-base font-extrabold text-zinc-900">
+            {searchParams.get("from") || searchParams.get("to") ? `期間指定（${range.label}）` : `デフォルト（${range.label}）`}
+          </div>
+        </div>
+        <a class="text-sm font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="/tracker/reviews">
+          クリア
+        </a>
+      </div>
+
+      <form method="get" class="mt-4 flex flex-wrap items-end gap-3">
+        <label class="block">
+          <div class="text-xs font-extrabold text-zinc-500">開始日</div>
+          <input
+            type="date"
+            name="from"
+            value={range?.fromYmd ?? ""}
+            class="mt-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
+          />
+        </label>
+        <label class="block">
+          <div class="text-xs font-extrabold text-zinc-500">終了日</div>
+          <input
+            type="date"
+            name="to"
+            value={range?.toYmd ?? ""}
+            class="mt-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
+          />
+        </label>
+        <label class="block">
+          <div class="text-xs font-extrabold text-zinc-500">サービス</div>
+          <select
+            name="school_id"
+            class="mt-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
+          >
+            <option value="">すべて</option>
+            {Array.from(schoolsMap.values())
+              .sort((a, b) => a.name.localeCompare(b.name, "ja"))
+              .map((s) => (
+                <option value={s.id} selected={schoolIdFilter === s.id}>
+                  {s.name}
+                </option>
+              ))}
+          </select>
+        </label>
+        {defaultStatusFilter.map((s) => (
+          <input type="hidden" name="status" value={s} />
+        ))}
+        <input type="hidden" name="per" value={String(pageSize)} />
+        <button
+          type="submit"
+          class="btn-brand inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-extrabold text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        >
+          絞り込む
+        </button>
+      </form>
+
+      <div class="mt-4">
+        <div class="text-xs font-extrabold text-zinc-500 mb-2">ステータスで絞り込み</div>
+        <form method="get" class="flex flex-wrap items-center gap-3">
+          {searchParams.get("from") ? <input type="hidden" name="from" value={searchParams.get("from") ?? ""} /> : null}
+          {searchParams.get("to") ? <input type="hidden" name="to" value={searchParams.get("to") ?? ""} /> : null}
+          {schoolIdFilter ? <input type="hidden" name="school_id" value={schoolIdFilter} /> : null}
+          <input type="hidden" name="per" value={String(pageSize)} />
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="pending"
+              checked={statusFilter.includes("pending")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">pending</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="approved"
+              checked={statusFilter.includes("approved")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">approved</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="rejected"
+              checked={statusFilter.includes("rejected")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">rejected</span>
+          </label>
+          {hasStatusFilter ? (
+            <a
+              href={buildHref({ status: null })}
+              class="text-xs font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+            >
+              クリア
+            </a>
+          ) : null}
+        </form>
+      </div>
+
+      <div class="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+        <a class="rounded-full bg-zinc-100 px-3 py-1 text-zinc-700 hover:bg-zinc-200" href={`/tracker/reviews?from=${todayYmd}&to=${todayYmd}`}>
+          今日
+        </a>
+        <a
+          class="rounded-full bg-zinc-100 px-3 py-1 text-zinc-700 hover:bg-zinc-200"
+          href={`/tracker/reviews?from=${last7.fromYmd}&to=${last7.toYmd}`}
+        >
+          直近7日
+        </a>
+      </div>
+    </section>
+
+    {errors.length ? (
+      <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+        <div class="font-extrabold">データ取得エラー</div>
+        <ul class="mt-2 list-disc pl-5">
+          {errors.map((e) => (
+            <li>{e}</li>
+          ))}
+        </ul>
+      </div>
+    ) : null}
+
+    <section class="mt-10">
+      <h2 class="text-lg font-extrabold text-zinc-900">レビュー一覧</h2>
+      <div class="mt-2 flex flex-wrap items-end justify-between gap-3">
+        <div class="text-xs font-semibold text-zinc-500">
+          {showingFrom}–{showingTo} / {totalReviews ?? 0} 件（{range.label}）
+        </div>
+
+        <div class="flex items-center gap-2">
+          <form method="get" class="flex items-center gap-2">
+            {searchParams.get("from") ? <input type="hidden" name="from" value={searchParams.get("from") ?? ""} /> : null}
+            {searchParams.get("to") ? <input type="hidden" name="to" value={searchParams.get("to") ?? ""} /> : null}
+            {schoolIdFilter ? <input type="hidden" name="school_id" value={schoolIdFilter} /> : null}
+            {statusFilter.map((s) => (
+              <input type="hidden" name="status" value={s} />
+            ))}
+            <input type="hidden" name="page" value="1" />
+            <label class="inline-flex items-center gap-2">
+              <span class="text-xs font-extrabold text-zinc-500">表示件数</span>
+              <select
+                name="per"
+                class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-semibold text-zinc-900 shadow-sm"
+                onchange="this.form.submit()"
+              >
+                <option value="10" selected={pageSize === 10}>10</option>
+                <option value="50" selected={pageSize === 50}>50</option>
+                <option value="100" selected={pageSize === 100}>100</option>
+              </select>
+            </label>
+          </form>
+
+          <div class="flex items-center gap-1">
+            <a
+              class:list={[
+                "rounded-lg border px-3 py-1 text-xs font-extrabold shadow-sm",
+                pageClamped <= 1 ? "pointer-events-none border-zinc-200 bg-zinc-100 text-zinc-400" : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
+              ]}
+              href={buildHref({ page: pageClamped - 1 })}
+            >
+              前へ
+            </a>
+            <span class="px-2 text-xs font-semibold text-zinc-500">
+              {pageClamped} / {totalPages}
+            </span>
+            <a
+              class:list={[
+                "rounded-lg border px-3 py-1 text-xs font-extrabold shadow-sm",
+                pageClamped >= totalPages ? "pointer-events-none border-zinc-200 bg-zinc-100 text-zinc-400" : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
+              ]}
+              href={buildHref({ page: pageClamped + 1 })}
+            >
+              次へ
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[1200px] text-left text-sm">
+            <thead class="bg-zinc-50 text-xs font-extrabold text-zinc-600">
+              <tr>
+                <th class="px-4 py-3">日時</th>
+                <th class="px-4 py-3">サービス</th>
+                <th class="px-4 py-3">総合</th>
+                <th class="px-4 py-3">講師</th>
+                <th class="px-4 py-3">教材</th>
+                <th class="px-4 py-3">通信</th>
+                <th class="px-4 py-3">口コミ本文</th>
+                <th class="px-4 py-3">年齢</th>
+                <th class="px-4 py-3">ステータス</th>
+                <th class="px-4 py-3">詳細</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200">
+              {reviews.map((r) => (
+                <tr class="align-top">
+                  <td class="px-4 py-3 whitespace-nowrap">{fmtDate(r.created_at)}</td>
+                  <td class="px-4 py-3 font-semibold text-zinc-900">{schoolNameById(r.school_id)}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.overall_rating ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.teacher_quality ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.material_quality ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.connection_quality ?? "—"}</td>
+                  <td class="px-4 py-3 text-xs text-zinc-700">
+                    <span class="inline-block max-w-[300px] truncate align-top" title={r.body ?? ""}>
+                      {r.body ? shortText(r.body, 100) : "—"}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">{r.age ?? "—"}</td>
+                  <td class="px-4 py-3">
+                    <form method="post" action="/api/tracker/review-status" class="flex items-center gap-2">
+                      <input type="hidden" name="id" value={String(r.id ?? "")} />
+                      <input type="hidden" name="returnTo" value={returnTo} />
+                      <select
+                        name="status"
+                        class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-900 shadow-sm"
+                        onchange="this.form.submit()"
+                      >
+                        <option value="pending" selected={(r.status ?? "pending") === "pending"}>pending</option>
+                        <option value="approved" selected={(r.status ?? "") === "approved"}>approved</option>
+                        <option value="rejected" selected={(r.status ?? "") === "rejected"}>rejected</option>
+                      </select>
+                      <noscript>
+                        <button type="submit" class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-800 hover:bg-zinc-50">
+                          更新
+                        </button>
+                      </noscript>
+                    </form>
+                  </td>
+                  <td class="px-4 py-3 text-xs text-zinc-700">
+                    <details>
+                      <summary class="cursor-pointer select-none font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]">
+                        表示
+                      </summary>
+                      <div class="mt-2 space-y-2">
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">口コミ本文（全文）</div>
+                          <div class="break-words text-xs">{r.body ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">IP</div>
+                          <div class="break-all font-mono text-xs">
+                            {r.ip ? (
+                              <span title={r.ip}>
+                                <span class="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-extrabold text-zinc-700">
+                                  {r.ip_version === 6 ? "IPv6" : r.ip_version === 4 ? "IPv4" : "IP"}
+                                </span>
+                                <span class="ml-2">{shortText(r.ip, 40)}</span>
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">User-Agent</div>
+                          <div class="break-all font-mono text-xs">{r.user_agent ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">Referrer</div>
+                          <div class="break-all text-xs">{r.referrer ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">管理者コメント</div>
+                          <div class="break-words text-xs">{r.review_comment ?? "—"}</div>
+                        </div>
+                      </div>
+                    </details>
+                  </td>
+                </tr>
+              ))}
+              {!reviews.length ? (
+                <tr>
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="10">
+                    データなし
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
