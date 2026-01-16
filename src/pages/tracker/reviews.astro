@@ -17,6 +17,7 @@ type ReviewRow = {
   connection_quality?: number | null;
   body?: string | null;
   age?: string | null;
+  email?: string | null;
   ip?: string | null;
   ip_hash?: string | null;
   ip_version?: number | null;
@@ -445,6 +446,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                 <th class="px-4 py-3">通信</th>
                 <th class="px-4 py-3">口コミ本文</th>
                 <th class="px-4 py-3">年齢</th>
+                <th class="px-4 py-3">Email</th>
                 <th class="px-4 py-3">ステータス</th>
                 <th class="px-4 py-3">詳細</th>
               </tr>
@@ -464,6 +466,11 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                     </span>
                   </td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">{r.age ?? "—"}</td>
+                  <td class="px-4 py-3 text-xs text-zinc-700">
+                    <span class="inline-block max-w-[200px] truncate align-top" title={r.email ?? ""}>
+                      {r.email ? shortText(r.email, 30) : "—"}
+                    </span>
+                  </td>
                   <td class="px-4 py-3">
                     <form method="post" action="/api/tracker/review-status" class="flex items-center gap-2">
                       <input type="hidden" name="id" value={String(r.id ?? "")} />
@@ -493,6 +500,10 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">口コミ本文（全文）</div>
                           <div class="break-words text-xs">{r.body ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">Email</div>
+                          <div class="break-all text-xs">{r.email ?? "—"}</div>
                         </div>
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">IP</div>
@@ -528,7 +539,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
               ))}
               {!reviews.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="10">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="11">
                     データなし
                   </td>
                 </tr>

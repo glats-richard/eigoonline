@@ -13,6 +13,7 @@ create table if not exists reviews (
   connection_quality numeric(3,1) not null check (connection_quality >= 1 and connection_quality <= 5),
   body text not null,
   age text,
+  email text,
   ip text,
   ip_hash text,
   ip_version smallint,
@@ -35,6 +36,7 @@ alter table reviews add column if not exists material_quality numeric(3,1);
 alter table reviews add column if not exists connection_quality numeric(3,1);
 alter table reviews add column if not exists body text;
 alter table reviews add column if not exists age text;
+alter table reviews add column if not exists email text;
 alter table reviews add column if not exists ip text;
 alter table reviews add column if not exists ip_hash text;
 alter table reviews add column if not exists ip_version smallint;

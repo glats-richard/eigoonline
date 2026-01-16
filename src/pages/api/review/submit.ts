@@ -49,6 +49,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const materialQualityRaw = formData.get("material_quality");
   const connectionQualityRaw = formData.get("connection_quality");
   const body = String(formData.get("body") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().slice(0, 255) || null;
   const age = String(formData.get("age") ?? "").trim().slice(0, 20) || null;
 
   // Validate school_id exists
@@ -88,9 +89,25 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     });
   }
 
+  // Validate email
+  if (!email) {
+    return new Response(JSON.stringify({ ok: false, error: "email is required" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return new Response(JSON.stringify({ ok: false, error: "Invalid email format" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   // Validate body
-  if (body.length < 10 || body.length > 2000) {
-    return new Response(JSON.stringify({ ok: false, error: "Body must be between 10 and 2000 characters" }), {
+  if (body.length < 10 || body.length > 300) {
+    return new Response(JSON.stringify({ ok: false, error: "Body must be between 10 and 300 characters" }), {
       status: 400,
       headers: { "content-type": "application/json" },
     });
@@ -127,8 +144,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Insert review
   try {
     await query(
-      "insert into reviews (school_id, status, overall_rating, teacher_quality, material_quality, connection_quality, body, age, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
-      [schoolId, "pending", overallRating, teacherQuality, materialQuality, connectionQuality, body, age, ip, ipHash, ipVer, userAgent, referrer],
+      "insert into reviews (school_id, status, overall_rating, teacher_quality, material_quality, connection_quality, body, age, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+      [schoolId, "pending", overallRating, teacherQuality, materialQuality, connectionQuality, body, age, email, ip, ipHash, ipVer, userAgent, referrer],
     );
   } catch (e: any) {
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? String(e) }), {
