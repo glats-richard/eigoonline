@@ -207,7 +207,7 @@ function sqlWhereCreatedAtRange(startIso: string | null, endIso: string | null, 
   }
   if (statuses && statuses.length > 0) {
     params.push(statuses);
-    conds.push(`status = any($${startIndex + params.length})`);
+    conds.push(`status = any($${startIndex + params.length - 1}::text[])`);
   }
   const whereSql = conds.length ? `where ${conds.join(" and ")}` : "";
   return { whereSql, params };
