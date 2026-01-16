@@ -163,6 +163,24 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
             ></textarea>
             <div class="mt-1 text-xs text-zinc-500">10文字以上300文字以内で入力してください</div>
           </label>
+          
+          <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <div class="text-xs font-extrabold text-blue-900 mb-2">より良いレビューを書くコツ</div>
+            <ul class="space-y-2 text-xs text-blue-800">
+              <li class="flex items-start gap-2">
+                <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
+                <span><strong>具体的なキーワード</strong>を含める（例: 初心者、ビジネス、TOEIC、発音、文法など）</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
+                <span><strong>原因と結果</strong>をセットで書く（例: 「言葉に詰まった時、講師が待ってくれたので、焦らず話せた」）</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
+                <span><strong>評価と本文の整合性</strong>を保つ（★5なら本文もポジティブに、★1なら改善点を具体的に）</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
