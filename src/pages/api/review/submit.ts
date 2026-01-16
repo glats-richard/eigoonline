@@ -28,10 +28,9 @@ function toFiniteNumber(v: unknown): number | null {
 
 function validateRating(rating: number | null): boolean {
   if (rating === null) return false;
-  // Check if rating is between 1 and 5, and is a multiple of 0.5
+  // Check if rating is an integer between 1 and 5
   if (rating < 1 || rating > 5) return false;
-  const rounded = Math.round(rating * 2) / 2;
-  return Math.abs(rating - rounded) < 0.01;
+  return Math.floor(rating) === rating;
 }
 
 export const POST: APIRoute = async ({ request, redirect }) => {
@@ -83,7 +82,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const connectionQuality = toFiniteNumber(connectionQualityRaw);
 
   if (!validateRating(overallRating) || !validateRating(teacherQuality) || !validateRating(materialQuality) || !validateRating(connectionQuality)) {
-    return new Response(JSON.stringify({ ok: false, error: "All ratings must be between 1 and 5 in 0.5 increments" }), {
+    return new Response(JSON.stringify({ ok: false, error: "All ratings must be integers between 1 and 5" }), {
       status: 400,
       headers: { "content-type": "application/json" },
     });

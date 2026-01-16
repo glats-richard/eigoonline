@@ -7,6 +7,8 @@ create table if not exists reviews (
   created_at timestamptz not null default now(),
   school_id text not null,
   status text not null default 'pending',
+  -- Featured slot for homepage snippets (admin-selected). Use 1..5; NULL = not featured.
+  featured_rank smallint,
   overall_rating numeric(3,1) not null check (overall_rating >= 1 and overall_rating <= 5),
   teacher_quality numeric(3,1) not null check (teacher_quality >= 1 and teacher_quality <= 5),
   material_quality numeric(3,1) not null check (material_quality >= 1 and material_quality <= 5),
@@ -23,13 +25,21 @@ create table if not exists reviews (
 );
 
 create index if not exists reviews_school_id_status_created_at_idx on reviews (school_id, status, created_at desc);
+create index if not exists reviews_school_id_status_featured_idx on reviews (school_id, status, featured_rank asc, created_at desc);
 create index if not exists reviews_status_created_at_idx on reviews (status, created_at desc);
 create index if not exists reviews_ip_hash_created_at_idx on reviews (ip_hash, created_at desc);
+
+-- Enforce one review per featured slot (1..5) per school.
+-- Max 5 is enforced by limiting UI/API to 1..5 plus this uniqueness.
+create unique index if not exists reviews_featured_slot_unique
+  on reviews (school_id, featured_rank)
+  where featured_rank is not null;
 
 -- If you already created tables, you can safely re-run this file.
 -- Postgres will keep existing columns; for schema drift, apply ALTERs below.
 alter table reviews add column if not exists school_id text;
 alter table reviews add column if not exists status text;
+alter table reviews add column if not exists featured_rank smallint;
 alter table reviews add column if not exists overall_rating numeric(3,1);
 alter table reviews add column if not exists teacher_quality numeric(3,1);
 alter table reviews add column if not exists material_quality numeric(3,1);

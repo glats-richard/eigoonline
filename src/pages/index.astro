@@ -46,15 +46,19 @@ const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar
 // Start with static reviews
 const staticReviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
 
-// Fetch approved reviews from database
-let dbReviewsBySchoolId = new Map<string, (DBReviewRow & { body?: string | null; age?: string | null })[]>();
+// Fetch approved reviews from database (include featured_rank for homepage selection)
+type DbReviewRow = DBReviewRow & { school_id: string; body?: string | null; age?: string | null; featured_rank?: number | null; created_at?: string | null };
+let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
-  const dbReviewsWithSchoolId = await query<DBReviewRow & { school_id: string; body?: string | null; age?: string | null }>(
-    "select school_id, overall_rating, teacher_quality, material_quality, connection_quality, body, age from reviews where status = 'approved'",
+  const dbReviewsWithSchoolId = await query<DbReviewRow>(
+    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, body, age from reviews where status = 'approved'",
   );
   for (const r of dbReviewsWithSchoolId.rows ?? []) {
     const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
     existing.push({
+      school_id: r.school_id,
+      created_at: r.created_at ?? null,
+      featured_rank: (r as any).featured_rank ?? null,
       overall_rating: r.overall_rating,
       teacher_quality: r.teacher_quality,
       material_quality: r.material_quality,
@@ -77,14 +81,40 @@ for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
 // Add DB reviews (convert DB format to display format)
 for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
   const existing = reviewsBySchoolId.get(schoolId) ?? [];
-  const dbReviewsForDisplay = dbReviews
-    .filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body)
-    .map((r) => ({
-      age: r.age || "ユーザー",
-      rating: r.overall_rating!,
-      body: r.body!,
-    }));
-  reviewsBySchoolId.set(schoolId, [...existing, ...dbReviewsForDisplay]);
+  const valid = dbReviews.filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body);
+
+  // If any featured reviews are set in tracker (featured_rank 1..5), prefer those (max 5).
+  const featured = valid
+    .filter((r) => typeof r.featured_rank === "number" && Number.isFinite(r.featured_rank as any))
+    .sort((a, b) => {
+      const ar = (a.featured_rank ?? 999) as number;
+      const br = (b.featured_rank ?? 999) as number;
+      if (ar !== br) return ar - br;
+      const at = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return bt - at;
+    })
+    .slice(0, 5);
+
+  const picked = featured.length
+    ? featured
+    : valid
+        .slice()
+        .sort((a, b) => {
+          const at = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return bt - at;
+        });
+
+  const dbReviewsForDisplay = picked.map((r) => ({
+    age: r.age || "ユーザー",
+    rating: r.overall_rating!,
+    body: r.body!,
+  }));
+
+  // Put selected DB reviews first, then existing (static) reviews.
+  // This makes the homepage snippet (first 3) controllable via tracker selection.
+  reviewsBySchoolId.set(schoolId, [...dbReviewsForDisplay, ...existing]);
 }
 
 // Calculate review stats from merged reviews (for rating display)

@@ -11,6 +11,7 @@ type ReviewRow = {
   created_at?: string | Date | null;
   school_id?: string | null;
   status?: string | null;
+  featured_rank?: number | null;
   overall_rating?: number | null;
   teacher_quality?: number | null;
   material_quality?: number | null;
@@ -224,6 +225,8 @@ const totalPages = Math.max(1, Math.ceil((totalReviews ?? 0) / pageSize));
 const pageClamped = Math.min(page, totalPages);
 const showingFrom = (totalReviews ?? 0) === 0 ? 0 : (pageClamped - 1) * pageSize + 1;
 const showingTo = Math.min((totalReviews ?? 0), pageClamped * pageSize);
+
+const FEATURED_SLOTS = [1, 2, 3, 4, 5] as const;
 
 const errors: string[] = [];
 if (dbEnvError) errors.push(dbEnvError);
@@ -440,6 +443,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
               <tr>
                 <th class="px-4 py-3">日時</th>
                 <th class="px-4 py-3">サービス</th>
+                <th class="px-4 py-3">表示枠</th>
                 <th class="px-4 py-3">総合</th>
                 <th class="px-4 py-3">講師</th>
                 <th class="px-4 py-3">教材</th>
@@ -456,6 +460,31 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                 <tr class="align-top">
                   <td class="px-4 py-3 whitespace-nowrap">{fmtDate(r.created_at)}</td>
                   <td class="px-4 py-3 font-semibold text-zinc-900">{schoolNameById(r.school_id)}</td>
+                  <td class="px-4 py-3">
+                    <form method="post" action="/api/tracker/review-status" class="flex items-center gap-2">
+                      <input type="hidden" name="id" value={String(r.id ?? "")} />
+                      <input type="hidden" name="returnTo" value={returnTo} />
+                      <input type="hidden" name="status" value={String(r.status ?? "pending")} />
+                      <select
+                        name="featured_rank"
+                        class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-900 shadow-sm"
+                        onchange="this.form.submit()"
+                      >
+                        <option value="" selected={r.featured_rank === null || r.featured_rank === undefined}>—</option>
+                        {FEATURED_SLOTS.map((n) => (
+                          <option value={String(n)} selected={Number(r.featured_rank ?? 0) === n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                      <noscript>
+                        <button type="submit" class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-800 hover:bg-zinc-50">
+                          更新
+                        </button>
+                      </noscript>
+                    </form>
+                    <div class="mt-1 text-[11px] font-semibold text-zinc-500">最大5件まで</div>
+                  </td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.overall_rating ?? "—"}</td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.teacher_quality ?? "—"}</td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.material_quality ?? "—"}</td>
@@ -475,6 +504,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                     <form method="post" action="/api/tracker/review-status" class="flex items-center gap-2">
                       <input type="hidden" name="id" value={String(r.id ?? "")} />
                       <input type="hidden" name="returnTo" value={returnTo} />
+                      <input type="hidden" name="featured_rank" value={r.featured_rank === null || r.featured_rank === undefined ? "" : String(r.featured_rank)} />
                       <select
                         name="status"
                         class="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-extrabold text-zinc-900 shadow-sm"
@@ -539,7 +569,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
               ))}
               {!reviews.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="11">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="12">
                     データなし
                   </td>
                 </tr>
