@@ -79,6 +79,9 @@ const jsonLd = [
     <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    <!-- Speed up GTM connection -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     <!-- Google Tag Manager -->
     <script is:inline>
       // @ts-nocheck

@@ -102,6 +102,22 @@ body {
   overscroll-behavior-x: contain;
 }
 
+/* --- Performance: avoid rendering offscreen heavy sections --------------- */
+@supports (content-visibility: auto) {
+  /* Large below-the-fold sections */
+  section#compare,
+  section#details {
+    content-visibility: auto;
+    contain-intrinsic-size: 1000px;
+  }
+
+  /* Long detail cards inside #details */
+  #details .rank-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 900px;
+  }
+}
+
 /* Mobile hardening: ensure no horizontal overflow even when content is wide.
    This is an explicit media-query fallback in addition to Tailwind's responsive classes. */
 @media (max-width: 640px) {
