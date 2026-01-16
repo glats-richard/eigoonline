@@ -8,7 +8,9 @@ import node from '@astrojs/node';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://eigoonline.com',
-  // Astro v5: former `output: "hybrid"` behavior is now the default (`static`).
+  // Enable SSR (required for pages with `export const prerender = false;` like `/` and `/tracker/*`).
+  // Astro v5 removed `output: "hybrid"`, so we use `server` output.
+  output: 'server',
   adapter: node({ mode: 'standalone' }),
   integrations: [
     sitemap({
