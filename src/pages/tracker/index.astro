@@ -220,9 +220,12 @@ const last7 = getTokyoLastNDaysRange(7);
 const returnTo = `${Astro.url.pathname}${Astro.url.search}`;
 
 // Parse status filters from URL params (e.g., ?status=pending&status=check)
+// Default to pending and check if no status filter is specified
 const statusFilterRaw = searchParams.getAll("status");
 const ALLOWED_STATUSES = new Set(["pending", "check", "approved", "rejected"]);
-const statusFilter = statusFilterRaw.filter((s) => ALLOWED_STATUSES.has(s));
+const statusFilterParsed = statusFilterRaw.filter((s) => ALLOWED_STATUSES.has(s));
+// If no status filter in URL, default to pending and check
+const statusFilter = statusFilterParsed.length > 0 ? statusFilterParsed : ["pending", "check"];
 const hasStatusFilter = statusFilter.length > 0;
 
 const pageSizeRaw = searchParams.get("per") ?? "10";
