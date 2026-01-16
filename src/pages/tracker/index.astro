@@ -194,7 +194,7 @@ function maskId(s?: string | null) {
   return `${t.slice(0, 4)}…${t.slice(-4)}`;
 }
 
-function sqlWhereCreatedAtRange(startIso: string | null, endIso: string | null, startIndex = 1) {
+function sqlWhereCreatedAtRange(startIso: string | null, endIso: string | null, statuses: string[] | null = null, startIndex = 1) {
   const conds: string[] = [];
   const params: any[] = [];
   if (startIso) {
@@ -205,6 +205,10 @@ function sqlWhereCreatedAtRange(startIso: string | null, endIso: string | null, 
     params.push(endIso);
     conds.push(`created_at < $${startIndex + params.length - 1}`);
   }
+  if (statuses && statuses.length > 0) {
+    params.push(statuses);
+    conds.push(`status = any($${startIndex + params.length})`);
+  }
   const whereSql = conds.length ? `where ${conds.join(" and ")}` : "";
   return { whereSql, params };
 }
@@ -214,6 +218,12 @@ const range = getTokyoDateRange(searchParams.get("from"), searchParams.get("to")
 const todayYmd = getTokyoTodayYmd().ymd;
 const last7 = getTokyoLastNDaysRange(7);
 const returnTo = `${Astro.url.pathname}${Astro.url.search}`;
+
+// Parse status filters from URL params (e.g., ?status=pending&status=check)
+const statusFilterRaw = searchParams.getAll("status");
+const ALLOWED_STATUSES = new Set(["pending", "check", "approved", "rejected"]);
+const statusFilter = statusFilterRaw.filter((s) => ALLOWED_STATUSES.has(s));
+const hasStatusFilter = statusFilter.length > 0;
 
 const pageSizeRaw = searchParams.get("per") ?? "10";
 const pageSize = pageSizeRaw === "100" ? 100 : pageSizeRaw === "50" ? 50 : 10;
@@ -244,7 +254,7 @@ try {
   clicksErr = e;
 }
 try {
-  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null, hasStatusFilter ? statusFilter : null);
   const r = await query<ConversionRow>(
     `select * from conversions ${w.whereSql} order by created_at desc limit $${w.params.length + 1} offset $${w.params.length + 2}`,
     [...w.params, pageSize, offset],
@@ -288,7 +298,7 @@ try {
   totalClicks = 0;
 }
 try {
-  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null);
+  const w = sqlWhereCreatedAtRange(range?.startIso ?? null, range?.endIso ?? null, hasStatusFilter ? statusFilter : null);
   const r = await query<{ count: number }>(`select count(*)::bigint as count from conversions ${w.whereSql}`, w.params);
   totalConversions = r.rows?.[0]?.count ?? 0;
 } catch (e: any) {
@@ -422,6 +432,9 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
             class="mt-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
           />
         </label>
+        {statusFilter.map((s) => (
+          <input type="hidden" name="status" value={s} />
+        ))}
         <input type="hidden" name="per" value={String(pageSize)} />
         <button
           type="submit"
@@ -430,6 +443,67 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
           絞り込む
         </button>
       </form>
+
+      <div class="mt-4">
+        <div class="text-xs font-extrabold text-zinc-500 mb-2">ステータスで絞り込み</div>
+        <form method="get" class="flex flex-wrap items-center gap-3">
+          {searchParams.get("from") ? <input type="hidden" name="from" value={searchParams.get("from") ?? ""} /> : null}
+          {searchParams.get("to") ? <input type="hidden" name="to" value={searchParams.get("to") ?? ""} /> : null}
+          <input type="hidden" name="per" value={String(pageSize)} />
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="pending"
+              checked={statusFilter.includes("pending")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">pending</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="check"
+              checked={statusFilter.includes("check")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">check</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="approved"
+              checked={statusFilter.includes("approved")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">approved</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="status"
+              value="rejected"
+              checked={statusFilter.includes("rejected")}
+              onchange="this.form.submit()"
+              class="rounded border-zinc-300 text-[color:var(--brand-link)] focus:ring-[color:var(--brand-link)]"
+            />
+            <span class="text-sm font-semibold text-zinc-700">rejected</span>
+          </label>
+          {hasStatusFilter ? (
+            <a
+              href={buildHref({ status: null })}
+              class="text-xs font-extrabold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+            >
+              クリア
+            </a>
+          ) : null}
+        </form>
+      </div>
 
       <div class="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
         <a class="rounded-full bg-zinc-100 px-3 py-1 text-zinc-700 hover:bg-zinc-200" href={`/tracker?from=${todayYmd}&to=${todayYmd}`}>
@@ -590,8 +664,11 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
 
         <div class="flex items-center gap-2">
           <form method="get" class="flex items-center gap-2">
-            <input type="hidden" name="from" value={searchParams.get("from") ?? ""} />
-            <input type="hidden" name="to" value={searchParams.get("to") ?? ""} />
+            {searchParams.get("from") ? <input type="hidden" name="from" value={searchParams.get("from") ?? ""} /> : null}
+            {searchParams.get("to") ? <input type="hidden" name="to" value={searchParams.get("to") ?? ""} /> : null}
+            {statusFilter.map((s) => (
+              <input type="hidden" name="status" value={s} />
+            ))}
             <input type="hidden" name="page" value="1" />
             <label class="inline-flex items-center gap-2">
               <span class="text-xs font-extrabold text-zinc-500">表示件数</span>
