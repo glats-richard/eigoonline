@@ -43,7 +43,8 @@ const sidebarBannersTop = banners.filter((b) => ["sidebar", "sidebar_top"].inclu
 const sidebarBannersMid = banners.filter((b) => b.data.placement === "sidebar_mid").map((b) => b.data);
 const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar_bottom").map((b) => b.data);
 
-const reviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
+// Start with static reviews
+const staticReviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
 
 // Fetch approved reviews from database
 let dbReviewsBySchoolId = new Map<string, (DBReviewRow & { body?: string | null; age?: string | null })[]>();
@@ -67,18 +68,30 @@ try {
   // If DB query fails (e.g., table doesn't exist yet), continue with static reviews only
 }
 
-// Merge static and DB reviews for overall rating calculation
+// Merge static and DB reviews for display
+const reviewsBySchoolId = new Map<string, { age: string; rating: number; body: string }[]>();
+// Add static reviews
+for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
+  reviewsBySchoolId.set(schoolId, [...staticItems]);
+}
+// Add DB reviews (convert DB format to display format)
+for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
+  const existing = reviewsBySchoolId.get(schoolId) ?? [];
+  const dbReviewsForDisplay = dbReviews
+    .filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body)
+    .map((r) => ({
+      age: r.age || "ユーザー",
+      rating: r.overall_rating!,
+      body: r.body!,
+    }));
+  reviewsBySchoolId.set(schoolId, [...existing, ...dbReviewsForDisplay]);
+}
+
+// Calculate review stats from merged reviews (for rating display)
 const reviewStatsBySchoolId = new Map<string, { count: number; avg: number | null }>();
-for (const [schoolId, staticItems] of reviewsBySchoolId) {
-  const staticStats = getReviewStats(staticItems);
-  const dbReviews = dbReviewsBySchoolId.get(schoolId) ?? [];
-  // Combine static ratings with DB overall_rating
-  const allRatings = [
-    ...staticItems.map((i) => i.rating),
-    ...dbReviews.map((r) => r.overall_rating).filter((r): r is number => typeof r === "number" && Number.isFinite(r)),
-  ];
-  const combinedStats = getReviewStats(allRatings.map((r) => ({ rating: r })));
-  reviewStatsBySchoolId.set(schoolId, combinedStats);
+for (const [schoolId, mergedReviews] of reviewsBySchoolId) {
+  const stats = getReviewStats(mergedReviews);
+  reviewStatsBySchoolId.set(schoolId, stats);
 }
 
 // Detailed stats for compare table (teacher, material, connection quality)
