@@ -1,0 +1,183 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="体験談の投稿方法" description="オンライン英会話サービスの体験談を投稿する方法をご説明します">
+  <main class="mx-auto w-full max-w-3xl px-4 pb-14 pt-8">
+    <div class="mb-8">
+      <h1 class="text-2xl font-extrabold text-zinc-900">体験談の投稿方法</h1>
+      <p class="mt-2 text-sm text-zinc-600">
+        オンライン英会話サービスの体験談を投稿していただき、ありがとうございます。投稿いただいた内容は、他のユーザーの参考になります。
+      </p>
+    </div>
+
+    <section class="mb-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-lg font-extrabold text-zinc-900">投稿の流れ</h2>
+      <ol class="space-y-4">
+        <li class="flex gap-4">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--brand-link)] text-sm font-extrabold text-white">
+            1
+          </div>
+          <div>
+            <div class="font-extrabold text-zinc-900">サービスを選択</div>
+            <p class="mt-1 text-sm text-zinc-600">
+              体験談を投稿したいオンライン英会話サービスを選択してください。
+            </p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--brand-link)] text-sm font-extrabold text-white">
+            2
+          </div>
+          <div>
+            <div class="font-extrabold text-zinc-900">評価を入力</div>
+            <p class="mt-1 text-sm text-zinc-600">
+              総合評価、講師の質、教材の質、通信の質をそれぞれ1.0〜5.0の範囲で0.5刻みで評価してください。
+            </p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--brand-link)] text-sm font-extrabold text-white">
+            3
+          </div>
+          <div>
+            <div class="font-extrabold text-zinc-900">体験談を記入</div>
+            <p class="mt-1 text-sm text-zinc-600">
+              サービスの体験談や口コミを10文字以上2000文字以内で記入してください。
+            </p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--brand-link)] text-sm font-extrabold text-white">
+            4
+          </div>
+          <div>
+            <div class="font-extrabold text-zinc-900">投稿</div>
+            <p class="mt-1 text-sm text-zinc-600">
+              内容を確認して投稿ボタンをクリックしてください。投稿後、管理者が確認し、承認されるとサイトに反映されます。
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="mb-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-lg font-extrabold text-zinc-900">評価項目について</h2>
+      <div class="space-y-4">
+        <div>
+          <div class="font-extrabold text-zinc-900">総合評価</div>
+          <p class="mt-1 text-sm text-zinc-600">
+            サービス全体の満足度を1.0〜5.0の範囲で評価してください。5.0が最高評価です。
+          </p>
+        </div>
+        <div>
+          <div class="font-extrabold text-zinc-900">講師の質</div>
+          <p class="mt-1 text-sm text-zinc-600">
+            講師の教え方、発音、対応の質を評価してください。
+          </p>
+        </div>
+        <div>
+          <div class="font-extrabold text-zinc-900">教材の質</div>
+          <p class="mt-1 text-sm text-zinc-600">
+            教材の内容、使いやすさ、レベル設定の適切さを評価してください。
+          </p>
+        </div>
+        <div>
+          <div class="font-extrabold text-zinc-900">通信の質</div>
+          <p class="mt-1 text-sm text-zinc-600">
+            音声・映像の品質、接続の安定性を評価してください。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
+      <h2 class="mb-4 text-lg font-extrabold text-amber-900">注意事項</h2>
+      <ul class="space-y-2 text-sm text-amber-800">
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold">•</span>
+          <span>投稿いただいた内容は、管理者が確認後、承認されるとサイトに反映されます。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold">•</span>
+          <span>不適切な内容（誹謗中傷、個人情報の記載など）が含まれている場合は、承認されない場合があります。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold">•</span>
+          <span>同一IPアドレスから1時間あたり3件まで投稿できます。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold">•</span>
+          <span>年齢の入力は任意です。入力しない場合でも投稿は可能です。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold">•</span>
+          <span>投稿後、内容の修正や削除はできません。投稿前に内容をよく確認してください。</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="mb-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-lg font-extrabold text-zinc-900">体験談を書く際のポイント</h2>
+      <ul class="space-y-3 text-sm text-zinc-700">
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold text-[color:var(--brand-link)]">✓</span>
+          <span>実際に利用した経験に基づいた内容を記入してください。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold text-[color:var(--brand-link)]">✓</span>
+          <span>良い点だけでなく、改善点や注意点も含めると、他のユーザーの参考になります。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold text-[color:var(--brand-link)]">✓</span>
+          <span>具体的なエピソードや体験談を交えると、より参考価値の高いレビューになります。</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 font-extrabold text-[color:var(--brand-link)]">✓</span>
+          <span>どのような目的で利用したか（日常会話、ビジネス、試験対策など）を記載すると、同じ目的のユーザーに役立ちます。</span>
+        </li>
+      </ul>
+    </section>
+
+    <div class="flex justify-center">
+      <a
+        href="/review/submit"
+        class="btn-brand inline-flex items-center justify-center rounded-xl px-8 py-3 text-base font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        体験談を投稿する
+      </a>
+    </div>
+
+    <section class="mt-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 text-sm text-zinc-700">
+      <h2 class="mb-3 text-base font-extrabold text-zinc-900">よくある質問</h2>
+      <dl class="space-y-4">
+        <div>
+          <dt class="font-extrabold text-zinc-900">Q. 投稿後、どのくらいで反映されますか？</dt>
+          <dd class="mt-1 text-zinc-600">
+            A. 管理者が確認後、承認されるとサイトに反映されます。通常、数日以内に反映されますが、内容によっては時間がかかる場合があります。
+          </dd>
+        </div>
+        <div>
+          <dt class="font-extrabold text-zinc-900">Q. 複数のサービスについて投稿できますか？</dt>
+          <dd class="mt-1 text-zinc-600">
+            A. はい、複数のサービスについてそれぞれ投稿できます。ただし、同一IPアドレスから1時間あたり3件までという制限があります。
+          </dd>
+        </div>
+        <div>
+          <dt class="font-extrabold text-zinc-900">Q. 投稿した内容を修正・削除したい場合は？</dt>
+          <dd class="mt-1 text-zinc-600">
+            A. 申し訳ございませんが、投稿後の修正・削除はできません。投稿前に内容をよく確認してください。
+          </dd>
+        </div>
+        <div>
+          <dt class="font-extrabold text-zinc-900">Q. 匿名で投稿できますか？</dt>
+          <dd class="mt-1 text-zinc-600">
+            A. はい、年齢の入力は任意です。個人を特定できる情報は記載しないでください。
+          </dd>
+        </div>
+      </dl>
+    </section>
+  </main>
+</Layout>
