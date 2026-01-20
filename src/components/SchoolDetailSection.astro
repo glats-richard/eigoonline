@@ -32,14 +32,15 @@ type Props = {
   offerId: string;
   item: School;
   reviews?: Review[];
+  reviewStats?: { count: number; avg: number | null } | null;
 };
 
-const { rank, offerId, item, reviews = [] } = Astro.props satisfies Props;
+const { rank, offerId, item, reviews = [], reviewStats = null } = Astro.props satisfies Props;
 
 const quality = typeof item.teacherQuality === "number" ? item.teacherQuality : null;
 const planHref = item.planUrl || item.officialUrl;
 const bannerHref = item.bannerHref || planHref;
-const stats = getReviewStats(reviews);
+const stats = reviewStats ?? getReviewStats(reviews);
 
 const trackHref = (href: string) =>
   href.startsWith("http://") || href.startsWith("https://")

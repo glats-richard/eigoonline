@@ -405,7 +405,13 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{overall?.description}</p>
 							<div class="grid gap-4">
 								{overallItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem
+											item={x.data}
+											offerId={x.id}
+											rank={idx + 1}
+											reviews={reviewsBySchoolId.get(x.id) ?? []}
+											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
+										/>
 								))}
 							</div>
 						</section>
@@ -414,7 +420,13 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{exam?.description}</p>
 							<div class="grid gap-4">
 								{examItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem
+											item={x.data}
+											offerId={x.id}
+											rank={idx + 1}
+											reviews={reviewsBySchoolId.get(x.id) ?? []}
+											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
+										/>
 								))}
 							</div>
 						</section>
@@ -423,7 +435,13 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{daily?.description}</p>
 							<div class="grid gap-4">
 								{dailyItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem
+											item={x.data}
+											offerId={x.id}
+											rank={idx + 1}
+											reviews={reviewsBySchoolId.get(x.id) ?? []}
+											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
+										/>
 								))}
 							</div>
 						</section>
@@ -432,7 +450,13 @@ const faqJsonLd = {
 							<p class="mb-3 text-sm text-zinc-600">{business?.description}</p>
 							<div class="grid gap-4">
 								{businessItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+										<RankingListItem
+											item={x.data}
+											offerId={x.id}
+											rank={idx + 1}
+											reviews={reviewsBySchoolId.get(x.id) ?? []}
+											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
+										/>
 								))}
 							</div>
 						</section>
@@ -477,7 +501,13 @@ const faqJsonLd = {
 
 					{overallItemsRated.map((x, idx) => (
 						<div id={`school-${x.id}`} class="scroll-mt-24">
-							<SchoolDetailSection offerId={x.id} rank={idx + 1} item={x.data} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+							<SchoolDetailSection
+								offerId={x.id}
+								rank={idx + 1}
+								item={x.data}
+								reviews={reviewsBySchoolId.get(x.id) ?? []}
+								reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
+							/>
 						</div>
 					))}
 				</section>

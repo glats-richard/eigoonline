@@ -18,10 +18,11 @@ type Props = {
   offerId: string;
   rank: number;
   reviews?: { age: string; rating: number; body: string }[];
+  reviewStats?: { count: number; avg: number | null } | null;
 };
 
-const { item, offerId, rank, reviews = [] } = Astro.props satisfies Props;
-const stats = getReviewStats(reviews);
+const { item, offerId, rank, reviews = [], reviewStats = null } = Astro.props satisfies Props;
+const stats = reviewStats ?? getReviewStats(reviews);
 ---
 
 <article class="surface rounded-2xl border border-white/30 shadow-sm">
