@@ -1,8 +1,8 @@
 {
   "name": "クラウティ",
   "priceText": null,
-  "trialText": "1回",
-  "benefitText": null,
+  "trialText": "8日間",
+  "benefitText": "スタンダード初月500円（ポップアップ表示時／コード入力）",
   "rating": 2.6,
   "features": [
     "家族で1アカウントをシェアできる",
@@ -10,7 +10,7 @@
   ],
   "logoUrl": "/logos/company-62.webp",
   "officialUrl": "https://www.cloudt.jp/",
-  "campaignText": null,
+  "campaignText": "スタンダード初月500円（ポップアップ表示時／コード：TqBU6ZVx）",
   "summary": "家族で使える設計や、ゲームを使ったレッスンなどが特徴のオンライン英会話。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",
@@ -27,7 +27,10 @@
     "AIによる発音チェックができる"
   ],
   "campaignEndsAt": null,
-  "campaignBullets": [],
+  "campaignBullets": [
+    "対象：ポップアップが表示された場合の特典（表示・条件は時期により変動）",
+    "コード：TqBU6ZVx（申込フォームで入力）"
+  ],
   "points": [
     "家族で使える",
     "ゲームで続けやすい"

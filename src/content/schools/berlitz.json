@@ -2,7 +2,7 @@
   "name": "Berlitz",
   "priceText": "16,500円",
   "trialText": "1回",
-  "benefitText": "最大49,500円割引キャンペーン実施中！",
+  "benefitText": "Berlitz Flex 12ヶ月：最大49,500円割引（〜1/31）",
   "rating": 3.8,
   "features": [
     "ネイティブ講師のマンツーマンレッスン",
@@ -10,7 +10,7 @@
   ],
   "logoUrl": "/logos/company-51.webp",
   "officialUrl": "https://www.berlitz.com/ja-jp",
-  "campaignText": "【1月31日まで】期間限定キャンペーン：最大49,500円割引キャンペーン実施中！／英会話フレーズ集プレゼント！",
+  "campaignText": "【〜1月31日】Berlitz Flex 12ヶ月プラン：受講費 最大49,500円OFF",
   "summary": "ネイティブ講師のマンツーマン指導に強み。対面型の選択肢もある英会話サービス。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",
@@ -26,8 +26,11 @@
     "ネイティブ講師によるマンツーマンで実践的に学べる",
     "目的・レベルに合わせて学習できる"
   ],
-  "campaignEndsAt": null,
-  "campaignBullets": [],
+  "campaignEndsAt": "2026-01-31",
+  "campaignBullets": [
+    "Berlitz Flex 12ヶ月プラン：受講費 最大49,500円OFF（〜1/31）",
+    "Flexは入会金・教材費0円の案内がある（詳細は公式で要確認）"
+  ],
   "points": [
     "ネイティブ講師のマンツーマン",
     "対面型も選べる"

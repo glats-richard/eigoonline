@@ -2,14 +2,14 @@
   "name": "ECCオンラインレッスン",
   "priceText": null,
   "trialText": "2回",
-  "benefitText": null,
+  "benefitText": "受講料10%OFF（最大3ヶ月／コード入力）",
   "rating": 3.5,
   "features": [
     "語学学習機関として長い実績のあるECCが運営"
   ],
   "logoUrl": "/logos/company-71.webp",
   "officialUrl": "https://online.ecc.co.jp/",
-  "campaignText": null,
+  "campaignText": "【〜1月25日 22:00】受講料10%OFF×最大3ヶ月（コード：E1A312242831）",
   "summary": "ECCが運営するオンライン英会話。日本人向け教材やカリキュラムを訴求。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",
@@ -25,8 +25,12 @@
     "運営実績のあるECCによるカリキュラム",
     "プロ講師によるレッスン"
   ],
-  "campaignEndsAt": null,
-  "campaignBullets": [],
+  "campaignEndsAt": "2026-01-25",
+  "campaignBullets": [
+    "対象：全言語・全プラン（デイタイム含む）※新規申込限定",
+    "申込期限：〜1/25 22:00（定員等で早期終了の場合あり）",
+    "コード：E1A312242831（プラン選択前に入力）"
+  ],
   "points": [
     "実績ある学習機関が運営",
     "日本人向け教材"

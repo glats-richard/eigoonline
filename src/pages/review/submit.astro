@@ -12,6 +12,8 @@ const schoolsList = schools
 const submitted = Astro.url.searchParams.get("submitted") === "true";
 const preselectedSchoolId = Astro.url.searchParams.get("school_id")?.trim() || "";
 const RATING_VALUES = [1, 2, 3, 4, 5];
+const currentYear = new Date().getFullYear();
+const BIRTH_YEARS = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => currentYear - i);
 
 const recaptchaSiteKey =
   (typeof process !== "undefined" && process.env && process.env.RECAPTCHA_SITE_KEY) ||
@@ -226,16 +228,16 @@ const recaptchaAction = "review_submit";
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
               <div class="text-xs font-semibold text-zinc-600 mb-1">誕生年</div>
-              <input
-                type="number"
+              <select
                 name="birth_year"
                 required
-                inputmode="numeric"
-                min="1900"
-                max={String(new Date().getFullYear())}
-                placeholder="例: 1994"
                 class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-              />
+              >
+                <option value="">年</option>
+                {BIRTH_YEARS.map((y) => (
+                  <option value={String(y)}>{y}年</option>
+                ))}
+              </select>
             </label>
             <label class="block">
               <div class="text-xs font-semibold text-zinc-600 mb-1">誕生月</div>
@@ -250,9 +252,6 @@ const recaptchaAction = "review_submit";
                 ))}
               </select>
             </label>
-          </div>
-          <div class="mt-2 text-xs text-zinc-500">
-            誕生日（日にち）は入力しません（個人情報保護のため）。
           </div>
         </div>
 

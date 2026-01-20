@@ -1,8 +1,8 @@
 {
   "name": "Kimini英会話",
   "priceText": "月額1,210円から",
-  "trialText": "30日間",
-  "benefitText": "期間限定：30日間無料体験",
+  "trialText": "10日間",
+  "benefitText": "TOEIC講座（Shikaku Pass）無料（〜1/31）",
   "rating": null,
   "features": [
     "中学英語の基礎からやり直したい。",
@@ -10,7 +10,7 @@
   ],
   "logoUrl": "/logos/company-30.webp",
   "officialUrl": "https://br.glats.online/",
-  "campaignText": "【1月19日まで】期間限定キャンペーン：30日間無料体験キャンペーン実施中！！",
+  "campaignText": "【〜1月31日】特典：TOEIC® L&Rテスト講座（Shikaku Pass）が無料（対象プラン）",
   "summary": "学研が運営するオンライン英会話。基礎から学び直したい人や、月額を抑えて始めたい人向け。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",
@@ -25,7 +25,7 @@
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [],
-  "campaignEndsAt": null,
+  "campaignEndsAt": "2026-01-31",
   "campaignBullets": [],
   "bannerImage": "/banners/company-30.webp",
   "bannerAlt": "Kimini英会話 バナー",

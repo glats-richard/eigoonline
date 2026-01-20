@@ -2,14 +2,14 @@
   "name": "ネイティブキャンプ",
   "priceText": "6,480円",
   "trialText": "7日間",
-  "benefitText": "10,000円分の特典プレゼント！",
+  "benefitText": "Amazonギフト券＆コイン 合計10,000円分（条件あり）",
   "rating": 4.5,
   "features": [
     "24時間スマホから受けられて続けやすい"
   ],
   "logoUrl": "/logos/company-70.webp",
   "officialUrl": "https://nativecamp.net/",
-  "campaignText": null,
+  "campaignText": "Amazonギフト券5,000円＆コイン5,000円分プレゼント（条件・申請あり）",
   "summary": "レッスン受け放題プランなど、学習ペースに合わせて続けやすいオンライン英会話。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",
@@ -31,7 +31,10 @@
   "planUrl": null,
   "editorialComments": [],
   "campaignEndsAt": null,
-  "campaignBullets": [],
+  "campaignBullets": [
+    "7日間無料トライアル（決済前日までの退会で無料）",
+    "特典はキャンペーンページからの申請が必要な場合あり（条件は時期により変動）"
+  ],
   "bannerImage": "/banners/company-70.webp",
   "bannerAlt": "ネイティブキャンプ バナー",
   "bannerHref": "https://nativecamp.net/"

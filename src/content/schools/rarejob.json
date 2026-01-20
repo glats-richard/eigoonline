@@ -10,7 +10,7 @@
   ],
   "logoUrl": "/logos/company-50.webp",
   "officialUrl": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2",
-  "campaignText": "【1月31日まで】期間限定キャンペーン：最大49,500円割引／英会話フレーズ集プレゼント",
+  "campaignText": "初月50%OFF（登録後7日以内／コード：7dayscpn ※条件あり）",
   "summary": "初心者の日常英会話や、日本人講師のレッスンも検討したい人向けのオンライン英会話。",
   "source": {
     "url": "https://search-online-eikaiwa.com/ranking/top2",
@@ -26,7 +26,10 @@
   "planUrl": null,
   "editorialComments": [],
   "campaignEndsAt": null,
-  "campaignBullets": [],
+  "campaignBullets": [
+    "7日間無料トライアル（選択プランにより最大14回）",
+    "初月50%OFF（コード：7dayscpn／3ヶ月継続条件などあり）"
+  ],
   "bannerImage": "/banners/company-50.webp",
   "bannerAlt": "レアジョブ英会話 バナー",
   "bannerHref": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2"
