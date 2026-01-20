@@ -26,6 +26,13 @@ function toFiniteNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function toInt(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n)) return null;
+  return Math.floor(n);
+}
+
 function validateRating(rating: number | null): boolean {
   if (rating === null) return false;
   // Check if rating is an integer between 1 and 5
@@ -123,7 +130,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const connectionQualityRaw = formData.get("connection_quality");
   const body = String(formData.get("body") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().slice(0, 255) || null;
-  const age = String(formData.get("age") ?? "").trim().slice(0, 20) || null;
+  const birthYear = toInt(formData.get("birth_year"));
+  const birthMonth = toInt(formData.get("birth_month"));
   const recaptchaToken = String(formData.get("recaptcha_token") ?? "").trim();
   const recaptchaAction = String(formData.get("recaptcha_action") ?? "").trim() || "review_submit";
 
@@ -188,6 +196,27 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     });
   }
 
+  // Validate birth year/month (privacy: no day)
+  const currentYear = new Date().getFullYear();
+  if (birthYear === null || birthMonth === null) {
+    return new Response(JSON.stringify({ ok: false, error: "birth_year and birth_month are required" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+  if (birthYear < 1900 || birthYear > currentYear) {
+    return new Response(JSON.stringify({ ok: false, error: "Invalid birth_year" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+  if (birthMonth < 1 || birthMonth > 12) {
+    return new Response(JSON.stringify({ ok: false, error: "Invalid birth_month" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   // Get request metadata
   const h = request.headers;
   const referrer = h.get("referer");
@@ -230,8 +259,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Insert review
   try {
     await query(
-      "insert into reviews (school_id, status, overall_rating, teacher_quality, material_quality, connection_quality, body, age, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
-      [schoolId, "pending", overallRating, teacherQuality, materialQuality, connectionQuality, body, age, email, ip, ipHash, ipVer, userAgent, referrer],
+      "insert into reviews (school_id, status, overall_rating, teacher_quality, material_quality, connection_quality, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
+      [schoolId, "pending", overallRating, teacherQuality, materialQuality, connectionQuality, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer],
     );
   } catch (e: any) {
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? String(e) }), {

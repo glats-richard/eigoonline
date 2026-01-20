@@ -17,6 +17,8 @@ type ReviewRow = {
   material_quality?: number | null;
   connection_quality?: number | null;
   body?: string | null;
+  birth_year?: number | null;
+  birth_month?: number | null;
   age?: string | null;
   email?: string | null;
   ip?: string | null;
@@ -100,6 +102,16 @@ function fmtDate(iso?: string | Date | null) {
   const d = iso instanceof Date ? iso : new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString("ja-JP");
+}
+
+function fmtBirthYm(r: Pick<ReviewRow, "birth_year" | "birth_month" | "age">) {
+  const y = r.birth_year;
+  const m = r.birth_month;
+  if (typeof y === "number" && Number.isFinite(y) && typeof m === "number" && Number.isFinite(m) && m >= 1 && m <= 12) {
+    return `${y}年${m}月`;
+  }
+  // Backward compat: legacy free-text age column (do not use for new submissions)
+  return r.age ?? "—";
 }
 
 function shortText(s?: string | null, max = 64) {
@@ -449,7 +461,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                 <th class="px-4 py-3">教材</th>
                 <th class="px-4 py-3">通信</th>
                 <th class="px-4 py-3">口コミ本文</th>
-                <th class="px-4 py-3">年齢</th>
+                <th class="px-4 py-3">誕生年月</th>
                 <th class="px-4 py-3">Email</th>
                 <th class="px-4 py-3">ステータス</th>
                 <th class="px-4 py-3">詳細</th>
@@ -494,7 +506,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                       {r.body ? shortText(r.body, 100) : "—"}
                     </span>
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">{r.age ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">{fmtBirthYm(r)}</td>
                   <td class="px-4 py-3 text-xs text-zinc-700">
                     <span class="inline-block max-w-[200px] truncate align-top" title={r.email ?? ""}>
                       {r.email ? shortText(r.email, 30) : "—"}

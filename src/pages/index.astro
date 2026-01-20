@@ -46,12 +46,20 @@ const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar
 // Start with static reviews
 const staticReviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
 
-// Fetch approved reviews from database (include featured_rank for homepage selection)
-type DbReviewRow = DBReviewRow & { school_id: string; body?: string | null; age?: string | null; featured_rank?: number | null; created_at?: string | null };
+// Fetch approved reviews from database
+type DbReviewRow = DBReviewRow & {
+  school_id: string;
+  body?: string | null;
+  birth_year?: number | null;
+  birth_month?: number | null;
+  age?: string | null; // legacy
+  featured_rank?: number | null;
+  created_at?: string | null;
+};
 let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
   const dbReviewsWithSchoolId = await query<DbReviewRow>(
-    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, body, age from reviews where status = 'approved'",
+    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, body, birth_year, birth_month, age from reviews where status = 'approved'",
   );
   for (const r of dbReviewsWithSchoolId.rows ?? []) {
     const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
@@ -64,7 +72,9 @@ try {
       material_quality: r.material_quality,
       connection_quality: r.connection_quality,
       body: r.body,
-      age: r.age,
+      birth_year: (r as any).birth_year ?? null,
+      birth_month: (r as any).birth_month ?? null,
+      age: (r as any).age ?? null,
     });
     dbReviewsBySchoolId.set(r.school_id, existing);
   }
@@ -72,55 +82,48 @@ try {
   // If DB query fails (e.g., table doesn't exist yet), continue with static reviews only
 }
 
-// Merge static and DB reviews for display
+// Display reviews for components:
+// - Prefer latest approved user-submitted reviews per school (max 3)
+// - Fall back to static reviews if no approved DB reviews exist
 const reviewsBySchoolId = new Map<string, { age: string; rating: number; body: string }[]>();
-// Add static reviews
 for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
   reviewsBySchoolId.set(schoolId, [...staticItems]);
 }
-// Add DB reviews (convert DB format to display format)
 for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
-  const existing = reviewsBySchoolId.get(schoolId) ?? [];
-  const valid = dbReviews.filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body);
-
-  // If any featured reviews are set in tracker (featured_rank 1..5), prefer those (max 5).
-  const featured = valid
-    .filter((r) => typeof r.featured_rank === "number" && Number.isFinite(r.featured_rank as any))
+  const valid = dbReviews
+    .filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body)
+    .slice()
     .sort((a, b) => {
-      const ar = (a.featured_rank ?? 999) as number;
-      const br = (b.featured_rank ?? 999) as number;
-      if (ar !== br) return ar - br;
       const at = a.created_at ? new Date(a.created_at).getTime() : 0;
       const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
       return bt - at;
-    })
-    .slice(0, 5);
+    });
 
-  const picked = featured.length
-    ? featured
-    : valid
-        .slice()
-        .sort((a, b) => {
-          const at = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return bt - at;
-        });
+  if (!valid.length) continue;
 
-  const dbReviewsForDisplay = picked.map((r) => ({
-    age: r.age || "ユーザー",
+  const latest3 = valid.slice(0, 3).map((r) => ({
+    age:
+      typeof r.birth_year === "number" && typeof r.birth_month === "number"
+        ? `${r.birth_year}年${r.birth_month}月`
+        : r.age || "ユーザー",
     rating: r.overall_rating!,
     body: r.body!,
   }));
-
-  // Put selected DB reviews first, then existing (static) reviews.
-  // This makes the homepage snippet (first 3) controllable via tracker selection.
-  reviewsBySchoolId.set(schoolId, [...dbReviewsForDisplay, ...existing]);
+  reviewsBySchoolId.set(schoolId, latest3);
 }
 
-// Calculate review stats from merged reviews (for rating display)
+// Calculate review stats from ALL reviews (static + ALL approved DB), for rating display.
 const reviewStatsBySchoolId = new Map<string, { count: number; avg: number | null }>();
-for (const [schoolId, mergedReviews] of reviewsBySchoolId) {
-  const stats = getReviewStats(mergedReviews);
+for (const [schoolId] of schoolsById) {
+  const staticItems = staticReviewsBySchoolId.get(schoolId) ?? [];
+  const dbItems = dbReviewsBySchoolId.get(schoolId) ?? [];
+  const dbForStats = dbItems
+    .filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating))
+    .map((r) => ({ rating: r.overall_rating! }));
+  const stats = getReviewStats([
+    ...staticItems,
+    ...dbForStats,
+  ]);
   reviewStatsBySchoolId.set(schoolId, stats);
 }
 
@@ -214,7 +217,7 @@ for (const [schoolId, schoolData] of schoolsById) {
           "@type": "Review",
           author: {
             "@type": "Person",
-            name: review.age || "ユーザー",
+            name: "ユーザー",
           },
           reviewRating: {
             "@type": "Rating",

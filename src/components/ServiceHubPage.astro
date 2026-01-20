@@ -1,0 +1,350 @@
+---
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import StarRating from "./StarRating.astro";
+import { getCollection } from "astro:content";
+import { dbEnvError, query } from "../lib/db";
+import { getReviewStats } from "../utils/reviewStats";
+
+type Props = {
+  schoolId: string;
+};
+
+const { schoolId } = Astro.props satisfies Props;
+
+const schools = await getCollection("schools");
+const schoolEntry = schools.find((s) => s.id === schoolId) ?? null;
+const school = schoolEntry?.data ?? null;
+
+if (!school) {
+  Astro.response.status = 404;
+}
+
+// Overall rank (if present in rankings/overall.json)
+const rankings = await getCollection("rankings");
+const overallRanking = rankings.find((r) => r.data.category === "overall")?.data ?? null;
+const overallRankIndex = overallRanking ? overallRanking.items.indexOf(schoolId) : -1;
+const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
+
+// Static reviews (editorial)
+const reviewsCollection = await getCollection("reviews");
+const staticReviews = reviewsCollection.find((r) => r.data.schoolId === schoolId)?.data.items ?? [];
+const staticStats = getReviewStats(staticReviews);
+
+// DB reviews (approved)
+type DbReview = {
+  created_at: string | null;
+  overall_rating: number | null;
+  body: string | null;
+  birth_year: number | null;
+  birth_month: number | null;
+  age: string | null; // legacy
+};
+
+let dbLatest: { label: string; rating: number; body: string; createdAt: string | null }[] = [];
+let dbCount = 0;
+let dbAvg: number | null = null;
+let dbErr: string | null = null;
+
+try {
+  const statsRes = await query<{ count: number; avg: number | null }>(
+    "select count(*)::bigint as count, avg(overall_rating)::numeric as avg from reviews where status = 'approved' and school_id = $1 and overall_rating is not null",
+    [schoolId],
+  );
+  dbCount = statsRes.rows?.[0]?.count ?? 0;
+  dbAvg = statsRes.rows?.[0]?.avg ?? null;
+
+  const latestRes = await query<DbReview>(
+    `
+    select created_at, overall_rating, body, birth_year, birth_month, age
+    from reviews
+    where status = 'approved' and school_id = $1 and overall_rating is not null and body is not null
+    order by created_at desc
+    limit 3
+    `,
+    [schoolId],
+  );
+
+  dbLatest = (latestRes.rows ?? []).map((r: DbReview) => ({
+    label:
+      typeof r.birth_year === "number" && typeof r.birth_month === "number"
+        ? `${r.birth_year}年${r.birth_month}月`
+        : r.age ?? "ユーザー",
+    rating: r.overall_rating ?? 0,
+    body: r.body ?? "",
+    createdAt: r.created_at ?? null,
+  }));
+} catch (e: any) {
+  // If DB isn't ready, continue with static reviews only
+  dbErr = e?.message ?? String(e);
+}
+
+// Aggregate rating variables (designed to be dynamically fed)
+const staticCount = staticStats.count;
+const staticAvg = staticStats.avg;
+
+const totalCount = staticCount + dbCount;
+const ratingValue =
+  totalCount > 0
+    ? Math.round(
+        (((staticAvg ?? 0) * staticCount + (dbAvg ?? 0) * dbCount) / totalCount) * 10,
+      ) / 10
+    : null;
+const reviewCount = totalCount;
+
+// Meta (AI-friendly concise description)
+const title = school ? `${school.name}｜料金・特徴・口コミ・評判まとめ` : "サービス情報";
+const description = school
+  ? schoolId === "kimini"
+    ? "Kimini英会話（学研グループ運営）の料金・特徴（学研メソッド）・口コミ・総合評価をまとめたページです。"
+    : `${school.name}の料金・特徴・口コミ・総合評価をまとめたページです。`
+  : "サービス情報ページです。";
+
+const base = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
+const pageUrl = new URL(Astro.url.pathname, base).toString();
+const logoAbs = school?.logoUrl ? new URL(school.logoUrl, base).toString() : null;
+
+const jsonLd: any[] = [];
+if (school) {
+  const product: any = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: school.name,
+    url: pageUrl,
+    description,
+  };
+  if (logoAbs) product.image = [logoAbs];
+  if (schoolId === "kimini") {
+    product.brand = { "@type": "Brand", name: "学研グループ" };
+  }
+  if (ratingValue !== null && reviewCount > 0) {
+    product.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue,
+      reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  jsonLd.push(product);
+}
+---
+
+<Layout title={title} description={description}>
+  <Fragment slot="head">
+    {jsonLd.length ? <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} /> : null}
+  </Fragment>
+
+  {!school ? (
+    <main class="mx-auto w-full max-w-3xl px-4 pb-14 pt-8">
+      <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <h1 class="text-xl font-extrabold text-zinc-900">ページが見つかりません</h1>
+        <p class="mt-3 text-sm text-zinc-700">指定されたサービスが見つかりませんでした。</p>
+        <div class="mt-4">
+          <a class="link-brand font-semibold underline" href="/">TOPへ戻る</a>
+        </div>
+      </section>
+    </main>
+  ) : (
+    <main id="top" class="mx-auto w-full max-w-6xl px-4 pb-12 pt-6">
+      <!-- Hero -->
+      <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-3">
+              {school.logoUrl ? (
+                <div class="flex h-14 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3">
+                  <img
+                    src={school.logoUrl}
+                    alt={`${school.name} ロゴ`}
+                    width="160"
+                    height="56"
+                    loading="eager"
+                    decoding="async"
+                    class="h-10 w-auto max-w-[160px] object-contain"
+                  />
+                </div>
+              ) : (
+                <div class="flex h-14 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-extrabold text-zinc-800">
+                  LOGO
+                </div>
+              )}
+
+              {overallRank ? (
+                <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
+                  総合ランキング：{overallRank}位
+                </div>
+              ) : null}
+            </div>
+
+            <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">{school.name}</h1>
+            <p class="mt-2 text-sm font-semibold text-zinc-700 sm:text-base">
+              {schoolId === "kimini"
+                ? "学研グループ運営。学研メソッドの学習サイクルで、基礎から迷わず進めやすいオンライン英会話。"
+                : school.summary}
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <a
+              class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              href={school.officialUrl}
+              target="_blank"
+              rel="nofollow sponsored noopener noreferrer"
+              referrerpolicy="no-referrer"
+            >
+              公式サイトを見る
+            </a>
+            <a
+              class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+              href={`/${encodeURIComponent(schoolId)}/reviews`}
+            >
+              口コミを見る
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Basic data -->
+      <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-zinc-900">基本データ</h2>
+        <div class="mt-4 overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
+          <table class="w-full table-fixed border-separate border-spacing-0" style="min-width:720px">
+            <colgroup>
+              <col style="width:200px" />
+              <col style="width:520px" />
+            </colgroup>
+            <tbody class="align-top">
+              <tr>
+                <th class="bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">月額料金</th>
+                <td class="px-4 py-3 text-sm font-semibold text-zinc-900">{school.priceText ?? "—"}</td>
+              </tr>
+              <tr>
+                <th class="border-t border-zinc-200 bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">無料体験</th>
+                <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">{school.trialText ?? "—"}</td>
+              </tr>
+              <tr>
+                <th class="border-t border-zinc-200 bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">レッスン回数</th>
+                <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">—</td>
+              </tr>
+              <tr>
+                <th class="border-t border-zinc-200 bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">対象年齢</th>
+                <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">—</td>
+              </tr>
+              <tr>
+                <th class="border-t border-zinc-200 bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">講師の質</th>
+                <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                  {typeof school.teacherQuality === "number" ? `${school.teacherQuality} / 5` : "—"}
+                </td>
+              </tr>
+              <tr>
+                <th class="border-t border-zinc-200 bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">教材の質</th>
+                <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                  {typeof school.materialQuality === "number" ? `${school.materialQuality} / 5` : "—"}
+                </td>
+              </tr>
+              <tr>
+                <th class="border-t border-zinc-200 bg-zinc-100 px-4 py-3 text-left text-sm font-extrabold text-zinc-700">通信の質</th>
+                <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                  {typeof school.connectionQuality === "number" ? `${school.connectionQuality} / 5` : "—"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Feature section -->
+      <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-zinc-900">{schoolId === "kimini" ? "特徴（学研メソッド）" : "特徴"}</h2>
+        {schoolId === "kimini" ? (
+          <div class="mt-3 space-y-3 text-sm text-zinc-700">
+            <p>
+              Kimini英会話は学研グループが運営するオンライン英会話です。学研メソッドの考え方をベースに、教材と学習ステップが整理されているため、
+              「何を・どの順番で・どれくらい」学ぶかが分かりやすいのが特徴です。
+            </p>
+            <ul class="list-disc pl-5">
+              <li>目的に合うコースを選びやすい（基礎〜目的別）</li>
+              <li>学習サイクル（予習→レッスン→復習）を回しやすい</li>
+              <li>教材が体系化されていて、迷いにくい</li>
+            </ul>
+          </div>
+        ) : (
+          <div class="mt-3 space-y-3 text-sm text-zinc-700">
+            <p>{school.summary}</p>
+            {school.features?.length ? (
+              <ul class="list-disc pl-5">
+                {school.features.slice(0, 6).map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        )}
+      </section>
+
+      <!-- Reviews -->
+      <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-extrabold text-zinc-900">口コミ・評判</h2>
+            <p class="mt-1 text-sm text-zinc-600">総合評価と最新の口コミを確認できます。</p>
+          </div>
+          <a
+            class="inline-flex items-center justify-center rounded-xl bg-[color:var(--brand-link)] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm hover:opacity-90 transition-opacity"
+            href={`/${encodeURIComponent(schoolId)}/reviews`}
+          >
+            もっと口コミを見る →
+          </a>
+        </div>
+
+        <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+          <div class="text-xs font-extrabold text-zinc-700">総合評価</div>
+          <div class="mt-1 flex flex-wrap items-center gap-3">
+            <StarRating value={ratingValue} size={18} />
+            <div class="text-sm font-extrabold text-zinc-900">
+              {ratingValue ? `${ratingValue} / 5` : "—"}
+              <span class="ml-2 text-xs font-semibold text-zinc-500">（口コミ{reviewCount}件）</span>
+            </div>
+          </div>
+          {dbEnvError ? (
+            <div class="mt-2 text-xs font-semibold text-rose-700">DB未設定のため、口コミ（ユーザー投稿）の集計が一部表示できません。</div>
+          ) : null}
+          {dbErr ? (
+            <div class="mt-2 text-xs text-zinc-500">（参考: DB取得に失敗した場合は静的口コミのみ表示します）</div>
+          ) : null}
+        </div>
+
+        {dbLatest.length ? (
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            {dbLatest.map((r) => (
+              <article class="rounded-xl border border-zinc-200 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="text-xs font-extrabold text-zinc-700">{r.label}</div>
+                  <StarRating value={r.rating} showValue={false} size={16} />
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-zinc-700">{r.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : staticReviews.length ? (
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            {staticReviews.slice(0, 3).map((r) => (
+              <article class="rounded-xl border border-zinc-200 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="text-xs font-extrabold text-zinc-700">{r.age}</div>
+                  <StarRating value={r.rating} showValue={false} size={16} />
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-zinc-700">{r.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p class="mt-3 text-sm text-zinc-600">まだ口コミがありません。</p>
+        )}
+      </section>
+    </main>
+  )}
+</Layout>
+

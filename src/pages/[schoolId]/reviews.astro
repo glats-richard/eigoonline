@@ -33,7 +33,9 @@ type DbApprovedReviewRow = DBReviewRow & {
   id: number;
   created_at: string;
   body: string;
-  age: string | null;
+  birth_year?: number | null;
+  birth_month?: number | null;
+  age?: string | null; // legacy
 };
 
 let dbApprovedReviews: DbApprovedReviewRow[] = [];
@@ -48,6 +50,8 @@ try {
       material_quality,
       connection_quality,
       body,
+      birth_year,
+      birth_month,
       age
     from reviews
     where status = 'approved' and school_id = $1
@@ -62,7 +66,10 @@ try {
 }
 
 const dbDisplayReviews = dbApprovedReviews.map((r) => ({
-  age: r.age ?? "年齢非公開",
+  age:
+    typeof r.birth_year === "number" && typeof r.birth_month === "number"
+      ? `${r.birth_year}年${r.birth_month}月`
+      : (r as any).age ?? "年齢非公開",
   rating: typeof r.overall_rating === "number" ? r.overall_rating : 0,
   body: r.body,
   createdAt: r.created_at,

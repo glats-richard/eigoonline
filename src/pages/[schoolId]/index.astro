@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import ServiceHubPage from "../../components/ServiceHubPage.astro";
+
+const schoolId = Astro.params.schoolId ?? "";
+---
+
+<ServiceHubPage schoolId={schoolId} />
+

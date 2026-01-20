@@ -14,7 +14,10 @@ create table if not exists reviews (
   material_quality numeric(3,1) not null check (material_quality >= 1 and material_quality <= 5),
   connection_quality numeric(3,1) not null check (connection_quality >= 1 and connection_quality <= 5),
   body text not null,
-  age text,
+  -- Privacy: collect birth year/month only (no birth day).
+  birth_year smallint not null check (birth_year >= 1900 and birth_year <= 2100),
+  birth_month smallint not null check (birth_month >= 1 and birth_month <= 12),
+  age text, -- legacy (do not use for new submissions)
   email text,
   ip text,
   ip_hash text,
@@ -45,6 +48,8 @@ alter table reviews add column if not exists teacher_quality numeric(3,1);
 alter table reviews add column if not exists material_quality numeric(3,1);
 alter table reviews add column if not exists connection_quality numeric(3,1);
 alter table reviews add column if not exists body text;
+alter table reviews add column if not exists birth_year smallint;
+alter table reviews add column if not exists birth_month smallint;
 alter table reviews add column if not exists age text;
 alter table reviews add column if not exists email text;
 alter table reviews add column if not exists ip text;
