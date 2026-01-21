@@ -15,6 +15,14 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ランキング本文の表記を参照"
   },
+  "miyamanavi": {
+    "sourceUrl": "https://www.miyamanavi.net/",
+    "extractedAt": "2026-01-21",
+    "pricePlan": "【フィリピン人講師通常プラン 毎日10:00～24:00】 月4回 3,520円～ 月8回 5,280円～ 1日1回 11,935円～ 1日2回 18,414円～ 【フィリピン人講師デイタイムプラン 月～金 10:00～18:00】 月4回 3,168円～ 月8回 4,752円～ 1日1回 10,726円～ 1日2回 16,554円～ 【ネイティブ・バイリンガル日本人講師 毎日 6:00～25:00】 月2回 8,360円 月3回 12,540円 月8回 31,680円",
+    "priceMinYen": 3168,
+    "freeTrial": "25分レッスンを2回",
+    "hours": "6:00～25:00 ※コースによって異なる"
+  },
   "hoursText": "朝6時～深夜24時",
   "teacherQuality": 3,
   "materialQuality": 4,

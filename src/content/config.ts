@@ -85,6 +85,18 @@ const schools = defineCollection({
 			url: z.string().url(),
 			note: z.string().optional(),
 		}),
+		/** Third-party comparison snapshot (e.g. Miyamanavi). */
+		miyamanavi: z
+			.object({
+				sourceUrl: z.string().url(),
+				extractedAt: z.string().optional(),
+				pricePlan: z.string().nullable().optional(),
+				priceMinYen: z.number().int().nullable().optional(),
+				freeTrial: z.string().nullable().optional(),
+				hours: z.string().nullable().optional(),
+			})
+			.nullable()
+			.optional(),
 	}),
 });
 

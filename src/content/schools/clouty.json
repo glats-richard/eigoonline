@@ -16,6 +16,14 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ランキング本文の表記を参照"
   },
+  "miyamanavi": {
+    "sourceUrl": "https://www.miyamanavi.net/",
+    "extractedAt": "2026-01-21",
+    "pricePlan": "スタンダード 月額7,150円（1日2レッスンまで） プレミアム 月額10,780円（1日4レッスンまで） スタンダードDAYS 月額4,950円（1日2レッスンまで） プレミアムDAYS 月額 月額8,800円（1日4レッスンまで） ※1日の最大レッスン数は10分レッスンの場合",
+    "priceMinYen": 4950,
+    "freeTrial": "8日間（10分レッスンの場合は1日2回、25分レッスンの場合は1日1回受講可）",
+    "hours": "9:00～24:00（スタンダード、プレミアム） 9:00～16:00（DAYプラン、土日も含む）"
+  },
   "hoursText": "朝9時～深夜24時",
   "teacherQuality": 2,
   "materialQuality": 4,

@@ -16,7 +16,15 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ページ内に「7位 Kimini英会話」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
   },
-  "hoursText": null,
+  "miyamanavi": {
+    "sourceUrl": "https://www.miyamanavi.net/",
+    "extractedAt": "2026-01-21",
+    "pricePlan": "スタンダードPlusプラン 月額7,480円 ウィークデイPlusプラン 月額5,940円 回数プラン月2回月額1,210円 スタンダードプラン 月額6,380円 ウィークデイプラン 月額4,840円",
+    "priceMinYen": 1210,
+    "freeTrial": "25分のレッスンを10日間",
+    "hours": "毎日朝6時から24時まで"
+  },
+  "hoursText": "朝6時〜24時",
   "points": [],
   "recommendedFor": [],
   "teacherQuality": 4,

@@ -16,7 +16,15 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ページ内に「5位 レアジョブ英会話」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
   },
-  "hoursText": null,
+  "miyamanavi": {
+    "sourceUrl": "https://www.miyamanavi.net/",
+    "extractedAt": "2026-01-21",
+    "pricePlan": "日常英会話コース 月8回 月額4,980円 日常英会話コース 毎日1レッスン 月額7,980円 ビジネス英会話コース 毎日1レッスン 月額12,980円",
+    "priceMinYen": 4980,
+    "freeTrial": "7日間の無料トライアル（日本人カウンセリング付き） 選択したプランに応じた回数分受講可能",
+    "hours": "毎日朝6時から深夜1時まで"
+  },
+  "hoursText": "朝6時〜深夜1時",
   "points": [],
   "recommendedFor": [],
   "teacherQuality": 4.5,

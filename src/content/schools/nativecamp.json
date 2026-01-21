@@ -15,6 +15,14 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ページ内に「2位 ネイティブキャンプ」および比較表の価格・特徴表記あり"
   },
+  "miyamanavi": {
+    "sourceUrl": "https://www.miyamanavi.net/",
+    "extractedAt": "2026-01-21",
+    "pricePlan": "プレミアプラン（レッスン回数制限なし）7,480円 ファミリープラン1,980円 ライトプラン（月8回目安）5,450円 ネイティブ受け放題オプション 上記プラン＋9,800円※2 年間割引オプション 通常料金から月額－1,000円",
+    "priceMinYen": 1980,
+    "freeTrial": "7日間無料トライアル",
+    "hours": "24時間"
+  },
   "hoursText": "24時間",
   "points": [
     "月額でレッスン受け放題",
