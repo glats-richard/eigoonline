@@ -28,18 +28,29 @@ const overallRanking = rankings.find((r) => r.data.category === "overall")?.data
 const overallRankIndex = overallRanking ? overallRanking.items.indexOf(schoolId) : -1;
 const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
 
-// Radar chart compare candidates (use school JSON metrics)
-const compareOptions = schools
-  .map((s) => ({
-    id: s.id,
-    name: s.data.name,
-    teacherQuality: typeof s.data.teacherQuality === "number" ? s.data.teacherQuality : null,
-    materialQuality: typeof s.data.materialQuality === "number" ? s.data.materialQuality : null,
-    connectionQuality: typeof s.data.connectionQuality === "number" ? s.data.connectionQuality : null,
-  }))
-  .filter((s) => s.id !== schoolId)
-  .filter((s) => s.teacherQuality !== null || s.materialQuality !== null || s.connectionQuality !== null)
-  .sort((a, b) => a.name.localeCompare(b.name, "ja"));
+// Radar chart quality metrics:
+// - Prefer averages from approved user reviews (DB)
+// - Fall back to editorial scores in `src/content/schools/*.json`
+type RadarQuality = {
+  teacherQuality: number | null;
+  materialQuality: number | null;
+  connectionQuality: number | null;
+};
+
+function asQualityNumber(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+const radarQualityById = new Map<string, RadarQuality>(
+  schools.map((s) => [
+    s.id,
+    {
+      teacherQuality: asQualityNumber(s.data.teacherQuality),
+      materialQuality: asQualityNumber(s.data.materialQuality),
+      connectionQuality: asQualityNumber(s.data.connectionQuality),
+    },
+  ]),
+);
 
 // Radar chart geometry (3 axes)
 const RADAR_CX = 110;
@@ -110,6 +121,43 @@ try {
   dbCount = statsRes.rows?.[0]?.count ?? 0;
   dbAvg = statsRes.rows?.[0]?.avg ?? null;
 
+  // Quality averages (teacher/material/connection) across services for radar compare
+  const qRes = await query<{
+    school_id: string;
+    count: number;
+    tq: number | null;
+    mq: number | null;
+    cq: number | null;
+  }>(
+    `
+    select
+      school_id,
+      count(*)::bigint as count,
+      avg(teacher_quality)::numeric as tq,
+      avg(material_quality)::numeric as mq,
+      avg(connection_quality)::numeric as cq
+    from reviews
+    where status = 'approved'
+      and school_id = any($1::text[])
+      and teacher_quality is not null
+      and material_quality is not null
+      and connection_quality is not null
+    group by school_id
+    `,
+    [schools.map((s) => s.id)],
+  );
+
+  for (const row of qRes.rows ?? []) {
+    if (!row?.school_id) continue;
+    if (!radarQualityById.has(row.school_id)) continue;
+    if ((row.count ?? 0) <= 0) continue;
+    radarQualityById.set(row.school_id, {
+      teacherQuality: asQualityNumber(row.tq),
+      materialQuality: asQualityNumber(row.mq),
+      connectionQuality: asQualityNumber(row.cq),
+    });
+  }
+
   const latestRes = await query<DbReview>(
     `
     select created_at, overall_rating, body, birth_year, birth_month, age
@@ -134,6 +182,31 @@ try {
   // If DB isn't ready, continue with static reviews only
   dbErr = e?.message ?? String(e);
 }
+
+const radarBaseQuality = radarQualityById.get(schoolId) ?? {
+  teacherQuality: asQualityNumber(school?.teacherQuality),
+  materialQuality: asQualityNumber(school?.materialQuality),
+  connectionQuality: asQualityNumber(school?.connectionQuality),
+};
+
+const compareOptions = schools
+  .map((s) => {
+    const q = radarQualityById.get(s.id) ?? {
+      teacherQuality: asQualityNumber(s.data.teacherQuality),
+      materialQuality: asQualityNumber(s.data.materialQuality),
+      connectionQuality: asQualityNumber(s.data.connectionQuality),
+    };
+    return {
+      id: s.id,
+      name: s.data.name,
+      teacherQuality: q.teacherQuality,
+      materialQuality: q.materialQuality,
+      connectionQuality: q.connectionQuality,
+    };
+  })
+  .filter((s) => s.id !== schoolId)
+  .filter((s) => s.teacherQuality !== null || s.materialQuality !== null || s.connectionQuality !== null)
+  .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
 const staticLatest: DisplayReview[] = staticReviews.map((r) => ({
   label: r.age ?? "ユーザー",
@@ -360,9 +433,9 @@ if (faqItems.length) {
               data-base={JSON.stringify({
                 id: schoolId,
                 name: school.name,
-                teacherQuality: typeof school.teacherQuality === "number" ? school.teacherQuality : null,
-                materialQuality: typeof school.materialQuality === "number" ? school.materialQuality : null,
-                connectionQuality: typeof school.connectionQuality === "number" ? school.connectionQuality : null,
+                teacherQuality: radarBaseQuality.teacherQuality,
+                materialQuality: radarBaseQuality.materialQuality,
+                connectionQuality: radarBaseQuality.connectionQuality,
               })}
               data-compare={JSON.stringify(compareOptions)}
             >
@@ -404,9 +477,9 @@ if (faqItems.length) {
                   <polygon
                     id="radar-base"
                     points={radarPoints({
-                      teacherQuality: typeof school.teacherQuality === "number" ? school.teacherQuality : null,
-                      materialQuality: typeof school.materialQuality === "number" ? school.materialQuality : null,
-                      connectionQuality: typeof school.connectionQuality === "number" ? school.connectionQuality : null,
+                      teacherQuality: radarBaseQuality.teacherQuality,
+                      materialQuality: radarBaseQuality.materialQuality,
+                      connectionQuality: radarBaseQuality.connectionQuality,
                     })}
                     style="fill: var(--brand-link); fill-opacity: 0.18; stroke: var(--brand-link); stroke-width: 2;"
                   />
