@@ -512,8 +512,17 @@ if (faqItems.length) {
   var root = document.getElementById("radar-root");
   if (!root) return;
 
+  function decodeHtmlEntities(s) {
+    if (!s) return s;
+    // Astro escapes quotes in attributes (e.g. &#34;), so decode enough for JSON.parse().
+    return String(s)
+      .replace(/&#34;|&quot;/g, "\"")
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, "&");
+  }
+
   function safeParse(json, fallback) {
-    try { return JSON.parse(json); } catch (e) { return fallback; }
+    try { return JSON.parse(decodeHtmlEntities(json)); } catch (e) { return fallback; }
   }
 
   var list = safeParse(root.getAttribute("data-compare") || "[]", []);
