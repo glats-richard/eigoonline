@@ -12,6 +12,7 @@ type ReviewRow = {
   school_id?: string | null;
   status?: string | null;
   featured_rank?: number | null;
+  duration_months?: number | null;
   overall_rating?: number | null;
   teacher_quality?: number | null;
   material_quality?: number | null;
@@ -456,6 +457,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                 <th class="px-4 py-3">日時</th>
                 <th class="px-4 py-3">サービス</th>
                 <th class="px-4 py-3">表示枠</th>
+                <th class="px-4 py-3">継続(月)</th>
                 <th class="px-4 py-3">総合</th>
                 <th class="px-4 py-3">講師</th>
                 <th class="px-4 py-3">教材</th>
@@ -496,6 +498,9 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                       </noscript>
                     </form>
                     <div class="mt-1 text-[11px] font-semibold text-zinc-500">最大5件まで</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">
+                    {typeof r.duration_months === "number" && Number.isFinite(r.duration_months) ? r.duration_months : "—"}
                   </td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.overall_rating ?? "—"}</td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.teacher_quality ?? "—"}</td>
@@ -542,6 +547,10 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">口コミ本文（全文）</div>
                           <div class="break-words text-xs">{r.body ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">継続月数（目安）</div>
+                          <div class="break-words text-xs">{typeof r.duration_months === "number" && Number.isFinite(r.duration_months) ? `${r.duration_months}ヶ月` : "—"}</div>
                         </div>
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">Email</div>

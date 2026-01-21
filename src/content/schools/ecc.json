@@ -39,6 +39,29 @@
     "英語で挫折経験がある",
     "基礎からしっかり学びたい"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "国際規格ISO29993認証の学習サービスとして、教育の品質を第三者基準で示している",
+    "予習→マンツーマン→チェックテスト（復習）を基本サイクルとして、定着までの流れが設計されている",
+    "日本人学習者向けに開発された教材（日本語訳・弱点フォロー）で、初学者でも取り組みやすい"
+  ],
+  "primarySources": [
+    {
+      "label": "カリキュラム（ISO29993/学習サイクル）",
+      "url": "https://online.ecc.co.jp/curriculum/",
+      "type": "official"
+    },
+    {
+      "label": "教材紹介（日本人向け設計）",
+      "url": "https://online.ecc.co.jp/material/",
+      "type": "official"
+    },
+    {
+      "label": "キャンペーン情報（1月）",
+      "url": "https://online.ecc.co.jp/information/all/01.php",
+      "type": "lp"
+    }
+  ],
   "bannerImage": "/banners/company-71.webp",
   "bannerAlt": "ECCオンラインレッスン バナー",
   "bannerHref": "https://online.ecc.co.jp/"

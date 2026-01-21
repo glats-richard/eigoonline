@@ -39,6 +39,34 @@
     "家族で一緒に学びたい",
     "子供にも続けやすいサービスを探している"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "1つのプランで家族最大6名までアカウントを作成でき、レッスン枠を分け合って使える",
+    "学研監修の教材と、10分/25分のレッスン時間選択で、子どもでも続けやすい設計",
+    "ゲームレッスン（クラウティArcade）やAI学習（TerraTalk）で、勉強感を下げて継続しやすい"
+  ],
+  "primarySources": [
+    {
+      "label": "クラウティの強み（家族シェア/教材/AI）",
+      "url": "https://www.cloudt.jp/about/strength/",
+      "type": "official"
+    },
+    {
+      "label": "クラウティArcade（ゲームレッスン）",
+      "url": "https://www.cloudt.jp/method/arcade/",
+      "type": "official"
+    },
+    {
+      "label": "料金プラン",
+      "url": "https://www.cloudt.jp/plans/",
+      "type": "official"
+    },
+    {
+      "label": "お得な特典（クーポン等）",
+      "url": "https://www.cloudt.jp/about/benefits/",
+      "type": "official"
+    }
+  ],
   "bannerImage": "/banners/company-62.webp",
   "bannerAlt": "クラウティ バナー",
   "bannerHref": "https://www.cloudt.jp/"

@@ -35,6 +35,34 @@
     "7日間無料トライアル（決済前日までの退会で無料）",
     "特典はキャンペーンページからの申請が必要な場合あり（条件は時期により変動）"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "予約不要の「今すぐレッスン」で、24時間いつでも回数無制限に受講できる（プランによる）",
+    "コイン制で予約レッスンやオプション（例：ネイティブ受け放題）を組み合わせ、学習ペースを調整しやすい",
+    "7日間無料トライアルで、実際の受講感（短時間レッスン含む）を確認しやすい"
+  ],
+  "primarySources": [
+    {
+      "label": "公式トップ（今すぐレッスン/24時間）",
+      "url": "https://nativecamp.net/",
+      "type": "official"
+    },
+    {
+      "label": "料金・プラン（プレミアム/ライト/ファミリー等）",
+      "url": "https://nativecamp.net/usage/price",
+      "type": "official"
+    },
+    {
+      "label": "7日間無料トライアルレッスン",
+      "url": "https://nativecamp.net/usage/free_lesson",
+      "type": "official"
+    },
+    {
+      "label": "コインについて（予約・購入）",
+      "url": "https://nativecamp.net/usage/coin",
+      "type": "official"
+    }
+  ],
   "bannerImage": "/banners/company-70.webp",
   "bannerAlt": "ネイティブキャンプ バナー",
   "bannerHref": "https://nativecamp.net/"

@@ -37,6 +37,29 @@
     "対象：新規入会・再入会（休会中から）",
     "条件：同一プランを1回自動更新（合計2ヶ月利用）など"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "世界120カ国以上の講師と24時間365日マンツーマンで会話でき、生活時間に合わせて受講しやすい",
+    "自社開発レッスンシステム（Eikaiwa Live）で、ビデオ通話・教材・チャット等をブラウザで完結できる",
+    "有料会員は英語学習アプリ「iKnow!」を追加料金なしで利用でき、インプット→アウトプットのサイクルを作りやすい"
+  ],
+  "primarySources": [
+    {
+      "label": "DMM英会話の強み（公式）",
+      "url": "https://eikaiwa.dmm.com/guide/advantage/",
+      "type": "official"
+    },
+    {
+      "label": "DMM英会話｜事業情報（DMM Group）",
+      "url": "https://dmm-corp.com/business/eikaiwa/",
+      "type": "pr"
+    },
+    {
+      "label": "DMM英会話 x iKnow!（連携の説明）",
+      "url": "https://eikaiwa.dmm.com/iknow/",
+      "type": "official"
+    }
+  ],
   "bannerImage": "/banners/company-39.webp",
   "bannerAlt": "DMM英会話 バナー",
   "bannerHref": "https://eikaiwa.dmm.com/"

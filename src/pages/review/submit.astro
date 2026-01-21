@@ -222,6 +222,28 @@ const recaptchaAction = "review_submit";
         </div>
 
         <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <label class="block">
+            <div class="text-sm font-extrabold text-zinc-700 mb-2">
+              継続月数（目安） <span class="text-rose-600">*</span>
+            </div>
+            <select
+              name="duration_months"
+              required
+              class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+            >
+              <option value="">選択してください</option>
+              <option value="1">1ヶ月</option>
+              <option value="3">3ヶ月</option>
+              <option value="6">6ヶ月</option>
+              <option value="12">12ヶ月</option>
+              <option value="24">24ヶ月</option>
+              <option value="36">36ヶ月以上</option>
+            </select>
+            <div class="mt-1 text-xs text-zinc-500">だいたいの継続期間でOKです</div>
+          </label>
+        </div>
+
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div class="text-sm font-extrabold text-zinc-700 mb-2">
             誕生年月 <span class="text-rose-600">*</span>
           </div>

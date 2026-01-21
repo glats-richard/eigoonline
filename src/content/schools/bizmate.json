@@ -36,6 +36,34 @@
     "スキマ時間で実践的に学びたい",
     "仕事でも使える英語を伸ばしたい"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "ビジネス特化のオリジナル教材で、業務シーン（会議/メール/プレゼン等）に直結した英語を練習できる",
+    "6レベル×5ランクの30段階で到達度を管理し、次に伸ばすべき課題が明確になりやすい",
+    "Video Lesson（予習・復習用動画）が教材と連動し、レッスン前後の学習を回しやすい"
+  ],
+  "primarySources": [
+    {
+      "label": "4つのレッスンタイプとオリジナル教材",
+      "url": "https://www.bizmates.jp/program/",
+      "type": "official"
+    },
+    {
+      "label": "レッスンタイプ・教材一覧",
+      "url": "https://www.bizmates.jp/program/biz-program-guide/",
+      "type": "official"
+    },
+    {
+      "label": "6段階のレベル・ランク設定（30段階）",
+      "url": "https://www.bizmates.jp/program/level.html",
+      "type": "official"
+    },
+    {
+      "label": "Video Lesson（予習・復習）",
+      "url": "https://www.bizmates.jp/program/video_lesson.html",
+      "type": "official"
+    }
+  ],
   "bannerImage": "/banners/company-27.webp",
   "bannerAlt": "Bizmate バナー",
   "bannerHref": "https://www.bizmates.jp/"

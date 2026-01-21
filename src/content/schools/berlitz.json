@@ -39,6 +39,29 @@
     "ビジネス英語が必要",
     "短期間で英語力を上達させたい"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "ベルリッツ・メソッド®（学習言語のみで進行する没入型）で、翻訳を介さずに考える練習になりやすい",
+    "受講者の発話量を重視した設計（目標設定→反復→実践→フィードバック）でアウトプット中心に進めやすい",
+    "オンライン/教室/AI×教師（Flex）など受講形態の選択肢があり、目的や生活に合わせて組み合わせやすい"
+  ],
+  "primarySources": [
+    {
+      "label": "ベルリッツ・メソッド®とは",
+      "url": "https://www.berlitz.com/ja-jp/berlitz-method",
+      "type": "official"
+    },
+    {
+      "label": "ベルリッツのオンライン英会話",
+      "url": "https://www.berlitz.com/ja-jp/languages/english/online",
+      "type": "official"
+    },
+    {
+      "label": "受講料金案内（大人）",
+      "url": "https://www.berlitz.com/ja-jp/adults/pricing",
+      "type": "official"
+    }
+  ],
   "bannerImage": "/banners/company-51.webp",
   "bannerAlt": "Berlitz バナー",
   "bannerHref": "https://www.berlitz.com/ja-jp"

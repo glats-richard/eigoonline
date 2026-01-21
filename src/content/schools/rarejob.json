@@ -30,6 +30,34 @@
     "7日間無料トライアル（選択プランにより最大14回）",
     "初月50%OFF（コード：7dayscpn／3ヶ月継続条件などあり）"
   ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "無料トライアルでレッスン体験に加え、日本人による学習相談（カウンセリング）が受けられる",
+    "初回体験でCEFR準拠のレベルチェック（10段階）を行い、学習計画を立てやすい",
+    "学習目的に合わせたコース設計（例：日常/ビジネス）と教材で、継続学習の導線がある"
+  ],
+  "primarySources": [
+    {
+      "label": "初めての方へ（サービス概要）",
+      "url": "https://www.rarejob.com/about/",
+      "type": "official"
+    },
+    {
+      "label": "無料トライアルレッスン＆カウンセリング",
+      "url": "https://www.rarejob.com/experiences/trial/",
+      "type": "official"
+    },
+    {
+      "label": "サービスについて（コース/カリキュラム）",
+      "url": "https://www.rarejob.com/experiences/",
+      "type": "official"
+    },
+    {
+      "label": "初月半額キャンペーン（コード：7dayscpn）",
+      "url": "https://www.rarejob.com/pr/campaign/7days/",
+      "type": "lp"
+    }
+  ],
   "bannerImage": "/banners/company-50.webp",
   "bannerAlt": "レアジョブ英会話 バナー",
   "bannerHref": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2"

@@ -9,6 +9,8 @@ create table if not exists reviews (
   status text not null default 'pending',
   -- Featured slot for homepage snippets (admin-selected). Use 1..5; NULL = not featured.
   featured_rank smallint,
+  -- Approximate continuation period in months (required for new submissions).
+  duration_months smallint not null check (duration_months >= 1 and duration_months <= 240),
   overall_rating numeric(3,1) not null check (overall_rating >= 1 and overall_rating <= 5),
   teacher_quality numeric(3,1) not null check (teacher_quality >= 1 and teacher_quality <= 5),
   material_quality numeric(3,1) not null check (material_quality >= 1 and material_quality <= 5),
@@ -43,6 +45,8 @@ create unique index if not exists reviews_featured_slot_unique
 alter table reviews add column if not exists school_id text;
 alter table reviews add column if not exists status text;
 alter table reviews add column if not exists featured_rank smallint;
+-- NOTE: existing tables may have old rows; keep NULL-able during migration if needed.
+alter table reviews add column if not exists duration_months smallint;
 alter table reviews add column if not exists overall_rating numeric(3,1);
 alter table reviews add column if not exists teacher_quality numeric(3,1);
 alter table reviews add column if not exists material_quality numeric(3,1);

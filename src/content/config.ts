@@ -56,6 +56,20 @@ const schools = defineCollection({
 		campaignEndsAt: z.string().nullable().optional(),
 		/** Campaign bullets (preferred over parsing campaignText). */
 		campaignBullets: z.array(z.string()).default([]),
+		/** Uniqueness title for detail pages. */
+		uniquenessTitle: z.string().nullable().optional(),
+		/** Uniqueness bullets (what makes it different). */
+		uniquenessBullets: z.array(z.string()).default([]),
+		/** Primary sources (official/LP/PR) backing the claims. */
+		primarySources: z
+			.array(
+				z.object({
+					label: z.string(),
+					url: z.string().url(),
+					type: z.enum(['official', 'lp', 'pr']),
+				}),
+			)
+			.default([]),
 		/** Strong points for compare table. */
 		points: z.array(z.string()).default([]),
 		/** Recommended-for bullets. */

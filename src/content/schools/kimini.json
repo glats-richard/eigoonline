@@ -27,6 +27,34 @@
   "editorialComments": [],
   "campaignEndsAt": "2026-01-31",
   "campaignBullets": [],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "学研が制作・監修する教材と、コース化された学習ステップで「何を・どの順番で」学ぶか迷いにくい",
+    "予習→レッスン→復習の学習サイクルと、24時間使えるスキル別トレーニングで学習を継続しやすい",
+    "AI学習プログラム（Kimini Plus）やAI学習ツール（Kimini AI）で、理解度に応じた個別最適化を行う"
+  ],
+  "primarySources": [
+    {
+      "label": "学習の進め方（予習→レッスン→復習）",
+      "url": "https://kimini.online/guide/method/",
+      "type": "official"
+    },
+    {
+      "label": "教材の紹介（コース/教材体系）",
+      "url": "https://kimini.online/materials/",
+      "type": "official"
+    },
+    {
+      "label": "Kimini Plus（AIアダプティブラーニング）",
+      "url": "https://kimini.online/materials/kmnp/",
+      "type": "official"
+    },
+    {
+      "label": "学研：サイト全面リニューアルとAI学習プログラム（Kimini Plus）",
+      "url": "https://www.gakken.co.jp/ja/news_item/2023/202320230804102817.html",
+      "type": "pr"
+    }
+  ],
   "bannerImage": "/banners/company-30.webp",
   "bannerAlt": "Kimini英会話 バナー",
   "bannerHref": "https://br.glats.online/"

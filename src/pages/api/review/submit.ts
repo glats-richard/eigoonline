@@ -132,6 +132,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const email = String(formData.get("email") ?? "").trim().slice(0, 255) || null;
   const birthYear = toInt(formData.get("birth_year"));
   const birthMonth = toInt(formData.get("birth_month"));
+  const durationMonths = toInt(formData.get("duration_months"));
   const recaptchaToken = String(formData.get("recaptcha_token") ?? "").trim();
   const recaptchaAction = String(formData.get("recaptcha_action") ?? "").trim() || "review_submit";
 
@@ -217,6 +218,20 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     });
   }
 
+  // Validate continuation period (approx. months)
+  if (durationMonths === null) {
+    return new Response(JSON.stringify({ ok: false, error: "duration_months is required" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+  if (durationMonths < 1 || durationMonths > 240) {
+    return new Response(JSON.stringify({ ok: false, error: "Invalid duration_months" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   // Get request metadata
   const h = request.headers;
   const referrer = h.get("referer");
@@ -259,8 +274,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Insert review
   try {
     await query(
-      "insert into reviews (school_id, status, overall_rating, teacher_quality, material_quality, connection_quality, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
-      [schoolId, "pending", overallRating, teacherQuality, materialQuality, connectionQuality, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer],
+      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
+      [schoolId, "pending", durationMonths, overallRating, teacherQuality, materialQuality, connectionQuality, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer],
     );
   } catch (e: any) {
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? String(e) }), {
