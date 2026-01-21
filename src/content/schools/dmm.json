@@ -16,14 +16,6 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ページ内の比較表に「DMM英会話」および特徴表記あり"
   },
-  "miyamanavi": {
-    "sourceUrl": "https://www.miyamanavi.net/",
-    "extractedAt": "2026-01-21",
-    "pricePlan": "スタンダードプラン（毎日1レッスン）月額6,980円 プラスネイティブプラン（毎日1レッスン）月額22,880円",
-    "priceMinYen": 6980,
-    "freeTrial": "7日間レッスン受け放題",
-    "hours": "24時間"
-  },
   "hoursText": "24時間",
   "points": [
     "始めやすい料金設計",

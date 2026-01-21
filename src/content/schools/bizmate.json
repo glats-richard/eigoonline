@@ -16,14 +16,6 @@
     "url": "https://search-online-eikaiwa.com/ranking/top2",
     "note": "ページ内に「1位 Bizmate」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
   },
-  "miyamanavi": {
-    "sourceUrl": "https://www.miyamanavi.net/",
-    "extractedAt": "2026-01-21",
-    "pricePlan": "毎日1レッスンプラン 月額14,850円 毎日2レッスンプラン 月額21,450円",
-    "priceMinYen": 14850,
-    "freeTrial": "25分のレッスンを1回",
-    "hours": "毎日朝5時から深夜25時"
-  },
   "hoursText": "朝5時〜深夜25時",
   "teacherQuality": 4.5,
   "materialQuality": 4,
