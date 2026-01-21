@@ -427,7 +427,14 @@ if (faqItems.length) {
                   >
                     <option value="">比較しない</option>
                     {compareOptions.map((s) => (
-                      <option value={s.id}>{s.name}</option>
+                      <option
+                        value={s.id}
+                        data-tq={typeof s.teacherQuality === "number" ? String(s.teacherQuality) : ""}
+                        data-mq={typeof s.materialQuality === "number" ? String(s.materialQuality) : ""}
+                        data-cq={typeof s.connectionQuality === "number" ? String(s.connectionQuality) : ""}
+                      >
+                        {s.name}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -512,23 +519,6 @@ if (faqItems.length) {
   var root = document.getElementById("radar-root");
   if (!root) return;
 
-  function decodeHtmlEntities(s) {
-    if (!s) return s;
-    // Astro escapes quotes in attributes (e.g. &#34;), so decode enough for JSON.parse().
-    return String(s)
-      .replace(/&#34;|&quot;/g, "\"")
-      .replace(/&#39;/g, "'")
-      .replace(/&amp;/g, "&");
-  }
-
-  function safeParse(json, fallback) {
-    try { return JSON.parse(decodeHtmlEntities(json)); } catch (e) { return fallback; }
-  }
-
-  var list = safeParse(root.getAttribute("data-compare") || "[]", []);
-  var byId = {};
-  for (var i = 0; i < list.length; i++) byId[list[i].id] = list[i];
-
   var cmpPoly = root.querySelector("#radar-compare");
   var select = root.querySelector("#radar-compare-select");
   if (!cmpPoly) return;
@@ -574,8 +564,12 @@ if (faqItems.length) {
 
   if (select) {
     select.addEventListener("change", function () {
-      var id = select.value || "";
-      var cmp = id && byId[id] ? byId[id] : null;
+      var opt = select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+      var tq = opt && opt.dataset ? opt.dataset.tq : "";
+      var mq = opt && opt.dataset ? opt.dataset.mq : "";
+      var cq = opt && opt.dataset ? opt.dataset.cq : "";
+      var hasAny = (tq !== "" || mq !== "" || cq !== "");
+      var cmp = hasAny ? { teacherQuality: Number(tq || 0), materialQuality: Number(mq || 0), connectionQuality: Number(cq || 0) } : null;
       renderCompare(cmp);
     });
   }
