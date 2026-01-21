@@ -128,6 +128,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const teacherQualityRaw = formData.get("teacher_quality");
   const materialQualityRaw = formData.get("material_quality");
   const connectionQualityRaw = formData.get("connection_quality");
+  const priceRatingRaw = formData.get("price_rating");
+  const satisfactionRatingRaw = formData.get("satisfaction_rating");
   const body = String(formData.get("body") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().slice(0, 255) || null;
   const birthYear = toInt(formData.get("birth_year"));
@@ -165,8 +167,17 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const teacherQuality = toFiniteNumber(teacherQualityRaw);
   const materialQuality = toFiniteNumber(materialQualityRaw);
   const connectionQuality = toFiniteNumber(connectionQualityRaw);
+  const priceRating = toFiniteNumber(priceRatingRaw);
+  const satisfactionRating = toFiniteNumber(satisfactionRatingRaw);
 
-  if (!validateRating(overallRating) || !validateRating(teacherQuality) || !validateRating(materialQuality) || !validateRating(connectionQuality)) {
+  if (
+    !validateRating(overallRating) ||
+    !validateRating(teacherQuality) ||
+    !validateRating(materialQuality) ||
+    !validateRating(connectionQuality) ||
+    !validateRating(priceRating) ||
+    !validateRating(satisfactionRating)
+  ) {
     return new Response(JSON.stringify({ ok: false, error: "All ratings must be integers between 1 and 5" }), {
       status: 400,
       headers: { "content-type": "application/json" },
@@ -274,8 +285,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Insert review
   try {
     await query(
-      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
-      [schoolId, "pending", durationMonths, overallRating, teacherQuality, materialQuality, connectionQuality, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer],
+      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)",
+      [schoolId, "pending", durationMonths, overallRating, teacherQuality, materialQuality, connectionQuality, priceRating, satisfactionRating, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer],
     );
   } catch (e: any) {
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? String(e) }), {

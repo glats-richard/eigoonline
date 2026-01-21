@@ -17,6 +17,8 @@ type ReviewRow = {
   teacher_quality?: number | null;
   material_quality?: number | null;
   connection_quality?: number | null;
+  price_rating?: number | null;
+  satisfaction_rating?: number | null;
   body?: string | null;
   birth_year?: number | null;
   birth_month?: number | null;
@@ -462,6 +464,8 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                 <th class="px-4 py-3">講師</th>
                 <th class="px-4 py-3">教材</th>
                 <th class="px-4 py-3">通信</th>
+                <th class="px-4 py-3">安さ</th>
+                <th class="px-4 py-3">満足度</th>
                 <th class="px-4 py-3">口コミ本文</th>
                 <th class="px-4 py-3">誕生年月</th>
                 <th class="px-4 py-3">Email</th>
@@ -506,6 +510,8 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.teacher_quality ?? "—"}</td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.material_quality ?? "—"}</td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.connection_quality ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.price_rating ?? "—"}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs font-extrabold text-zinc-700">{r.satisfaction_rating ?? "—"}</td>
                   <td class="px-4 py-3 text-xs text-zinc-700">
                     <span class="inline-block max-w-[300px] truncate align-top" title={r.body ?? ""}>
                       {r.body ? shortText(r.body, 100) : "—"}
@@ -551,6 +557,13 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">継続月数（目安）</div>
                           <div class="break-words text-xs">{typeof r.duration_months === "number" && Number.isFinite(r.duration_months) ? `${r.duration_months}ヶ月` : "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">評価（追加）</div>
+                          <div class="grid gap-2 sm:grid-cols-2">
+                            <div class="break-words text-xs">安さ：{r.price_rating ?? "—"}</div>
+                            <div class="break-words text-xs">満足度：{r.satisfaction_rating ?? "—"}</div>
+                          </div>
                         </div>
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">Email</div>

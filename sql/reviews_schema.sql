@@ -15,6 +15,9 @@ create table if not exists reviews (
   teacher_quality numeric(3,1) not null check (teacher_quality >= 1 and teacher_quality <= 5),
   material_quality numeric(3,1) not null check (material_quality >= 1 and material_quality <= 5),
   connection_quality numeric(3,1) not null check (connection_quality >= 1 and connection_quality <= 5),
+  -- Added rating axes: price and satisfaction
+  price_rating numeric(3,1) not null check (price_rating >= 1 and price_rating <= 5),
+  satisfaction_rating numeric(3,1) not null check (satisfaction_rating >= 1 and satisfaction_rating <= 5),
   body text not null,
   -- Privacy: collect birth year/month only (no birth day).
   birth_year smallint not null check (birth_year >= 1900 and birth_year <= 2100),
@@ -51,6 +54,8 @@ alter table reviews add column if not exists overall_rating numeric(3,1);
 alter table reviews add column if not exists teacher_quality numeric(3,1);
 alter table reviews add column if not exists material_quality numeric(3,1);
 alter table reviews add column if not exists connection_quality numeric(3,1);
+alter table reviews add column if not exists price_rating numeric(3,1);
+alter table reviews add column if not exists satisfaction_rating numeric(3,1);
 alter table reviews add column if not exists body text;
 alter table reviews add column if not exists birth_year smallint;
 alter table reviews add column if not exists birth_month smallint;
