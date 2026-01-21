@@ -413,7 +413,7 @@ if (faqItems.length) {
                   <polygon
                     id="radar-compare"
                     points={radarPoints(null)}
-                    style="fill: none; stroke: #ec4899; stroke-width: 2; stroke-dasharray: 4 3; display: none;"
+                    style="fill: none; stroke: #ec4899; stroke-width: 2; stroke-dasharray: 4 3; opacity: 0;"
                   />
                 </svg>
               </div>
@@ -554,9 +554,9 @@ if (faqItems.length) {
   function renderCompare(cmpModel) {
     if (cmpModel) {
       cmpPoly.setAttribute("points", pointsFor(cmpModel, 1));
-      cmpPoly.style.display = "";
+      cmpPoly.style.opacity = "1";
     } else {
-      cmpPoly.style.display = "none";
+      cmpPoly.style.opacity = "0";
     }
   }
 
