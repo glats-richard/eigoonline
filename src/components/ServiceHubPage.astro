@@ -35,6 +35,8 @@ type RadarQuality = {
   teacherQuality: number | null;
   materialQuality: number | null;
   connectionQuality: number | null;
+  priceRating: number | null;
+  satisfactionRating: number | null;
 };
 
 function asQualityNumber(v: unknown): number | null {
@@ -48,11 +50,14 @@ const radarQualityById = new Map<string, RadarQuality>(
       teacherQuality: asQualityNumber(s.data.teacherQuality),
       materialQuality: asQualityNumber(s.data.materialQuality),
       connectionQuality: asQualityNumber(s.data.connectionQuality),
+      // These 2 axes are derived from user reviews (DB). Content JSON doesn't have editorial fallback.
+      priceRating: null,
+      satisfactionRating: null,
     },
   ]),
 );
 
-// Radar chart geometry (3 axes)
+// Radar chart geometry (5 axes)
 const RADAR_CX = 110;
 const RADAR_CY = 110;
 const RADAR_R = 78;
@@ -60,6 +65,8 @@ const RADAR_AXES = [
   { key: "teacherQuality", label: "講師" },
   { key: "materialQuality", label: "教材" },
   { key: "connectionQuality", label: "通信" },
+  { key: "priceRating", label: "安さ" },
+  { key: "satisfactionRating", label: "満足度" },
 ] as const;
 
 function clampRadar(v: unknown): number {
@@ -121,13 +128,15 @@ try {
   dbCount = statsRes.rows?.[0]?.count ?? 0;
   dbAvg = statsRes.rows?.[0]?.avg ?? null;
 
-  // Quality averages (teacher/material/connection) across services for radar compare
+  // Quality averages (teacher/material/connection + price/satisfaction) across services for radar compare
   const qRes = await query<{
     school_id: string;
     count: number;
     tq: number | null;
     mq: number | null;
     cq: number | null;
+    pr: number | null;
+    sr: number | null;
   }>(
     `
     select
@@ -135,13 +144,12 @@ try {
       count(*)::bigint as count,
       avg(teacher_quality)::numeric as tq,
       avg(material_quality)::numeric as mq,
-      avg(connection_quality)::numeric as cq
+      avg(connection_quality)::numeric as cq,
+      avg(price_rating)::numeric as pr,
+      avg(satisfaction_rating)::numeric as sr
     from reviews
     where status = 'approved'
       and school_id = any($1::text[])
-      and teacher_quality is not null
-      and material_quality is not null
-      and connection_quality is not null
     group by school_id
     `,
     [schools.map((s) => s.id)],
@@ -155,6 +163,8 @@ try {
       teacherQuality: asQualityNumber(row.tq),
       materialQuality: asQualityNumber(row.mq),
       connectionQuality: asQualityNumber(row.cq),
+      priceRating: asQualityNumber(row.pr),
+      satisfactionRating: asQualityNumber(row.sr),
     });
   }
 
@@ -187,6 +197,8 @@ const radarBaseQuality = radarQualityById.get(schoolId) ?? {
   teacherQuality: asQualityNumber(school?.teacherQuality),
   materialQuality: asQualityNumber(school?.materialQuality),
   connectionQuality: asQualityNumber(school?.connectionQuality),
+  priceRating: null,
+  satisfactionRating: null,
 };
 
 const compareOptions = schools
@@ -195,6 +207,8 @@ const compareOptions = schools
       teacherQuality: asQualityNumber(s.data.teacherQuality),
       materialQuality: asQualityNumber(s.data.materialQuality),
       connectionQuality: asQualityNumber(s.data.connectionQuality),
+      priceRating: null,
+      satisfactionRating: null,
     };
     return {
       id: s.id,
@@ -202,10 +216,19 @@ const compareOptions = schools
       teacherQuality: q.teacherQuality,
       materialQuality: q.materialQuality,
       connectionQuality: q.connectionQuality,
+      priceRating: q.priceRating,
+      satisfactionRating: q.satisfactionRating,
     };
   })
   .filter((s) => s.id !== schoolId)
-  .filter((s) => s.teacherQuality !== null || s.materialQuality !== null || s.connectionQuality !== null)
+  .filter(
+    (s) =>
+      s.teacherQuality !== null ||
+      s.materialQuality !== null ||
+      s.connectionQuality !== null ||
+      s.priceRating !== null ||
+      s.satisfactionRating !== null,
+  )
   .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
 const staticLatest: DisplayReview[] = staticReviews.map((r) => ({
@@ -424,7 +447,7 @@ if (faqItems.length) {
                   <div class="pb-0.5 text-xs font-extrabold text-zinc-600">/ 5</div>
                 </div>
               </div>
-              <div class="text-[11px] font-semibold text-zinc-500">講師/教材/通信（5段階）</div>
+              <div class="text-[11px] font-semibold text-zinc-500">講師/教材/通信/安さ/満足度（5段階）</div>
             </div>
 
             <div
@@ -436,6 +459,8 @@ if (faqItems.length) {
                 teacherQuality: radarBaseQuality.teacherQuality,
                 materialQuality: radarBaseQuality.materialQuality,
                 connectionQuality: radarBaseQuality.connectionQuality,
+                priceRating: radarBaseQuality.priceRating,
+                satisfactionRating: radarBaseQuality.satisfactionRating,
               })}
               data-compare={JSON.stringify(compareOptions)}
             >
@@ -480,6 +505,8 @@ if (faqItems.length) {
                       teacherQuality: radarBaseQuality.teacherQuality,
                       materialQuality: radarBaseQuality.materialQuality,
                       connectionQuality: radarBaseQuality.connectionQuality,
+                      priceRating: radarBaseQuality.priceRating,
+                      satisfactionRating: radarBaseQuality.satisfactionRating,
                     })}
                     style="fill: var(--brand-link); fill-opacity: 0.18; stroke: var(--brand-link); stroke-width: 2;"
                   />
@@ -505,6 +532,8 @@ if (faqItems.length) {
                         data-tq={typeof s.teacherQuality === "number" ? String(s.teacherQuality) : ""}
                         data-mq={typeof s.materialQuality === "number" ? String(s.materialQuality) : ""}
                         data-cq={typeof s.connectionQuality === "number" ? String(s.connectionQuality) : ""}
+                        data-pr={typeof s.priceRating === "number" ? String(s.priceRating) : ""}
+                        data-sr={typeof s.satisfactionRating === "number" ? String(s.satisfactionRating) : ""}
                       >
                         {s.name}
                       </option>
@@ -600,7 +629,9 @@ if (faqItems.length) {
   var axes = [
     { key: "teacherQuality", label: "講師" },
     { key: "materialQuality", label: "教材" },
-    { key: "connectionQuality", label: "通信" }
+    { key: "connectionQuality", label: "通信" },
+    { key: "priceRating", label: "安さ" },
+    { key: "satisfactionRating", label: "満足度" }
   ];
 
   function clamp01(v) {
@@ -641,8 +672,16 @@ if (faqItems.length) {
       var tq = opt && opt.dataset ? opt.dataset.tq : "";
       var mq = opt && opt.dataset ? opt.dataset.mq : "";
       var cq = opt && opt.dataset ? opt.dataset.cq : "";
-      var hasAny = (tq !== "" || mq !== "" || cq !== "");
-      var cmp = hasAny ? { teacherQuality: Number(tq || 0), materialQuality: Number(mq || 0), connectionQuality: Number(cq || 0) } : null;
+      var pr = opt && opt.dataset ? opt.dataset.pr : "";
+      var sr = opt && opt.dataset ? opt.dataset.sr : "";
+      var hasAny = (tq !== "" || mq !== "" || cq !== "" || pr !== "" || sr !== "");
+      var cmp = hasAny ? {
+        teacherQuality: Number(tq || 0),
+        materialQuality: Number(mq || 0),
+        connectionQuality: Number(cq || 0),
+        priceRating: Number(pr || 0),
+        satisfactionRating: Number(sr || 0)
+      } : null;
       renderCompare(cmp);
     });
   }
