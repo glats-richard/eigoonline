@@ -41,6 +41,45 @@ const compareOptions = schools
   .filter((s) => s.teacherQuality !== null || s.materialQuality !== null || s.connectionQuality !== null)
   .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
+// Radar chart geometry (3 axes)
+const RADAR_CX = 110;
+const RADAR_CY = 110;
+const RADAR_R = 78;
+const RADAR_AXES = [
+  { key: "teacherQuality", label: "講師" },
+  { key: "materialQuality", label: "教材" },
+  { key: "connectionQuality", label: "通信" },
+] as const;
+
+function clampRadar(v: unknown): number {
+  if (typeof v !== "number" || !Number.isFinite(v)) return 0;
+  if (v < 0) return 0;
+  if (v > 5) return 5;
+  return v;
+}
+
+function radarPoints(model: Record<string, unknown> | null, scale = 1): string {
+  return RADAR_AXES.map((a, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+    const val = clampRadar(model ? model[a.key] : 0);
+    const rr = RADAR_R * (val / 5) * scale;
+    const x = RADAR_CX + rr * Math.cos(ang);
+    const y = RADAR_CY + rr * Math.sin(ang);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function radarGridPoints(level: number): string {
+  const t = clampRadar(level) / 5;
+  return RADAR_AXES.map((_, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+    const rr = RADAR_R * t;
+    const x = RADAR_CX + rr * Math.cos(ang);
+    const y = RADAR_CY + rr * Math.sin(ang);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
 // Static reviews (editorial)
 const reviewsCollection = await getCollection("reviews");
 const staticReviews = reviewsCollection.find((r) => r.data.schoolId === schoolId)?.data.items ?? [];
@@ -329,10 +368,53 @@ if (faqItems.length) {
             >
               <div class="relative mx-auto aspect-square w-full max-w-[320px]">
                 <svg id="radar-svg" viewBox="0 0 220 220" class="h-full w-full">
-                  <g id="radar-grid"></g>
-                  <g id="radar-labels"></g>
-                  <polygon id="radar-base" points="" />
-                  <polygon id="radar-compare" points="" />
+                  <g id="radar-grid">
+                    {[1, 2, 3, 4, 5].map((lv) => (
+                      <polygon points={radarGridPoints(lv)} fill="none" stroke="#e4e4e7" stroke-width="1" />
+                    ))}
+                    {RADAR_AXES.map((_, i) => {
+                      const ang = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+                      const x2 = RADAR_CX + RADAR_R * Math.cos(ang);
+                      const y2 = RADAR_CY + RADAR_R * Math.sin(ang);
+                      return <line x1={RADAR_CX} y1={RADAR_CY} x2={x2} y2={y2} stroke="#e4e4e7" stroke-width="1" />;
+                    })}
+                  </g>
+
+                  <g id="radar-labels">
+                    {RADAR_AXES.map((a, i) => {
+                      const ang = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+                      const x = RADAR_CX + (RADAR_R + 18) * Math.cos(ang);
+                      const y = RADAR_CY + (RADAR_R + 18) * Math.sin(ang);
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          text-anchor="middle"
+                          dominant-baseline="middle"
+                          font-size="11"
+                          font-weight="700"
+                          fill="#52525b"
+                        >
+                          {a.label}
+                        </text>
+                      );
+                    })}
+                  </g>
+
+                  <polygon
+                    id="radar-base"
+                    points={radarPoints({
+                      teacherQuality: typeof school.teacherQuality === "number" ? school.teacherQuality : null,
+                      materialQuality: typeof school.materialQuality === "number" ? school.materialQuality : null,
+                      connectionQuality: typeof school.connectionQuality === "number" ? school.connectionQuality : null,
+                    })}
+                    style="fill: var(--brand-link); fill-opacity: 0.18; stroke: var(--brand-link); stroke-width: 2;"
+                  />
+                  <polygon
+                    id="radar-compare"
+                    points={radarPoints(null)}
+                    style="fill: none; stroke: #71717a; stroke-width: 2; stroke-dasharray: 4 3; display: none;"
+                  />
                 </svg>
               </div>
 
@@ -434,19 +516,13 @@ if (faqItems.length) {
     try { return JSON.parse(json); } catch (e) { return fallback; }
   }
 
-  var base = safeParse(root.getAttribute("data-base") || "null", null);
   var list = safeParse(root.getAttribute("data-compare") || "[]", []);
   var byId = {};
   for (var i = 0; i < list.length; i++) byId[list[i].id] = list[i];
 
-  var svg = document.getElementById("radar-svg");
-  var gridG = document.getElementById("radar-grid");
-  var labelsG = document.getElementById("radar-labels");
-  var basePoly = document.getElementById("radar-base");
-  var cmpPoly = document.getElementById("radar-compare");
-  var select = document.getElementById("radar-compare-select");
-
-  if (!svg || !gridG || !labelsG || !basePoly || !cmpPoly) return;
+  var cmpPoly = root.querySelector("#radar-compare");
+  var select = root.querySelector("#radar-compare-select");
+  if (!cmpPoly) return;
 
   var cx = 110, cy = 110, R = 78;
   var axes = [
@@ -476,82 +552,7 @@ if (faqItems.length) {
     }
     return pts.join(" ");
   }
-
-  function gridPolygon(level) {
-    var t = level / 5;
-    var pts = [];
-    for (var i = 0; i < axes.length; i++) {
-      var ang = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
-      var rr = R * t;
-      var x = cx + rr * Math.cos(ang);
-      var y = cy + rr * Math.sin(ang);
-      pts.push(x.toFixed(1) + "," + y.toFixed(1));
-    }
-    return pts.join(" ");
-  }
-
-  function clearNode(n) {
-    while (n.firstChild) n.removeChild(n.firstChild);
-  }
-
-  function el(name) {
-    return document.createElementNS("http://www.w3.org/2000/svg", name);
-  }
-
-  function renderStatic() {
-    clearNode(gridG);
-    clearNode(labelsG);
-
-    // Grid (5 levels)
-    for (var lv = 1; lv <= 5; lv++) {
-      var pg = el("polygon");
-      pg.setAttribute("points", gridPolygon(lv));
-      pg.setAttribute("fill", "none");
-      pg.setAttribute("stroke", "#e4e4e7"); // zinc-200
-      pg.setAttribute("stroke-width", "1");
-      gridG.appendChild(pg);
-    }
-
-    // Axes
-    for (var i = 0; i < axes.length; i++) {
-      var ang = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
-      var ax = el("line");
-      ax.setAttribute("x1", String(cx));
-      ax.setAttribute("y1", String(cy));
-      ax.setAttribute("x2", String(cx + R * Math.cos(ang)));
-      ax.setAttribute("y2", String(cy + R * Math.sin(ang)));
-      ax.setAttribute("stroke", "#e4e4e7");
-      ax.setAttribute("stroke-width", "1");
-      gridG.appendChild(ax);
-
-      var tx = el("text");
-      tx.textContent = axes[i].label;
-      tx.setAttribute("x", String(cx + (R + 18) * Math.cos(ang)));
-      tx.setAttribute("y", String(cy + (R + 18) * Math.sin(ang)));
-      tx.setAttribute("text-anchor", "middle");
-      tx.setAttribute("dominant-baseline", "middle");
-      tx.setAttribute("font-size", "11");
-      tx.setAttribute("font-weight", "700");
-      tx.setAttribute("fill", "#52525b"); // zinc-600
-      labelsG.appendChild(tx);
-    }
-
-    // Base polygon style
-    basePoly.setAttribute("fill", "var(--brand-link)");
-    basePoly.setAttribute("fill-opacity", "0.18");
-    basePoly.setAttribute("stroke", "var(--brand-link)");
-    basePoly.setAttribute("stroke-width", "2");
-
-    // Compare polygon style
-    cmpPoly.setAttribute("fill", "none");
-    cmpPoly.setAttribute("stroke", "#71717a"); // zinc-500
-    cmpPoly.setAttribute("stroke-width", "2");
-    cmpPoly.setAttribute("stroke-dasharray", "4 3");
-    cmpPoly.style.display = "none";
-  }
-
-  function render(baseModel, cmpModel) {
-    basePoly.setAttribute("points", pointsFor(baseModel, 1));
+  function renderCompare(cmpModel) {
     if (cmpModel) {
       cmpPoly.setAttribute("points", pointsFor(cmpModel, 1));
       cmpPoly.style.display = "";
@@ -560,14 +561,13 @@ if (faqItems.length) {
     }
   }
 
-  renderStatic();
-  render(base, null);
+  renderCompare(null);
 
   if (select) {
     select.addEventListener("change", function () {
       var id = select.value || "";
       var cmp = id && byId[id] ? byId[id] : null;
-      render(base, cmp);
+      renderCompare(cmp);
     });
   }
 })();`}
