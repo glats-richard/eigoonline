@@ -28,6 +28,19 @@ const overallRanking = rankings.find((r) => r.data.category === "overall")?.data
 const overallRankIndex = overallRanking ? overallRanking.items.indexOf(schoolId) : -1;
 const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
 
+// Radar chart compare candidates (use school JSON metrics)
+const compareOptions = schools
+  .map((s) => ({
+    id: s.id,
+    name: s.data.name,
+    teacherQuality: typeof s.data.teacherQuality === "number" ? s.data.teacherQuality : null,
+    materialQuality: typeof s.data.materialQuality === "number" ? s.data.materialQuality : null,
+    connectionQuality: typeof s.data.connectionQuality === "number" ? s.data.connectionQuality : null,
+  }))
+  .filter((s) => s.id !== schoolId)
+  .filter((s) => s.teacherQuality !== null || s.materialQuality !== null || s.connectionQuality !== null)
+  .sort((a, b) => a.name.localeCompare(b.name, "ja"));
+
 // Static reviews (editorial)
 const reviewsCollection = await getCollection("reviews");
 const staticReviews = reviewsCollection.find((r) => r.data.schoolId === schoolId)?.data.items ?? [];
@@ -256,7 +269,7 @@ if (faqItems.length) {
     <main id="top" class="mx-auto w-full max-w-6xl px-4 pb-12 pt-6">
       <!-- Hero -->
       <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-3">
               {school.logoUrl ? (
@@ -282,35 +295,6 @@ if (faqItems.length) {
                   総合ランキング：{overallRank}位
                 </div>
               ) : null}
-
-              {ratingValue !== null && reviewCount > 0 ? (
-                <div class="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-extrabold text-zinc-800">
-                  <span class="text-zinc-600">総合評価</span>
-                  <span>{ratingValue} / 5</span>
-                  <span class="text-zinc-500">（{reviewCount}件）</span>
-                </div>
-              ) : null}
-
-              {typeof school.teacherQuality === "number" ? (
-                <div class="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-extrabold text-zinc-800">
-                  <span class="text-zinc-600">講師の質</span>
-                  <span>{school.teacherQuality} / 5</span>
-                </div>
-              ) : null}
-
-              {typeof school.materialQuality === "number" ? (
-                <div class="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-extrabold text-zinc-800">
-                  <span class="text-zinc-600">教材の質</span>
-                  <span>{school.materialQuality} / 5</span>
-                </div>
-              ) : null}
-
-              {typeof school.connectionQuality === "number" ? (
-                <div class="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-extrabold text-zinc-800">
-                  <span class="text-zinc-600">通信の質</span>
-                  <span>{school.connectionQuality} / 5</span>
-                </div>
-              ) : null}
             </div>
 
             <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">{school.name}</h1>
@@ -319,23 +303,84 @@ if (faqItems.length) {
             </p>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <a
-              class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-              href={school.officialUrl}
-              target="_blank"
-              rel="nofollow sponsored noopener noreferrer"
-              referrerpolicy="no-referrer"
+          <aside class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+            <div class="flex items-end justify-between gap-3">
+              <div>
+                <div class="text-xs font-extrabold text-zinc-600">総合評価（口コミ{reviewCount}件）</div>
+                <div class="mt-1 flex items-end gap-2">
+                  <div class="text-2xl font-extrabold text-zinc-900">{ratingValue !== null ? ratingValue.toFixed(1) : "—"}</div>
+                  <div class="pb-0.5 text-xs font-extrabold text-zinc-600">/ 5</div>
+                </div>
+              </div>
+              <div class="text-[11px] font-semibold text-zinc-500">講師/教材/通信（5段階）</div>
+            </div>
+
+            <div
+              id="radar-root"
+              class="mt-3"
+              data-base={JSON.stringify({
+                id: schoolId,
+                name: school.name,
+                teacherQuality: typeof school.teacherQuality === "number" ? school.teacherQuality : null,
+                materialQuality: typeof school.materialQuality === "number" ? school.materialQuality : null,
+                connectionQuality: typeof school.connectionQuality === "number" ? school.connectionQuality : null,
+              })}
+              data-compare={JSON.stringify(compareOptions)}
             >
-              公式サイトを見る
-            </a>
-            <a
-              class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
-              href={`/${encodeURIComponent(schoolId)}/reviews`}
-            >
-              口コミを見る
-            </a>
-          </div>
+              <div class="relative mx-auto aspect-square w-full max-w-[320px]">
+                <svg id="radar-svg" viewBox="0 0 220 220" class="h-full w-full">
+                  <g id="radar-grid"></g>
+                  <g id="radar-labels"></g>
+                  <polygon id="radar-base" points="" />
+                  <polygon id="radar-compare" points="" />
+                </svg>
+              </div>
+
+              <div class="mt-3 grid gap-2">
+                <label class="block">
+                  <div class="text-xs font-extrabold text-zinc-700">他サービスと比較</div>
+                  <select
+                    id="radar-compare-select"
+                    class="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-900 shadow-sm"
+                  >
+                    <option value="">比較しない</option>
+                    {compareOptions.map((s) => (
+                      <option value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold text-zinc-600">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="inline-block h-2.5 w-2.5 rounded-sm bg-[color:var(--brand-link)]"></span>
+                    このサービス
+                  </span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="inline-block h-2.5 w-2.5 rounded-sm border border-zinc-400 bg-white"></span>
+                    比較サービス
+                  </span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a
+            class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            href={school.officialUrl}
+            target="_blank"
+            rel="nofollow sponsored noopener noreferrer"
+            referrerpolicy="no-referrer"
+          >
+            公式サイトを見る
+          </a>
+          <a
+            class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+            href={`/${encodeURIComponent(schoolId)}/reviews`}
+          >
+            口コミを見る
+          </a>
         </div>
       </section>
 
@@ -379,6 +424,154 @@ if (faqItems.length) {
           <p class="mt-2 text-sm font-semibold text-zinc-700">{bluf}</p>
         )}
       </section>
+
+      <script is:inline>
+        {String.raw`(function () {
+  var root = document.getElementById("radar-root");
+  if (!root) return;
+
+  function safeParse(json, fallback) {
+    try { return JSON.parse(json); } catch (e) { return fallback; }
+  }
+
+  var base = safeParse(root.getAttribute("data-base") || "null", null);
+  var list = safeParse(root.getAttribute("data-compare") || "[]", []);
+  var byId = {};
+  for (var i = 0; i < list.length; i++) byId[list[i].id] = list[i];
+
+  var svg = document.getElementById("radar-svg");
+  var gridG = document.getElementById("radar-grid");
+  var labelsG = document.getElementById("radar-labels");
+  var basePoly = document.getElementById("radar-base");
+  var cmpPoly = document.getElementById("radar-compare");
+  var select = document.getElementById("radar-compare-select");
+
+  if (!svg || !gridG || !labelsG || !basePoly || !cmpPoly) return;
+
+  var cx = 110, cy = 110, R = 78;
+  var axes = [
+    { key: "teacherQuality", label: "講師" },
+    { key: "materialQuality", label: "教材" },
+    { key: "connectionQuality", label: "通信" }
+  ];
+
+  function clamp01(v) {
+    if (v === null || v === undefined) return 0;
+    var n = Number(v);
+    if (!isFinite(n)) return 0;
+    if (n < 0) return 0;
+    if (n > 5) return 5;
+    return n;
+  }
+
+  function pointsFor(model, scale) {
+    var pts = [];
+    for (var i = 0; i < axes.length; i++) {
+      var ang = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
+      var val = clamp01(model ? model[axes[i].key] : 0);
+      var rr = (R * (val / 5)) * scale;
+      var x = cx + rr * Math.cos(ang);
+      var y = cy + rr * Math.sin(ang);
+      pts.push(x.toFixed(1) + "," + y.toFixed(1));
+    }
+    return pts.join(" ");
+  }
+
+  function gridPolygon(level) {
+    var t = level / 5;
+    var pts = [];
+    for (var i = 0; i < axes.length; i++) {
+      var ang = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
+      var rr = R * t;
+      var x = cx + rr * Math.cos(ang);
+      var y = cy + rr * Math.sin(ang);
+      pts.push(x.toFixed(1) + "," + y.toFixed(1));
+    }
+    return pts.join(" ");
+  }
+
+  function clearNode(n) {
+    while (n.firstChild) n.removeChild(n.firstChild);
+  }
+
+  function el(name) {
+    return document.createElementNS("http://www.w3.org/2000/svg", name);
+  }
+
+  function renderStatic() {
+    clearNode(gridG);
+    clearNode(labelsG);
+
+    // Grid (5 levels)
+    for (var lv = 1; lv <= 5; lv++) {
+      var pg = el("polygon");
+      pg.setAttribute("points", gridPolygon(lv));
+      pg.setAttribute("fill", "none");
+      pg.setAttribute("stroke", "#e4e4e7"); // zinc-200
+      pg.setAttribute("stroke-width", "1");
+      gridG.appendChild(pg);
+    }
+
+    // Axes
+    for (var i = 0; i < axes.length; i++) {
+      var ang = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
+      var ax = el("line");
+      ax.setAttribute("x1", String(cx));
+      ax.setAttribute("y1", String(cy));
+      ax.setAttribute("x2", String(cx + R * Math.cos(ang)));
+      ax.setAttribute("y2", String(cy + R * Math.sin(ang)));
+      ax.setAttribute("stroke", "#e4e4e7");
+      ax.setAttribute("stroke-width", "1");
+      gridG.appendChild(ax);
+
+      var tx = el("text");
+      tx.textContent = axes[i].label;
+      tx.setAttribute("x", String(cx + (R + 18) * Math.cos(ang)));
+      tx.setAttribute("y", String(cy + (R + 18) * Math.sin(ang)));
+      tx.setAttribute("text-anchor", "middle");
+      tx.setAttribute("dominant-baseline", "middle");
+      tx.setAttribute("font-size", "11");
+      tx.setAttribute("font-weight", "700");
+      tx.setAttribute("fill", "#52525b"); // zinc-600
+      labelsG.appendChild(tx);
+    }
+
+    // Base polygon style
+    basePoly.setAttribute("fill", "var(--brand-link)");
+    basePoly.setAttribute("fill-opacity", "0.18");
+    basePoly.setAttribute("stroke", "var(--brand-link)");
+    basePoly.setAttribute("stroke-width", "2");
+
+    // Compare polygon style
+    cmpPoly.setAttribute("fill", "none");
+    cmpPoly.setAttribute("stroke", "#71717a"); // zinc-500
+    cmpPoly.setAttribute("stroke-width", "2");
+    cmpPoly.setAttribute("stroke-dasharray", "4 3");
+    cmpPoly.style.display = "none";
+  }
+
+  function render(baseModel, cmpModel) {
+    basePoly.setAttribute("points", pointsFor(baseModel, 1));
+    if (cmpModel) {
+      cmpPoly.setAttribute("points", pointsFor(cmpModel, 1));
+      cmpPoly.style.display = "";
+    } else {
+      cmpPoly.style.display = "none";
+    }
+  }
+
+  renderStatic();
+  render(base, null);
+
+  if (select) {
+    select.addEventListener("change", function () {
+      var id = select.value || "";
+      var cmp = id && byId[id] ? byId[id] : null;
+      render(base, cmp);
+    });
+  }
+})();`}
+      </script>
 
       <!-- Key facts -->
       <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
