@@ -10,6 +10,8 @@ type School = {
   teacherQuality?: number | null;
   materialQuality?: number | null;
   connectionQuality?: number | null;
+  priceRating?: number | null;
+  satisfactionRating?: number | null;
   priceText?: string | null;
   hoursText?: string | null;
   trialText?: string | null;
@@ -190,6 +192,42 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                       />
                     </div>
                     <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.connectionQuality)} / 5</span>
+                  </div>
+                ) : (
+                  <span class="text-zinc-500">—</span>
+                )}
+              </div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">安さ</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {typeof x.data.priceRating === "number" && Number.isFinite(x.data.priceRating) ? (
+                  <div class="flex items-center gap-3">
+                    <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
+                      <div
+                        class="h-full rounded-full bg-linear-to-r from-[#f5c542] to-[#ff7ab6]"
+                        style={`width:${gaugeWidthPct(x.data.priceRating)}%`}
+                      />
+                    </div>
+                    <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.priceRating)} / 5</span>
+                  </div>
+                ) : (
+                  <span class="text-zinc-500">—</span>
+                )}
+              </div>
+            </div>
+            <div class="grid grid-cols-[96px_1fr] items-start gap-3 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+              <div class="text-xs font-extrabold text-zinc-700">満足度</div>
+              <div class="text-sm font-extrabold text-zinc-900">
+                {typeof x.data.satisfactionRating === "number" && Number.isFinite(x.data.satisfactionRating) ? (
+                  <div class="flex items-center gap-3">
+                    <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
+                      <div
+                        class="h-full rounded-full bg-linear-to-r from-[#b6a7ff] to-[#6ee7d8]"
+                        style={`width:${gaugeWidthPct(x.data.satisfactionRating)}%`}
+                      />
+                    </div>
+                    <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.satisfactionRating)} / 5</span>
                   </div>
                 ) : (
                   <span class="text-zinc-500">—</span>
@@ -384,6 +422,56 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                         />
                       </div>
                       <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.connectionQuality)} / 5</span>
+                    </>
+                  ) : (
+                    <span class="text-sm font-semibold text-zinc-500">—</span>
+                  )}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>安さ</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                <div class="flex items-center justify-center gap-2">
+                  {typeof x.data.priceRating === "number" && Number.isFinite(x.data.priceRating) ? (
+                    <>
+                      <div class="h-2.5 w-[140px] overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
+                        <div
+                          class="h-full rounded-full bg-linear-to-r from-[#f5c542] to-[#ff7ab6]"
+                          style={`width:${gaugeWidthPct(x.data.priceRating)}%`}
+                        />
+                      </div>
+                      <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.priceRating)} / 5</span>
+                    </>
+                  ) : (
+                    <span class="text-sm font-semibold text-zinc-500">—</span>
+                  )}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+        <tr>
+          <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>満足度</th>
+          {ranking.items.map((x, idx) => {
+            const borderColor = colBorder(idx + 1);
+            return (
+              <td class="border-t border-zinc-200 px-3 py-3" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+                <div class="flex items-center justify-center gap-2">
+                  {typeof x.data.satisfactionRating === "number" && Number.isFinite(x.data.satisfactionRating) ? (
+                    <>
+                      <div class="h-2.5 w-[140px] overflow-hidden rounded-full bg-zinc-200 ring-1 ring-zinc-300">
+                        <div
+                          class="h-full rounded-full bg-linear-to-r from-[#b6a7ff] to-[#6ee7d8]"
+                          style={`width:${gaugeWidthPct(x.data.satisfactionRating)}%`}
+                        />
+                      </div>
+                      <span class="whitespace-nowrap text-xs font-extrabold text-zinc-700">{fmtScore(x.data.satisfactionRating)} / 5</span>
                     </>
                   ) : (
                     <span class="text-sm font-semibold text-zinc-500">—</span>

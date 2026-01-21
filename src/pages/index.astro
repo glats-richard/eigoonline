@@ -59,7 +59,7 @@ type DbReviewRow = DBReviewRow & {
 let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
   const dbReviewsWithSchoolId = await query<DbReviewRow>(
-    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, body, birth_year, birth_month, age from reviews where status = 'approved'",
+    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age from reviews where status = 'approved'",
   );
   for (const r of dbReviewsWithSchoolId.rows ?? []) {
     const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
@@ -71,6 +71,8 @@ try {
       teacher_quality: r.teacher_quality,
       material_quality: r.material_quality,
       connection_quality: r.connection_quality,
+      price_rating: (r as any).price_rating ?? null,
+      satisfaction_rating: (r as any).satisfaction_rating ?? null,
       body: r.body,
       birth_year: (r as any).birth_year ?? null,
       birth_month: (r as any).birth_month ?? null,
@@ -147,7 +149,9 @@ const applyReviewRating = <T extends { id: string; data: Record<string, unknown>
 		const teacherQuality = detailedStats?.teacherQualityAvg ?? x.data.teacherQuality ?? null;
 		const materialQuality = detailedStats?.materialQualityAvg ?? x.data.materialQuality ?? null;
 		const connectionQuality = detailedStats?.connectionQualityAvg ?? x.data.connectionQuality ?? null;
-		return { ...x, data: { ...x.data, rating, teacherQuality, materialQuality, connectionQuality } };
+		const priceRating = detailedStats?.priceRatingAvg ?? (x.data as any).priceRating ?? null;
+		const satisfactionRating = detailedStats?.satisfactionRatingAvg ?? (x.data as any).satisfactionRating ?? null;
+		return { ...x, data: { ...x.data, rating, teacherQuality, materialQuality, connectionQuality, priceRating, satisfactionRating } };
 	});
 
 const overallItemsRated = applyReviewRating(overallItems);
