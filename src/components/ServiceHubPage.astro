@@ -297,17 +297,8 @@ function uniqTags(xs: string[], limit = 10): string[] {
   return Array.from(new Set(xs.map(normalizeTag).filter(Boolean))).slice(0, limit).map((t) => shortenTag(t, 18));
 }
 
-const recommendedTagsRaw: string[] = school?.recommendedFor?.length
-  ? school.recommendedFor
-  : schoolId === "kimini"
-    ? ["初心者", "中学英語から", "低価格", "TOEIC対策"]
-    : [];
-
-const featureTagsRaw: string[] = school?.features?.length
-  ? school.features
-  : schoolId === "kimini"
-    ? ["学研", "学研メソッド", "教材が体系的", "学習ステップが明確"]
-    : [];
+const recommendedTagsRaw: string[] = school?.recommendedFor ?? [];
+const featureTagsRaw: string[] = school?.features ?? [];
 
 const recommendedTags = uniqTags(recommendedTagsRaw, 8);
 const featureTags = uniqTags(featureTagsRaw, 8);
