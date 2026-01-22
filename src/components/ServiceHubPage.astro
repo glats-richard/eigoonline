@@ -271,10 +271,7 @@ const pageUrl = new URL(Astro.url.pathname, base).toString();
 const logoAbs = school?.logoUrl ? new URL(school.logoUrl, base).toString() : null;
 
 // On-page content (user-friendly headings; structured/consistent wording)
-const heroDescription =
-  school?.heroDescription ??
-  school?.summary ??
-  "オンライン英会話の料金・特徴・口コミをまとめています。";
+const introPlacement: "section" | "hero" = (school as any)?.introPlacement === "hero" ? "hero" : "section";
 
 const bluf =
   schoolId === "kimini"
@@ -335,6 +332,19 @@ function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
 }
 
+const introHeroText =
+  introPlacement === "hero" && introSections.length
+    ? introSections
+        .map((s) => (isNonEmptyString(s?.body) ? String(s.body).trim() : ""))
+        .filter(Boolean)
+        .join("\n\n")
+    : "";
+
+const heroDescription =
+  school?.heroDescription ??
+  (introHeroText || null) ??
+  school?.summary ??
+  "オンライン英会話の料金・特徴・口コミをまとめています。";
 const methodology =
   schoolId === "kimini"
     ? [
@@ -446,7 +456,7 @@ if (faqItems.length) {
             </div>
 
             <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">{school.name}</h1>
-            <p class="mt-2 text-sm font-semibold text-zinc-700 sm:text-base">
+            <p class="mt-2 whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700 sm:text-base">
               {heroDescription}
             </p>
           </div>
@@ -792,7 +802,7 @@ if (faqItems.length) {
         </ul>
       </section>
 
-      {introSections.length ? (
+      {introPlacement !== "hero" && introSections.length ? (
         <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 class="text-lg font-extrabold text-zinc-900">{school.introSectionTitle ?? "紹介"}</h2>
           <div class="mt-4 space-y-6">

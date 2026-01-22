@@ -32,6 +32,8 @@ const schools = defineCollection({
 		heroDescription: z.string().nullable().optional(),
 		/** Intro blocks shown on detail pages (image/embed + heading + body). */
 		introSectionTitle: z.string().nullable().optional(),
+		/** Where to show introSections: as a section (default) or in hero description. */
+		introPlacement: z.enum(['section', 'hero']).nullable().optional(),
 		introSections: z
 			.array(
 				z.object({

@@ -129,6 +129,13 @@ function parseJsonArray(v: string): any[] {
   return parsed;
 }
 
+function parseIntroPlacement(v: string): "section" | "hero" | null {
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  if (s === "section" || s === "hero") return s;
+  throw new Error("introPlacement must be 'section' or 'hero'");
+}
+
 export const POST: APIRoute = async ({ request }) => {
   if (dbEnvError) return json({ ok: false, error: dbEnvError }, 500);
 
@@ -175,6 +182,7 @@ export const POST: APIRoute = async ({ request }) => {
         summary: r.summary?.trim() || null,
         heroDescription: r.heroDescription?.trim() || null,
         introSectionTitle: r.introSectionTitle?.trim() || null,
+        introPlacement: parseIntroPlacement(r.introPlacement ?? ""),
         introSections: parseJsonArray(r.introSections ?? ""),
         editorialComments: splitLines(r.editorialComments ?? ""),
         features: splitLines(r.features ?? ""),

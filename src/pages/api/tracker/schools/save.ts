@@ -74,6 +74,15 @@ function parsePrimarySources(lines: string[] | undefined): { label: string; url:
   return out;
 }
 
+function parseIntroPlacement(v: unknown): "section" | "hero" | null | undefined {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  if (s === "section" || s === "hero") return s;
+  throw new Error("introPlacement must be 'section' or 'hero'");
+}
+
 export const POST: APIRoute = async ({ request }) => {
   if (dbEnvError) return json({ ok: false, error: dbEnvError }, 500);
 
@@ -101,8 +110,10 @@ export const POST: APIRoute = async ({ request }) => {
   const recommendedFor = toArrayFromTextarea(patch.recommendedFor);
   const uniquenessBullets = toArrayFromTextarea(patch.uniquenessBullets);
   let introSections: any[] | undefined = undefined;
+  let introPlacement: "section" | "hero" | null | undefined = undefined;
   try {
     introSections = toJsonArrayOrEmpty(patch.introSections);
+    introPlacement = parseIntroPlacement(patch.introPlacement);
   } catch (e: any) {
     return json({ ok: false, error: e?.message ?? String(e) }, 400);
   }
@@ -127,6 +138,7 @@ export const POST: APIRoute = async ({ request }) => {
     summary: toStringOrNull(patch.summary),
     heroDescription: toStringOrNull(patch.heroDescription),
     introSectionTitle: toStringOrNull(patch.introSectionTitle),
+    introPlacement,
     introSections,
     editorialComments,
     features,

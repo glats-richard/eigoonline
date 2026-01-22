@@ -399,6 +399,15 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                         value={d.introSectionTitle ?? ""}
                         placeholder="セクションタイトル（例: 紹介 / 選ばれる理由）"
                       />
+                      <select
+                        data-field="introPlacement"
+                        data-school-id={id}
+                        class="w-full rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-semibold text-zinc-900"
+                      >
+                        <option value="" selected={!d.introPlacement}>表示位置: セクション（デフォルト）</option>
+                        <option value="section" selected={d.introPlacement === "section"}>表示位置: セクション</option>
+                        <option value="hero" selected={d.introPlacement === "hero"}>表示位置: ヒーロー説明に入れる</option>
+                      </select>
                       <textarea
                         data-field="introSections"
                         data-school-id={id}
