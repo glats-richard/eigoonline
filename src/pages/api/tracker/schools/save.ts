@@ -137,6 +137,8 @@ export const POST: APIRoute = async ({ request }) => {
     campaignBullets,
     summary: toStringOrNull(patch.summary),
     heroDescription: toStringOrNull(patch.heroDescription),
+    heroImageUrl: toStringOrNull(patch.heroImageUrl),
+    heroImageAlt: toStringOrNull(patch.heroImageAlt),
     introSectionTitle: toStringOrNull(patch.introSectionTitle),
     introPlacement,
     introSections,

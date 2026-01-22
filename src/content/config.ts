@@ -30,6 +30,9 @@ const schools = defineCollection({
 		hoursText: z.string().nullable().optional(),
 		/** Optional hero paragraph shown under the title on detail pages. */
 		heroDescription: z.string().nullable().optional(),
+		/** Optional hero image shown above heroDescription. */
+		heroImageUrl: z.string().nullable().optional(),
+		heroImageAlt: z.string().nullable().optional(),
 		/** Intro blocks shown on detail pages (image/embed + heading + body). */
 		introSectionTitle: z.string().nullable().optional(),
 		/** Where to show introSections: as a section (default) or in hero description. */

@@ -181,6 +181,8 @@ export const POST: APIRoute = async ({ request }) => {
         campaignBullets: splitLines(r.campaignBullets ?? ""),
         summary: r.summary?.trim() || null,
         heroDescription: r.heroDescription?.trim() || null,
+        heroImageUrl: r.heroImageUrl?.trim() || null,
+        heroImageAlt: r.heroImageAlt?.trim() || null,
         introSectionTitle: r.introSectionTitle?.trim() || null,
         introPlacement: parseIntroPlacement(r.introPlacement ?? ""),
         introSections: parseJsonArray(r.introSections ?? ""),

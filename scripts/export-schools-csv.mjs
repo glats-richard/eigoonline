@@ -55,6 +55,8 @@ async function main() {
 
       summary: data.summary ?? "",
       heroDescription: data.heroDescription ?? "",
+      heroImageUrl: data.heroImageUrl ?? "",
+      heroImageAlt: data.heroImageAlt ?? "",
       introSectionTitle: data.introSectionTitle ?? "",
       introPlacement: data.introPlacement ?? "",
       introSections: Array.isArray(data.introSections) && data.introSections.length ? JSON.stringify(data.introSections) : "",

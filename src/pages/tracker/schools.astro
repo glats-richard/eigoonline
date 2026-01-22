@@ -264,6 +264,23 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                   <td class="border-b border-zinc-200 px-3 py-2">
                     <div class="grid gap-2">
                       <textarea data-field="summary" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="概要（summary）">{d.summary ?? ""}</textarea>
+                      <div class="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-2">
+                        <div class="text-[10px] font-extrabold text-zinc-600">ヒーロー画像（任意）</div>
+                        <input
+                          data-field="heroImageUrl"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 bg-white px-2 py-1"
+                          value={d.heroImageUrl ?? ""}
+                          placeholder="heroImageUrl（例: https://... / /images/...）"
+                        />
+                        <input
+                          data-field="heroImageAlt"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 bg-white px-2 py-1"
+                          value={d.heroImageAlt ?? ""}
+                          placeholder="heroImageAlt（任意）"
+                        />
+                      </div>
                       <textarea
                         data-field="heroDescription"
                         data-school-id={id}
