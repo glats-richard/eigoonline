@@ -81,6 +81,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!exists) return json({ ok: false, error: "Invalid schoolId" }, 400);
 
   const campaignBullets = toArrayFromTextarea(patch.campaignBullets);
+  const editorialComments = toArrayFromTextarea(patch.editorialComments);
   const features = toArrayFromTextarea(patch.features);
   const points = toArrayFromTextarea(patch.points);
   const recommendedFor = toArrayFromTextarea(patch.recommendedFor);
@@ -90,12 +91,14 @@ export const POST: APIRoute = async ({ request }) => {
   const data: Record<string, any> = {
     name: toStringOrNull(patch.name),
     officialUrl: toStringOrNull(patch.officialUrl),
+    logoUrl: toStringOrNull(patch.logoUrl),
     planUrl: toStringOrNull(patch.planUrl),
     bannerHref: toStringOrNull(patch.bannerHref),
     bannerImage: toStringOrNull(patch.bannerImage),
     bannerAlt: toStringOrNull(patch.bannerAlt),
     priceText: toStringOrNull(patch.priceText),
     trialText: toStringOrNull(patch.trialText),
+    trialDetailText: toStringOrNull(patch.trialDetailText),
     benefitText: toStringOrNull(patch.benefitText),
     hoursText: toStringOrNull(patch.hoursText),
     rating: toNumberOrNull(patch.rating),
@@ -106,6 +109,7 @@ export const POST: APIRoute = async ({ request }) => {
     campaignEndsAt: toStringOrNull(patch.campaignEndsAt),
     campaignBullets,
     summary: toStringOrNull(patch.summary),
+    editorialComments,
     features,
     points,
     recommendedFor,

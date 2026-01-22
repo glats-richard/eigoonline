@@ -4,7 +4,7 @@ export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import { dbEnvError, query } from "../../lib/db";
 import TrackerHeader from "../../components/TrackerHeader.astro";
-import { getCollection } from "astro:content";
+import { getSchoolsMerged } from "../../lib/schools";
 
 type ReviewRow = {
   id?: string | number;
@@ -197,7 +197,7 @@ const returnTo = `${Astro.url.pathname}${Astro.url.search}`;
 // Fetch schools for dropdown
 let schoolsMap = new Map<string, { id: string; name: string }>();
 try {
-  const schools = await getCollection("schools");
+  const schools = await getSchoolsMerged();
   schoolsMap = new Map(schools.map((s) => [s.id, { id: s.id, name: s.data.name }]));
 } catch {
   // If schools collection fails, continue

@@ -6,10 +6,11 @@ import Layout from "../../layouts/Layout.astro";
 import StarRating from "../../components/StarRating.astro";
 import { getDetailedReviewStatsFromDB, getReviewStats, type DBReviewRow } from "../../utils/reviewStats";
 import { query } from "../../lib/db";
+import { getSchoolsMerged } from "../../lib/schools";
 
 const schoolId = Astro.params.schoolId ?? "";
 
-const schools = await getCollection("schools");
+const schools = await getSchoolsMerged();
 const schoolEntry = schools.find((s) => s.id === schoolId) ?? null;
 
 if (!schoolEntry) {

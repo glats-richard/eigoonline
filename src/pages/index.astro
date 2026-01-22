@@ -10,8 +10,9 @@ import Sidebar from "../components/Sidebar.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
 import { getReviewStats, getDetailedReviewStatsFromDB, type DBReviewRow } from "../utils/reviewStats";
 import { query } from "../lib/db";
+import { getSchoolsMerged } from "../lib/schools";
 
-const schools = await getCollection("schools");
+const schools = await getSchoolsMerged();
 const rankings = await getCollection("rankings");
 const categories = await getCollection("categories");
 const pickups = await getCollection("pickups");

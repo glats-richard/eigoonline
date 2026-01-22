@@ -1,11 +1,12 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 import RankingListItem from "./RankingListItem.astro";
 import CompareTable from "./CompareTable.astro";
 import SchoolDetailSection from "./SchoolDetailSection.astro";
 import Sidebar from "./Sidebar.astro";
 import { getReviewStats } from "../utils/reviewStats";
+import { getSchoolsMerged } from "../lib/schools";
+import { getCollection } from "astro:content";
 
 type RankingCategory =
   | "overall"
@@ -32,7 +33,7 @@ type Props = {
 
 const { category, heading, lead } = Astro.props satisfies Props;
 
-const schools = await getCollection("schools");
+const schools = await getSchoolsMerged();
 const rankings = await getCollection("rankings");
 const categories = await getCollection("categories");
 const banners = await getCollection("banners");

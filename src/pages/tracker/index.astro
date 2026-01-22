@@ -404,6 +404,19 @@ const showingTo = Math.min((totalConversions ?? 0), pageClamped * pageSize);
     </div>
 
     <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="text-xs font-extrabold text-zinc-500">管理</div>
+          <div class="mt-1 text-sm font-semibold text-zinc-700">スクール情報・レビュー・成果を管理できます。</div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a class="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-extrabold text-white" href="/tracker/content">コンテンツ編集</a>
+          <a class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50" href="/tracker/reviews">レビュー管理</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div class="text-xs font-extrabold text-zinc-500">表示期間</div>

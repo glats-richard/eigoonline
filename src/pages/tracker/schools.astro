@@ -1,0 +1,458 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import TrackerHeader from "../../components/TrackerHeader.astro";
+import { dbEnvError, query } from "../../lib/db";
+import { getSchoolsMerged } from "../../lib/schools";
+
+type OverrideRow = { school_id: string; updated_at: string | null };
+
+const schools = await getSchoolsMerged();
+
+let overridesErr: string | null = null;
+let overridesById = new Map<string, { updatedAt: string | null }>();
+if (!dbEnvError) {
+  try {
+    const r = await query<OverrideRow>("select school_id, updated_at from school_overrides order by updated_at desc", []);
+    overridesById = new Map((r.rows ?? []).map((x: OverrideRow) => [String(x.school_id), { updatedAt: x.updated_at ?? null }]));
+  } catch (e: any) {
+    overridesErr = e?.message ?? String(e);
+  }
+}
+
+function fmtDate(iso?: string | null) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("ja-JP");
+}
+
+function joinLines(xs: unknown): string {
+  if (!Array.isArray(xs)) return "";
+  return xs.map((x) => String(x ?? "").trim()).filter(Boolean).join("\n");
+}
+
+function joinPrimarySources(xs: unknown): string {
+  if (!Array.isArray(xs)) return "";
+  // format: [type] label url
+  return xs
+    .map((x: any) => {
+      const type = x?.type ? String(x.type) : "official";
+      const label = x?.label ? String(x.label) : "";
+      const url = x?.url ? String(x.url) : "";
+      if (!label || !url) return "";
+      const t = type === "lp" || type === "pr" || type === "official" ? type : "official";
+      return `[${t}] ${label} ${url}`;
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+const errors: string[] = [];
+if (dbEnvError) errors.push(dbEnvError);
+if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
+---
+
+<Layout title="コンテンツ編集" description="スクール情報を編集（DB上書き）" robots="noindex,nofollow" showHeader={false}>
+  <TrackerHeader />
+  <main class="mx-auto w-full max-w-7xl px-4 pb-14 pt-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-extrabold text-zinc-900">コンテンツ編集</h1>
+        <p class="mt-1 text-sm text-zinc-600">/tracker/content（Basic認証保護）</p>
+      </div>
+      <div class="text-xs text-zinc-500">更新: {new Date().toLocaleString("ja-JP")}</div>
+    </div>
+
+    {errors.length ? (
+      <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+        <div class="font-extrabold">エラー</div>
+        <ul class="mt-2 list-disc pl-5">
+          {errors.map((e) => (
+            <li>{e}</li>
+          ))}
+        </ul>
+      </div>
+    ) : null}
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div class="text-xs font-extrabold text-zinc-500">操作</div>
+          <div class="mt-1 text-sm font-semibold text-zinc-700">
+            ここで編集→保存すると、DBの <code class="font-semibold">school_overrides</code> に保存され、サイト表示に反映されます（JSONファイルは編集しません）。
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            id="save-all"
+            class="btn-brand inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-extrabold text-white shadow-sm"
+          >
+            すべて保存
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <label class="block">
+          <div class="text-xs font-extrabold text-zinc-500">検索（名前/ID）</div>
+          <input
+            id="school-filter"
+            type="text"
+            placeholder="例: kimini / レアジョブ"
+            class="mt-1 w-[260px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm"
+          />
+        </label>
+
+        <div class="text-xs font-semibold text-zinc-500">
+          行数: <span id="row-count">{schools.length}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <div class="scroll-x-contain w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
+        <table class="w-full min-w-[2200px] table-fixed border-separate border-spacing-0 text-left text-xs">
+          <colgroup>
+            <col style="width:140px" />
+            <col style="width:220px" />
+            <col style="width:280px" />
+            <col style="width:220px" />
+            <col style="width:220px" />
+            <col style="width:220px" />
+            <col style="width:180px" />
+            <col style="width:180px" />
+            <col style="width:120px" />
+            <col style="width:120px" />
+            <col style="width:120px" />
+            <col style="width:120px" />
+            <col style="width:260px" />
+            <col style="width:260px" />
+            <col style="width:360px" />
+            <col style="width:360px" />
+            <col style="width:360px" />
+            <col style="width:320px" />
+            <col style="width:360px" />
+            <col style="width:380px" />
+            <col style="width:240px" />
+            <col style="width:380px" />
+            <col style="width:380px" />
+          </colgroup>
+          <thead class="bg-zinc-50 text-[11px] font-extrabold text-zinc-600">
+            <tr>
+              <th class="sticky left-0 z-20 border-b border-zinc-200 bg-zinc-50 px-3 py-2">ID / 操作</th>
+              <th class="border-b border-zinc-200 px-3 py-2">名前</th>
+              <th class="border-b border-zinc-200 px-3 py-2">公式URL</th>
+              <th class="border-b border-zinc-200 px-3 py-2">ロゴURL</th>
+              <th class="border-b border-zinc-200 px-3 py-2">プランURL</th>
+              <th class="border-b border-zinc-200 px-3 py-2">バナー（href / img / alt）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">月額</th>
+              <th class="border-b border-zinc-200 px-3 py-2">無料体験</th>
+              <th class="border-b border-zinc-200 px-3 py-2">体験詳細</th>
+              <th class="border-b border-zinc-200 px-3 py-2">特典</th>
+              <th class="border-b border-zinc-200 px-3 py-2">受講時間</th>
+              <th class="border-b border-zinc-200 px-3 py-2">総合/講師/教材/通信</th>
+              <th class="border-b border-zinc-200 px-3 py-2">キャンペーン</th>
+              <th class="border-b border-zinc-200 px-3 py-2">キャンペーン期限</th>
+              <th class="border-b border-zinc-200 px-3 py-2">キャンペーン箇条書き（改行区切り）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">概要</th>
+              <th class="border-b border-zinc-200 px-3 py-2">特徴（features, 改行）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">ポイント（points, 改行）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">おすすめ（recommendedFor, 改行）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">独自性（title / bullets）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">一次情報（primarySources, 改行）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">出典URL</th>
+              <th class="border-b border-zinc-200 px-3 py-2">出典メモ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-200">
+            {schools.map((s) => {
+              const id = s.id;
+              const d: any = s.data as any;
+              const ov = overridesById.get(id) ?? null;
+              const rowKey = `row-${id}`;
+              return (
+                <tr class="align-top" data-row data-id={id} data-name={String(d.name ?? "")}>
+                  <td class="sticky left-0 z-10 border-b border-zinc-200 bg-white px-3 py-2">
+                    <div class="text-[11px] font-extrabold text-zinc-900">{id}</div>
+                    <div class="mt-1 text-[11px] text-zinc-500">上書き: {ov ? fmtDate(ov.updatedAt) : "—"}</div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="rounded-lg bg-[color:var(--brand-link)] px-3 py-1 text-[11px] font-extrabold text-white"
+                        data-action="save"
+                        data-school-id={id}
+                      >
+                        保存
+                      </button>
+                      <button
+                        type="button"
+                        class="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-[11px] font-extrabold text-zinc-800 hover:bg-zinc-50"
+                        data-action="clear"
+                        data-school-id={id}
+                      >
+                        上書き解除
+                      </button>
+                      <a
+                        class="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-[11px] font-extrabold text-zinc-800 hover:bg-zinc-50"
+                        href={`/${encodeURIComponent(id)}/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        ページ →
+                      </a>
+                    </div>
+                    <div class="mt-2 text-[11px] font-semibold text-zinc-500" id={`${rowKey}-status`}></div>
+                  </td>
+
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="name" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.name ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="officialUrl" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.officialUrl ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="logoUrl" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.logoUrl ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="planUrl" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.planUrl ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <div class="grid gap-2">
+                      <input data-field="bannerHref" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.bannerHref ?? ""} placeholder="href" />
+                      <input data-field="bannerImage" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.bannerImage ?? ""} placeholder="img" />
+                      <input data-field="bannerAlt" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.bannerAlt ?? ""} placeholder="alt" />
+                    </div>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="priceText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.priceText ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="trialText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.trialText ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="trialDetailText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.trialDetailText ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="benefitText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.benefitText ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="hoursText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.hoursText ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <div class="grid grid-cols-2 gap-2">
+                      <label class="grid gap-1">
+                        <span class="text-[10px] font-extrabold text-zinc-500">総合</span>
+                        <input data-field="rating" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.rating ?? ""} />
+                      </label>
+                      <label class="grid gap-1">
+                        <span class="text-[10px] font-extrabold text-zinc-500">講師</span>
+                        <input data-field="teacherQuality" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.teacherQuality ?? ""} />
+                      </label>
+                      <label class="grid gap-1">
+                        <span class="text-[10px] font-extrabold text-zinc-500">教材</span>
+                        <input data-field="materialQuality" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.materialQuality ?? ""} />
+                      </label>
+                      <label class="grid gap-1">
+                        <span class="text-[10px] font-extrabold text-zinc-500">通信</span>
+                        <input data-field="connectionQuality" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.connectionQuality ?? ""} />
+                      </label>
+                    </div>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="campaignText" data-school-id={id} class="h-20 w-full rounded border border-zinc-200 px-2 py-1">{d.campaignText ?? ""}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="campaignEndsAt" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.campaignEndsAt ?? ""} placeholder="YYYY-MM-DD" />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="campaignBullets" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.campaignBullets)}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="summary" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{d.summary ?? ""}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="features" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.features)}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="points" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.points)}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="recommendedFor" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.recommendedFor)}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <div class="grid gap-2">
+                      <input data-field="uniquenessTitle" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.uniquenessTitle ?? ""} placeholder="title" />
+                      <textarea data-field="uniquenessBullets" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="bullets (改行)">{joinLines(d.uniquenessBullets)}</textarea>
+                    </div>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="primarySources" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="[official] ラベル URL">{joinPrimarySources(d.primarySources)}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input data-field="sourceUrl" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.source?.url ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="sourceNote" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{d.source?.note ?? ""}</textarea>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-extrabold text-zinc-900">CSVインポート</h2>
+      <p class="mt-1 text-sm text-zinc-600">CSVをアップロードして `school_overrides` を一括更新できます。</p>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <input id="csv-file" type="file" accept=".csv,text/csv" class="block text-sm" />
+        <button type="button" id="csv-import" class="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-extrabold text-white">
+          CSVをインポート
+        </button>
+        <div id="csv-import-status" class="text-sm font-semibold text-zinc-600"></div>
+      </div>
+    </section>
+
+    <script is:inline>
+(function () {
+  function qs(sel, root) { return (root || document).querySelector(sel); }
+  function qsa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+
+  function setStatus(id, msg, kind) {
+    var el = document.getElementById("row-" + id + "-status");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.style.color = kind === "error" ? "#b91c1c" : kind === "ok" ? "#16a34a" : "";
+  }
+
+  function collectPatch(id) {
+    var fields = qsa('[data-school-id="' + id + '"][data-field]');
+    var patch = {};
+    for (var i = 0; i < fields.length; i++) {
+      var el = fields[i];
+      var key = el.getAttribute("data-field");
+      if (!key) continue;
+      var v = ("value" in el) ? el.value : (el.textContent || "");
+      patch[key] = v;
+    }
+    return patch;
+  }
+
+  async function postJson(url, body) {
+    var res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    var data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok || !data || data.ok !== true) {
+      var msg = (data && data.error) ? data.error : ("HTTP " + res.status);
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  async function saveOne(id) {
+    setStatus(id, "保存中…");
+    try {
+      var patch = collectPatch(id);
+      await postJson("/api/tracker/schools/save", { schoolId: id, patch: patch });
+      setStatus(id, "保存しました", "ok");
+    } catch (e) {
+      setStatus(id, "保存失敗: " + (e && e.message ? e.message : String(e)), "error");
+    }
+  }
+
+  async function clearOne(id) {
+    if (!confirm("上書きを解除しますか？（DBの上書きデータを削除）")) return;
+    setStatus(id, "解除中…");
+    try {
+      await postJson("/api/tracker/schools/clear", { schoolId: id });
+      setStatus(id, "解除しました（再読み込みします）", "ok");
+      location.reload();
+    } catch (e) {
+      setStatus(id, "解除失敗: " + (e && e.message ? e.message : String(e)), "error");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.getAttribute) return;
+    var act = t.getAttribute("data-action");
+    var id = t.getAttribute("data-school-id");
+    if (!act || !id) return;
+    e.preventDefault();
+    if (act === "save") saveOne(id);
+    if (act === "clear") clearOne(id);
+  });
+
+  var saveAllBtn = qs("#save-all");
+  if (saveAllBtn) {
+    saveAllBtn.addEventListener("click", async function () {
+      var rows = qsa("tr[data-row]");
+      for (var i = 0; i < rows.length; i++) {
+        var id = rows[i].getAttribute("data-id");
+        if (!id) continue;
+        // skip hidden by filter
+        if (rows[i].style.display === "none") continue;
+        await saveOne(id);
+      }
+      alert("保存が完了しました");
+    });
+  }
+
+  var filter = qs("#school-filter");
+  var countEl = qs("#row-count");
+  function applyFilter() {
+    var q = (filter && filter.value ? filter.value : "").trim().toLowerCase();
+    var rows = qsa("tr[data-row]");
+    var shown = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var id = (rows[i].getAttribute("data-id") || "").toLowerCase();
+      var name = (rows[i].getAttribute("data-name") || "").toLowerCase();
+      var hit = !q || id.indexOf(q) >= 0 || name.indexOf(q) >= 0;
+      rows[i].style.display = hit ? "" : "none";
+      if (hit) shown++;
+    }
+    if (countEl) countEl.textContent = String(shown);
+  }
+  if (filter) {
+    filter.addEventListener("input", applyFilter);
+    applyFilter();
+  }
+
+  var importBtn = qs("#csv-import");
+  var importFile = qs("#csv-file");
+  var importStatus = qs("#csv-import-status");
+  if (importBtn) {
+    importBtn.addEventListener("click", async function () {
+      if (!importFile || !importFile.files || !importFile.files[0]) {
+        if (importStatus) importStatus.textContent = "CSVファイルを選択してください";
+        return;
+      }
+      if (importStatus) importStatus.textContent = "インポート中…";
+      try {
+        var fd = new FormData();
+        fd.append("file", importFile.files[0]);
+        var res = await fetch("/api/tracker/schools/import", { method: "POST", body: fd });
+        var data = await res.json().catch(function () { return null; });
+        if (!res.ok || !data || data.ok !== true) {
+          throw new Error((data && data.error) ? data.error : ("HTTP " + res.status));
+        }
+        if (importStatus) importStatus.textContent = "完了: " + String(data.updated || 0) + "件更新";
+        setTimeout(function () { location.reload(); }, 500);
+      } catch (e) {
+        if (importStatus) importStatus.textContent = "失敗: " + (e && e.message ? e.message : String(e));
+      }
+    });
+  }
+})();
+    </script>
+  </main>
+</Layout>
+
