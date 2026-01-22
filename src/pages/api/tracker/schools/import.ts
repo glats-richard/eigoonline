@@ -153,10 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
       trialDetailText: r.trialDetailText?.trim() || null,
       benefitText: r.benefitText?.trim() || null,
       hoursText: r.hoursText?.trim() || null,
-      rating: parseNum(r.rating),
-      teacherQuality: parseNum(r.teacherQuality),
-      materialQuality: parseNum(r.materialQuality),
-      connectionQuality: parseNum(r.connectionQuality),
+      // rating/quality fields are derived from user reviews; do not allow overrides.
       campaignText: r.campaignText?.trim() || null,
       campaignEndsAt: r.campaignEndsAt?.trim() || null,
       campaignBullets: splitLines(r.campaignBullets ?? ""),

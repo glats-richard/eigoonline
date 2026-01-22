@@ -49,11 +49,6 @@ async function main() {
       benefitText: data.benefitText ?? "",
       hoursText: data.hoursText ?? "",
 
-      rating: data.rating ?? "",
-      teacherQuality: data.teacherQuality ?? "",
-      materialQuality: data.materialQuality ?? "",
-      connectionQuality: data.connectionQuality ?? "",
-
       campaignText: data.campaignText ?? "",
       campaignEndsAt: data.campaignEndsAt ?? "",
       campaignBullets: joinLines(data.campaignBullets),

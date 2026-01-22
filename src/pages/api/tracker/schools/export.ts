@@ -45,11 +45,6 @@ export const GET: APIRoute = async () => {
         benefitText: d.benefitText ?? "",
         hoursText: d.hoursText ?? "",
 
-        rating: d.rating ?? "",
-        teacherQuality: d.teacherQuality ?? "",
-        materialQuality: d.materialQuality ?? "",
-        connectionQuality: d.connectionQuality ?? "",
-
         campaignText: d.campaignText ?? "",
         campaignEndsAt: d.campaignEndsAt ?? "",
         campaignBullets: joinLines(d.campaignBullets),

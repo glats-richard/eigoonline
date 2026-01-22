@@ -141,7 +141,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <th class="border-b border-zinc-200 px-3 py-2">体験詳細</th>
               <th class="border-b border-zinc-200 px-3 py-2">特典</th>
               <th class="border-b border-zinc-200 px-3 py-2">受講時間</th>
-              <th class="border-b border-zinc-200 px-3 py-2">総合/講師/教材/通信</th>
+              <th class="border-b border-zinc-200 px-3 py-2">総合/講師/教材/通信（上書き不可）</th>
               <th class="border-b border-zinc-200 px-3 py-2">キャンペーン</th>
               <th class="border-b border-zinc-200 px-3 py-2">キャンペーン期限</th>
               <th class="border-b border-zinc-200 px-3 py-2">キャンペーン箇条書き（改行区切り）</th>
@@ -231,20 +231,23 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                     <div class="grid grid-cols-2 gap-2">
                       <label class="grid gap-1">
                         <span class="text-[10px] font-extrabold text-zinc-500">総合</span>
-                        <input data-field="rating" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.rating ?? ""} />
+                        <input class="w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-zinc-700" value={d.rating ?? ""} disabled />
                       </label>
                       <label class="grid gap-1">
                         <span class="text-[10px] font-extrabold text-zinc-500">講師</span>
-                        <input data-field="teacherQuality" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.teacherQuality ?? ""} />
+                        <input class="w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-zinc-700" value={d.teacherQuality ?? ""} disabled />
                       </label>
                       <label class="grid gap-1">
                         <span class="text-[10px] font-extrabold text-zinc-500">教材</span>
-                        <input data-field="materialQuality" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.materialQuality ?? ""} />
+                        <input class="w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-zinc-700" value={d.materialQuality ?? ""} disabled />
                       </label>
                       <label class="grid gap-1">
                         <span class="text-[10px] font-extrabold text-zinc-500">通信</span>
-                        <input data-field="connectionQuality" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.connectionQuality ?? ""} />
+                        <input class="w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-zinc-700" value={d.connectionQuality ?? ""} disabled />
                       </label>
+                    </div>
+                    <div class="mt-2 text-[10px] font-semibold text-zinc-500">
+                      ※体験談（レビュー）集計を優先。管理画面からは上書きしません。
                     </div>
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">

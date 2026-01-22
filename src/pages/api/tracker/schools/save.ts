@@ -100,10 +100,7 @@ export const POST: APIRoute = async ({ request }) => {
     trialDetailText: toStringOrNull(patch.trialDetailText),
     benefitText: toStringOrNull(patch.benefitText),
     hoursText: toStringOrNull(patch.hoursText),
-    rating: toNumberOrNull(patch.rating),
-    teacherQuality: toNumberOrNull(patch.teacherQuality),
-    materialQuality: toNumberOrNull(patch.materialQuality),
-    connectionQuality: toNumberOrNull(patch.connectionQuality),
+    // rating/quality fields are derived from user reviews; do not allow overrides.
     campaignText: toStringOrNull(patch.campaignText),
     campaignEndsAt: toStringOrNull(patch.campaignEndsAt),
     campaignBullets,
