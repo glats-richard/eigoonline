@@ -3,8 +3,9 @@ export const prerender = false;
 
 import Layout from "../layouts/Layout.astro";
 import StarRating from "./StarRating.astro";
-import { getCollection } from "astro:content";
 import { dbEnvError, query } from "../lib/db";
+import { getSchoolsMerged } from "../lib/schools";
+import { getCollection } from "astro:content";
 import { getReviewStats } from "../utils/reviewStats";
 
 type Props = {
@@ -14,7 +15,8 @@ type Props = {
 const { schoolId } = Astro.props satisfies Props;
 const LATEST_REVIEW_LIMIT = 10;
 
-const schools = await getCollection("schools");
+// Merge DB overrides (from /tracker) over static content.
+const schools = await getSchoolsMerged();
 const schoolEntry = schools.find((s) => s.id === schoolId) ?? null;
 const school = schoolEntry?.data ?? null;
 
@@ -794,7 +796,7 @@ if (faqItems.length) {
             <p>{school.summary}</p>
             {school.features?.length ? (
               <ul class="list-disc pl-5">
-                {school.features.slice(0, 6).map((t) => (
+                {school.features.slice(0, 6).map((t: string) => (
                   <li>{t}</li>
                 ))}
               </ul>
@@ -810,7 +812,7 @@ if (faqItems.length) {
               <h2 class="text-lg font-extrabold text-zinc-900">{school.uniquenessTitle ?? "独自性（他社との違い）"}</h2>
               <p class="mt-1 text-sm text-zinc-600">比較検討しやすいよう、一次情報をもとに要点を整理しています。</p>
               <ul class="mt-3 list-disc space-y-2 pl-5 text-sm font-semibold text-zinc-700">
-                {school.uniquenessBullets.slice(0, 6).map((t) => (
+                {school.uniquenessBullets.slice(0, 6).map((t: string) => (
                   <li>{t}</li>
                 ))}
               </ul>
@@ -822,7 +824,9 @@ if (faqItems.length) {
               <h2 class="text-lg font-extrabold text-zinc-900">出典（公式/LP/PR）</h2>
               <p class="mt-1 text-sm text-zinc-600">特徴・独自性の根拠として、公式情報を参照できます。</p>
               <ul class="mt-4 space-y-2 text-sm">
-                {school.primarySources.slice(0, 6).map((s) => (
+                {school.primarySources
+                  .slice(0, 6)
+                  .map((s: { label: string; url: string; type: "official" | "lp" | "pr" }) => (
                   <li class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                     <div class="min-w-0">
                       <div class="text-xs font-extrabold text-zinc-800">{s.label}</div>
