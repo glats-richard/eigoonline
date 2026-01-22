@@ -1,7 +1,9 @@
 import type { MiddlewareHandler } from "astro";
 
-const USER = process.env.TRACKER_BASIC_USER ?? "";
-const PASS = process.env.TRACKER_BASIC_PASS ?? "";
+const ADMIN_USER = process.env.TRACKER_BASIC_USER ?? "";
+const ADMIN_PASS = process.env.TRACKER_BASIC_PASS ?? "";
+const EDITOR_USER = process.env.TRACKER_EDITOR_USER ?? "";
+const EDITOR_PASS = process.env.TRACKER_EDITOR_PASS ?? "";
 
 function unauthorized() {
   return new Response("Unauthorized", {
@@ -12,12 +14,29 @@ function unauthorized() {
   });
 }
 
+function forbidden() {
+  return new Response("Forbidden", { status: 403 });
+}
+
 function timingSafeEqual(a: string, b: string) {
   // Basic constant-time-ish compare (length + char scan)
   if (a.length !== b.length) return false;
   let out = 0;
   for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return out === 0;
+}
+
+function parseBasicAuthHeader(authHeader: string | null): { user: string; pass: string } | null {
+  if (!authHeader?.startsWith("Basic ")) return null;
+  let decoded = "";
+  try {
+    decoded = Buffer.from(authHeader.slice(6), "base64").toString("utf-8");
+  } catch {
+    return null;
+  }
+  const idx = decoded.indexOf(":");
+  if (idx === -1) return null;
+  return { user: decoded.slice(0, idx), pass: decoded.slice(idx + 1) };
 }
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
@@ -30,24 +49,40 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
   // In production, require credentials to be configured.
   // In non-production environments, allow access if not configured.
-  if (!USER || !PASS) {
+  const hasAnyCreds = (ADMIN_USER && ADMIN_PASS) || (EDITOR_USER && EDITOR_PASS);
+  if (!hasAnyCreds) {
     if (process.env.NODE_ENV !== "production") return next();
     return new Response("Tracker auth is not configured", { status: 500 });
   }
-
-  const auth = context.request.headers.get("authorization");
-  if (!auth?.startsWith("Basic ")) return unauthorized();
-  let decoded = "";
-  try {
-    decoded = Buffer.from(auth.slice(6), "base64").toString("utf-8");
-  } catch {
-    return unauthorized();
+  if (process.env.NODE_ENV === "production" && (!ADMIN_USER || !ADMIN_PASS)) {
+    return new Response("Tracker admin auth is not configured", { status: 500 });
   }
-  const idx = decoded.indexOf(":");
-  if (idx === -1) return unauthorized();
-  const u = decoded.slice(0, idx);
-  const p = decoded.slice(idx + 1);
-  if (!timingSafeEqual(u, USER) || !timingSafeEqual(p, PASS)) return unauthorized();
+
+  const creds = parseBasicAuthHeader(context.request.headers.get("authorization"));
+  if (!creds) return unauthorized();
+
+  const isAdmin =
+    ADMIN_USER &&
+    ADMIN_PASS &&
+    timingSafeEqual(creds.user, ADMIN_USER) &&
+    timingSafeEqual(creds.pass, ADMIN_PASS);
+  if (isAdmin) return next();
+
+  const isEditor =
+    EDITOR_USER &&
+    EDITOR_PASS &&
+    timingSafeEqual(creds.user, EDITOR_USER) &&
+    timingSafeEqual(creds.pass, EDITOR_PASS);
+
+  if (!isEditor) return unauthorized();
+
+  // Editor can only access content editor UI + its APIs.
+  const editorAllowed =
+    pathname === "/tracker/content" ||
+    pathname === "/tracker/content/" ||
+    pathname.startsWith("/api/tracker/schools");
+
+  if (!editorAllowed) return forbidden();
 
   return next();
 };
