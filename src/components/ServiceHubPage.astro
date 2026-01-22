@@ -340,8 +340,23 @@ const introHeroText =
         .join("\n\n")
     : "";
 
+function looksLikeJsonArray(s: string): boolean {
+  const t = String(s ?? "").trim();
+  if (!t) return false;
+  if (!(t.startsWith("[") && t.endsWith("]"))) return false;
+  try {
+    return Array.isArray(JSON.parse(t));
+  } catch {
+    return false;
+  }
+}
+
+const heroDescriptionOverrideRaw = typeof school?.heroDescription === "string" ? school.heroDescription : null;
+const heroDescriptionOverride =
+  introPlacement === "hero" && heroDescriptionOverrideRaw && looksLikeJsonArray(heroDescriptionOverrideRaw) ? null : heroDescriptionOverrideRaw;
+
 const heroDescription =
-  school?.heroDescription ??
+  heroDescriptionOverride ??
   (introHeroText || null) ??
   school?.summary ??
   "オンライン英会話の料金・特徴・口コミをまとめています。";
