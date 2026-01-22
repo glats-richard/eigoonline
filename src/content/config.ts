@@ -74,6 +74,19 @@ const schools = defineCollection({
 		points: z.array(z.string()).default([]),
 		/** Recommended-for bullets. */
 		recommendedFor: z.array(z.string()).default([]),
+		/** Optional per-section title/subtitle overrides for detail pages. */
+		tagsSectionTitle: z.string().nullable().optional(),
+		tagsSectionSubtitle: z.string().nullable().optional(),
+		recommendedTagsTitle: z.string().nullable().optional(),
+		featureTagsTitle: z.string().nullable().optional(),
+		keyFactsSectionTitle: z.string().nullable().optional(),
+		keyFactsSectionSubtitle: z.string().nullable().optional(),
+		basicDataSectionTitle: z.string().nullable().optional(),
+		methodologySectionTitle: z.string().nullable().optional(),
+		methodologySectionSubtitle: z.string().nullable().optional(),
+		featureSectionTitle: z.string().nullable().optional(),
+		reviewsSectionTitle: z.string().nullable().optional(),
+		reviewsSectionSubtitle: z.string().nullable().optional(),
 		rating: z.number().min(0).max(5).nullable().optional(),
 		features: z.array(z.string()).default([]),
 		// Allow absolute URLs or local public paths like "/logos/company-27.png"

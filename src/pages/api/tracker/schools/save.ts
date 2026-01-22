@@ -114,6 +114,18 @@ export const POST: APIRoute = async ({ request }) => {
     recommendedFor,
     uniquenessTitle: toStringOrNull(patch.uniquenessTitle),
     uniquenessBullets,
+    tagsSectionTitle: toStringOrNull(patch.tagsSectionTitle),
+    tagsSectionSubtitle: toStringOrNull(patch.tagsSectionSubtitle),
+    recommendedTagsTitle: toStringOrNull(patch.recommendedTagsTitle),
+    featureTagsTitle: toStringOrNull(patch.featureTagsTitle),
+    keyFactsSectionTitle: toStringOrNull(patch.keyFactsSectionTitle),
+    keyFactsSectionSubtitle: toStringOrNull(patch.keyFactsSectionSubtitle),
+    basicDataSectionTitle: toStringOrNull(patch.basicDataSectionTitle),
+    methodologySectionTitle: toStringOrNull(patch.methodologySectionTitle),
+    methodologySectionSubtitle: toStringOrNull(patch.methodologySectionSubtitle),
+    featureSectionTitle: toStringOrNull(patch.featureSectionTitle),
+    reviewsSectionTitle: toStringOrNull(patch.reviewsSectionTitle),
+    reviewsSectionSubtitle: toStringOrNull(patch.reviewsSectionSubtitle),
   };
 
   // Remove undefined keys so "not provided" doesn't overwrite.

@@ -18,20 +18,6 @@ function joinLines(arr) {
   return arr.filter(Boolean).map(String).join("\n");
 }
 
-function sourcesToLines(arr) {
-  if (!Array.isArray(arr)) return "";
-  return arr
-    .map((x) => {
-      if (!x) return "";
-      const label = x.label ? String(x.label) : "";
-      const url = x.url ? String(x.url) : "";
-      const type = x.type ? String(x.type) : "";
-      return [type && `[${type}]`, label, url].filter(Boolean).join(" ");
-    })
-    .filter(Boolean)
-    .join("\n");
-}
-
 async function readJson(filePath) {
   const raw = await fs.readFile(filePath, "utf8");
   return JSON.parse(raw);
@@ -51,6 +37,7 @@ async function main() {
       id,
       name: data.name ?? "",
       officialUrl: data.officialUrl ?? "",
+      logoUrl: data.logoUrl ?? "",
       planUrl: data.planUrl ?? "",
       bannerHref: data.bannerHref ?? "",
       bannerImage: data.bannerImage ?? "",
@@ -58,6 +45,7 @@ async function main() {
 
       priceText: data.priceText ?? "",
       trialText: data.trialText ?? "",
+      trialDetailText: data.trialDetailText ?? "",
       benefitText: data.benefitText ?? "",
       hoursText: data.hoursText ?? "",
 
@@ -71,15 +59,24 @@ async function main() {
       campaignBullets: joinLines(data.campaignBullets),
 
       summary: data.summary ?? "",
+      editorialComments: joinLines(data.editorialComments),
       features: joinLines(data.features),
       points: joinLines(data.points),
       recommendedFor: joinLines(data.recommendedFor),
       uniquenessTitle: data.uniquenessTitle ?? "",
       uniquenessBullets: joinLines(data.uniquenessBullets),
-      primarySources: sourcesToLines(data.primarySources),
-
-      sourceUrl: data.source?.url ?? "",
-      sourceNote: data.source?.note ?? "",
+      tagsSectionTitle: data.tagsSectionTitle ?? "",
+      tagsSectionSubtitle: data.tagsSectionSubtitle ?? "",
+      recommendedTagsTitle: data.recommendedTagsTitle ?? "",
+      featureTagsTitle: data.featureTagsTitle ?? "",
+      keyFactsSectionTitle: data.keyFactsSectionTitle ?? "",
+      keyFactsSectionSubtitle: data.keyFactsSectionSubtitle ?? "",
+      basicDataSectionTitle: data.basicDataSectionTitle ?? "",
+      methodologySectionTitle: data.methodologySectionTitle ?? "",
+      methodologySectionSubtitle: data.methodologySectionSubtitle ?? "",
+      featureSectionTitle: data.featureSectionTitle ?? "",
+      reviewsSectionTitle: data.reviewsSectionTitle ?? "",
+      reviewsSectionSubtitle: data.reviewsSectionSubtitle ?? "",
     });
   }
 

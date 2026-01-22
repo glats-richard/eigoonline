@@ -167,6 +167,18 @@ export const POST: APIRoute = async ({ request }) => {
       recommendedFor: splitLines(r.recommendedFor ?? ""),
       uniquenessTitle: r.uniquenessTitle?.trim() || null,
       uniquenessBullets: splitLines(r.uniquenessBullets ?? ""),
+      tagsSectionTitle: r.tagsSectionTitle?.trim() || null,
+      tagsSectionSubtitle: r.tagsSectionSubtitle?.trim() || null,
+      recommendedTagsTitle: r.recommendedTagsTitle?.trim() || null,
+      featureTagsTitle: r.featureTagsTitle?.trim() || null,
+      keyFactsSectionTitle: r.keyFactsSectionTitle?.trim() || null,
+      keyFactsSectionSubtitle: r.keyFactsSectionSubtitle?.trim() || null,
+      basicDataSectionTitle: r.basicDataSectionTitle?.trim() || null,
+      methodologySectionTitle: r.methodologySectionTitle?.trim() || null,
+      methodologySectionSubtitle: r.methodologySectionSubtitle?.trim() || null,
+      featureSectionTitle: r.featureSectionTitle?.trim() || null,
+      reviewsSectionTitle: r.reviewsSectionTitle?.trim() || null,
+      reviewsSectionSubtitle: r.reviewsSectionSubtitle?.trim() || null,
     };
 
     try {

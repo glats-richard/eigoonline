@@ -69,6 +69,12 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <a
+            class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+            href="/api/tracker/schools/export"
+          >
+            CSVエクスポート
+          </a>
           <button
             type="button"
             id="save-all"
@@ -98,7 +104,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
 
     <section class="mt-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div class="scroll-x-contain w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
-        <table class="w-full min-w-[2200px] table-fixed border-separate border-spacing-0 text-left text-xs">
+        <table class="w-full min-w-[2800px] table-fixed border-separate border-spacing-0 text-left text-xs">
           <colgroup>
             <col style="width:140px" />
             <col style="width:220px" />
@@ -118,6 +124,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
             <col style="width:360px" />
             <col style="width:360px" />
             <col style="width:320px" />
+            <col style="width:520px" />
           </colgroup>
           <thead class="bg-zinc-50 text-[11px] font-extrabold text-zinc-600">
             <tr>
@@ -141,6 +148,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <th class="border-b border-zinc-200 px-3 py-2">ポイント（points, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">おすすめ（recommendedFor, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">独自性（title / bullets）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">セクション見出し（任意）</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-200">
@@ -262,6 +270,107 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                     <div class="grid gap-2">
                       <input data-field="uniquenessTitle" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.uniquenessTitle ?? ""} placeholder="title" />
                       <textarea data-field="uniquenessBullets" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="bullets (改行)">{joinLines(d.uniquenessBullets)}</textarea>
+                    </div>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <div class="grid gap-2">
+                      <div class="grid gap-1">
+                        <div class="text-[10px] font-extrabold text-zinc-500">キーワード（おすすめ/特徴）</div>
+                        <input
+                          data-field="tagsSectionTitle"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 px-2 py-1"
+                          value={d.tagsSectionTitle ?? ""}
+                          placeholder="セクションタイトル（例: おすすめの人・特徴（キーワード））"
+                        />
+                        <input
+                          data-field="tagsSectionSubtitle"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 px-2 py-1"
+                          value={d.tagsSectionSubtitle ?? ""}
+                          placeholder="サブタイトル（例: 気になるキーワードから…）"
+                        />
+                        <div class="grid grid-cols-2 gap-2">
+                          <input
+                            data-field="recommendedTagsTitle"
+                            data-school-id={id}
+                            class="w-full rounded border border-zinc-200 px-2 py-1"
+                            value={d.recommendedTagsTitle ?? ""}
+                            placeholder="左見出し（おすすめ）"
+                          />
+                          <input
+                            data-field="featureTagsTitle"
+                            data-school-id={id}
+                            class="w-full rounded border border-zinc-200 px-2 py-1"
+                            value={d.featureTagsTitle ?? ""}
+                            placeholder="右見出し（特徴）"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="grid gap-1">
+                        <div class="text-[10px] font-extrabold text-zinc-500">一覧/基本/学習設計/特徴/口コミ</div>
+                        <input
+                          data-field="keyFactsSectionTitle"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 px-2 py-1"
+                          value={d.keyFactsSectionTitle ?? ""}
+                          placeholder="一覧タイトル（例: 料金・無料体験・評価の一覧）"
+                        />
+                        <input
+                          data-field="keyFactsSectionSubtitle"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 px-2 py-1"
+                          value={d.keyFactsSectionSubtitle ?? ""}
+                          placeholder="一覧サブタイトル"
+                        />
+                        <div class="grid grid-cols-2 gap-2">
+                          <input
+                            data-field="basicDataSectionTitle"
+                            data-school-id={id}
+                            class="w-full rounded border border-zinc-200 px-2 py-1"
+                            value={d.basicDataSectionTitle ?? ""}
+                            placeholder="基本データ タイトル"
+                          />
+                          <input
+                            data-field="featureSectionTitle"
+                            data-school-id={id}
+                            class="w-full rounded border border-zinc-200 px-2 py-1"
+                            value={d.featureSectionTitle ?? ""}
+                            placeholder="特徴 タイトル"
+                          />
+                        </div>
+                        <input
+                          data-field="methodologySectionTitle"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 px-2 py-1"
+                          value={d.methodologySectionTitle ?? ""}
+                          placeholder="学習設計 タイトル"
+                        />
+                        <input
+                          data-field="methodologySectionSubtitle"
+                          data-school-id={id}
+                          class="w-full rounded border border-zinc-200 px-2 py-1"
+                          value={d.methodologySectionSubtitle ?? ""}
+                          placeholder="学習設計 サブタイトル"
+                        />
+                        <div class="grid grid-cols-2 gap-2">
+                          <input
+                            data-field="reviewsSectionTitle"
+                            data-school-id={id}
+                            class="w-full rounded border border-zinc-200 px-2 py-1"
+                            value={d.reviewsSectionTitle ?? ""}
+                            placeholder="口コミ タイトル"
+                          />
+                          <input
+                            data-field="reviewsSectionSubtitle"
+                            data-school-id={id}
+                            class="w-full rounded border border-zinc-200 px-2 py-1"
+                            value={d.reviewsSectionSubtitle ?? ""}
+                            placeholder="口コミ サブタイトル"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </td>
                 </tr>
