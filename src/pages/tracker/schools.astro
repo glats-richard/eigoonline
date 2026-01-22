@@ -33,22 +33,6 @@ function joinLines(xs: unknown): string {
   return xs.map((x) => String(x ?? "").trim()).filter(Boolean).join("\n");
 }
 
-function joinPrimarySources(xs: unknown): string {
-  if (!Array.isArray(xs)) return "";
-  // format: [type] label url
-  return xs
-    .map((x: any) => {
-      const type = x?.type ? String(x.type) : "official";
-      const label = x?.label ? String(x.label) : "";
-      const url = x?.url ? String(x.url) : "";
-      if (!label || !url) return "";
-      const t = type === "lp" || type === "pr" || type === "official" ? type : "official";
-      return `[${t}] ${label} ${url}`;
-    })
-    .filter(Boolean)
-    .join("\n");
-}
-
 const errors: string[] = [];
 if (dbEnvError) errors.push(dbEnvError);
 if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
@@ -134,11 +118,6 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
             <col style="width:360px" />
             <col style="width:360px" />
             <col style="width:320px" />
-            <col style="width:360px" />
-            <col style="width:380px" />
-            <col style="width:240px" />
-            <col style="width:380px" />
-            <col style="width:380px" />
           </colgroup>
           <thead class="bg-zinc-50 text-[11px] font-extrabold text-zinc-600">
             <tr>
@@ -162,9 +141,6 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <th class="border-b border-zinc-200 px-3 py-2">ポイント（points, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">おすすめ（recommendedFor, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">独自性（title / bullets）</th>
-              <th class="border-b border-zinc-200 px-3 py-2">一次情報（primarySources, 改行）</th>
-              <th class="border-b border-zinc-200 px-3 py-2">出典URL</th>
-              <th class="border-b border-zinc-200 px-3 py-2">出典メモ</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-200">
@@ -287,15 +263,6 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                       <input data-field="uniquenessTitle" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.uniquenessTitle ?? ""} placeholder="title" />
                       <textarea data-field="uniquenessBullets" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="bullets (改行)">{joinLines(d.uniquenessBullets)}</textarea>
                     </div>
-                  </td>
-                  <td class="border-b border-zinc-200 px-3 py-2">
-                    <textarea data-field="primarySources" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="[official] ラベル URL">{joinPrimarySources(d.primarySources)}</textarea>
-                  </td>
-                  <td class="border-b border-zinc-200 px-3 py-2">
-                    <input data-field="sourceUrl" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.source?.url ?? ""} />
-                  </td>
-                  <td class="border-b border-zinc-200 px-3 py-2">
-                    <textarea data-field="sourceNote" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{d.source?.note ?? ""}</textarea>
                   </td>
                 </tr>
               );

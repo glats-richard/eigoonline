@@ -116,26 +116,6 @@ function parseNum(v: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function parsePrimarySources(cell: string): { label: string; url: string; type: "official" | "lp" | "pr" }[] {
-  const out: { label: string; url: string; type: "official" | "lp" | "pr" }[] = [];
-  for (const raw of splitLines(cell)) {
-    let type: "official" | "lp" | "pr" = "official";
-    let rest = raw;
-    const m = rest.match(/^\[(official|lp|pr)\]\s*(.+)$/i);
-    if (m) {
-      type = m[1].toLowerCase() as any;
-      rest = m[2].trim();
-    }
-    const parts = rest.split(/\s+/);
-    const urlIdx = parts.findIndex((p) => /^https?:\/\//i.test(p));
-    const url = urlIdx >= 0 ? parts.slice(urlIdx).join(" ") : "";
-    const label = urlIdx >= 0 ? parts.slice(0, urlIdx).join(" ").trim() : rest;
-    if (!label || !url) continue;
-    out.push({ type, label, url });
-  }
-  return out;
-}
-
 export const POST: APIRoute = async ({ request }) => {
   if (dbEnvError) return json({ ok: false, error: dbEnvError }, 500);
 
@@ -187,14 +167,7 @@ export const POST: APIRoute = async ({ request }) => {
       recommendedFor: splitLines(r.recommendedFor ?? ""),
       uniquenessTitle: r.uniquenessTitle?.trim() || null,
       uniquenessBullets: splitLines(r.uniquenessBullets ?? ""),
-      primarySources: parsePrimarySources(r.primarySources ?? ""),
-      source: {
-        url: (r.sourceUrl ?? "").trim() || undefined,
-        note: (r.sourceNote ?? "").trim() || undefined,
-      },
     };
-    // Drop empty nested source
-    if (!data.source.url) delete data.source;
 
     try {
       await query(

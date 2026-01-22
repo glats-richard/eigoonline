@@ -86,7 +86,6 @@ export const POST: APIRoute = async ({ request }) => {
   const points = toArrayFromTextarea(patch.points);
   const recommendedFor = toArrayFromTextarea(patch.recommendedFor);
   const uniquenessBullets = toArrayFromTextarea(patch.uniquenessBullets);
-  const primarySourcesLines = toArrayFromTextarea(patch.primarySources);
 
   const data: Record<string, any> = {
     name: toStringOrNull(patch.name),
@@ -115,25 +114,12 @@ export const POST: APIRoute = async ({ request }) => {
     recommendedFor,
     uniquenessTitle: toStringOrNull(patch.uniquenessTitle),
     uniquenessBullets,
-    primarySources: parsePrimarySources(primarySourcesLines),
-    source: {
-      url: toStringOrNull(patch.sourceUrl),
-      note: toStringOrNull(patch.sourceNote) ?? undefined,
-    },
   };
 
   // Remove undefined keys so "not provided" doesn't overwrite.
   for (const k of Object.keys(data)) {
     if (data[k] === undefined) delete data[k];
   }
-  // Clean nested source
-  if (data.source) {
-    if (!data.source.url) delete data.source;
-    else {
-      if (data.source.note == null) delete data.source.note;
-    }
-  }
-
   try {
     await query(
       `
