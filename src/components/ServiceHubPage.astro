@@ -666,25 +666,30 @@ if (faqItems.length) {
     }
   }
 
-  renderCompare(null);
+  function readCompareFromSelect(sel) {
+    if (!sel) return null;
+    var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+    var tq = opt && opt.dataset ? opt.dataset.tq : "";
+    var mq = opt && opt.dataset ? opt.dataset.mq : "";
+    var cq = opt && opt.dataset ? opt.dataset.cq : "";
+    var pr = opt && opt.dataset ? opt.dataset.pr : "";
+    var sr = opt && opt.dataset ? opt.dataset.sr : "";
+    var hasAny = (tq !== "" || mq !== "" || cq !== "" || pr !== "" || sr !== "");
+    return hasAny ? {
+      teacherQuality: Number(tq || 0),
+      materialQuality: Number(mq || 0),
+      connectionQuality: Number(cq || 0),
+      priceRating: Number(pr || 0),
+      satisfactionRating: Number(sr || 0)
+    } : null;
+  }
+
+  // Initial render: if a compare option is already selected (bfcache/back/restore), show it.
+  renderCompare(readCompareFromSelect(select));
 
   if (select) {
     select.addEventListener("change", function () {
-      var opt = select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
-      var tq = opt && opt.dataset ? opt.dataset.tq : "";
-      var mq = opt && opt.dataset ? opt.dataset.mq : "";
-      var cq = opt && opt.dataset ? opt.dataset.cq : "";
-      var pr = opt && opt.dataset ? opt.dataset.pr : "";
-      var sr = opt && opt.dataset ? opt.dataset.sr : "";
-      var hasAny = (tq !== "" || mq !== "" || cq !== "" || pr !== "" || sr !== "");
-      var cmp = hasAny ? {
-        teacherQuality: Number(tq || 0),
-        materialQuality: Number(mq || 0),
-        connectionQuality: Number(cq || 0),
-        priceRating: Number(pr || 0),
-        satisfactionRating: Number(sr || 0)
-      } : null;
-      renderCompare(cmp);
+      renderCompare(readCompareFromSelect(select));
     });
   }
 })();`}
