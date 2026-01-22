@@ -36,6 +36,20 @@ function toStringOrNull(v: unknown): string | null | undefined {
   return s ? s : null;
 }
 
+function toJsonArrayOrEmpty(v: unknown): any[] | undefined {
+  if (v === undefined || v === null) return undefined;
+  const s = String(v).trim();
+  if (!s) return [];
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(s);
+  } catch {
+    throw new Error("introSections must be valid JSON");
+  }
+  if (!Array.isArray(parsed)) throw new Error("introSections must be a JSON array");
+  return parsed;
+}
+
 function parsePrimarySources(lines: string[] | undefined): { label: string; url: string; type: "official" | "lp" | "pr" }[] | undefined {
   if (!lines) return undefined;
   const out: { label: string; url: string; type: "official" | "lp" | "pr" }[] = [];
@@ -86,6 +100,12 @@ export const POST: APIRoute = async ({ request }) => {
   const points = toArrayFromTextarea(patch.points);
   const recommendedFor = toArrayFromTextarea(patch.recommendedFor);
   const uniquenessBullets = toArrayFromTextarea(patch.uniquenessBullets);
+  let introSections: any[] | undefined = undefined;
+  try {
+    introSections = toJsonArrayOrEmpty(patch.introSections);
+  } catch (e: any) {
+    return json({ ok: false, error: e?.message ?? String(e) }, 400);
+  }
 
   const data: Record<string, any> = {
     name: toStringOrNull(patch.name),
@@ -106,6 +126,8 @@ export const POST: APIRoute = async ({ request }) => {
     campaignBullets,
     summary: toStringOrNull(patch.summary),
     heroDescription: toStringOrNull(patch.heroDescription),
+    introSectionTitle: toStringOrNull(patch.introSectionTitle),
+    introSections,
     editorialComments,
     features,
     points,

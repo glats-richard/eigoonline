@@ -116,6 +116,19 @@ function parseNum(v: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function parseJsonArray(v: string): any[] {
+  const s = String(v ?? "").trim();
+  if (!s) return [];
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(s);
+  } catch {
+    throw new Error("introSections must be valid JSON");
+  }
+  if (!Array.isArray(parsed)) throw new Error("introSections must be a JSON array");
+  return parsed;
+}
+
 export const POST: APIRoute = async ({ request }) => {
   if (dbEnvError) return json({ ok: false, error: dbEnvError }, 500);
 
@@ -140,44 +153,52 @@ export const POST: APIRoute = async ({ request }) => {
       continue;
     }
 
-    const data: Record<string, any> = {
-      name: r.name?.trim() || undefined,
-      officialUrl: r.officialUrl?.trim() || undefined,
-      logoUrl: r.logoUrl?.trim() || null,
-      planUrl: r.planUrl?.trim() || null,
-      bannerHref: r.bannerHref?.trim() || null,
-      bannerImage: r.bannerImage?.trim() || null,
-      bannerAlt: r.bannerAlt?.trim() || null,
-      priceText: r.priceText?.trim() || null,
-      trialText: r.trialText?.trim() || null,
-      trialDetailText: r.trialDetailText?.trim() || null,
-      benefitText: r.benefitText?.trim() || null,
-      hoursText: r.hoursText?.trim() || null,
-      // rating/quality fields are derived from user reviews; do not allow overrides.
-      campaignText: r.campaignText?.trim() || null,
-      campaignEndsAt: r.campaignEndsAt?.trim() || null,
-      campaignBullets: splitLines(r.campaignBullets ?? ""),
-      summary: r.summary?.trim() || null,
-      heroDescription: r.heroDescription?.trim() || null,
-      editorialComments: splitLines(r.editorialComments ?? ""),
-      features: splitLines(r.features ?? ""),
-      points: splitLines(r.points ?? ""),
-      recommendedFor: splitLines(r.recommendedFor ?? ""),
-      uniquenessTitle: r.uniquenessTitle?.trim() || null,
-      uniquenessBullets: splitLines(r.uniquenessBullets ?? ""),
-      tagsSectionTitle: r.tagsSectionTitle?.trim() || null,
-      tagsSectionSubtitle: r.tagsSectionSubtitle?.trim() || null,
-      recommendedTagsTitle: r.recommendedTagsTitle?.trim() || null,
-      featureTagsTitle: r.featureTagsTitle?.trim() || null,
-      keyFactsSectionTitle: r.keyFactsSectionTitle?.trim() || null,
-      keyFactsSectionSubtitle: r.keyFactsSectionSubtitle?.trim() || null,
-      basicDataSectionTitle: r.basicDataSectionTitle?.trim() || null,
-      methodologySectionTitle: r.methodologySectionTitle?.trim() || null,
-      methodologySectionSubtitle: r.methodologySectionSubtitle?.trim() || null,
-      featureSectionTitle: r.featureSectionTitle?.trim() || null,
-      reviewsSectionTitle: r.reviewsSectionTitle?.trim() || null,
-      reviewsSectionSubtitle: r.reviewsSectionSubtitle?.trim() || null,
-    };
+    let data: Record<string, any> | null = null;
+    try {
+      data = {
+        name: r.name?.trim() || undefined,
+        officialUrl: r.officialUrl?.trim() || undefined,
+        logoUrl: r.logoUrl?.trim() || null,
+        planUrl: r.planUrl?.trim() || null,
+        bannerHref: r.bannerHref?.trim() || null,
+        bannerImage: r.bannerImage?.trim() || null,
+        bannerAlt: r.bannerAlt?.trim() || null,
+        priceText: r.priceText?.trim() || null,
+        trialText: r.trialText?.trim() || null,
+        trialDetailText: r.trialDetailText?.trim() || null,
+        benefitText: r.benefitText?.trim() || null,
+        hoursText: r.hoursText?.trim() || null,
+        // rating/quality fields are derived from user reviews; do not allow overrides.
+        campaignText: r.campaignText?.trim() || null,
+        campaignEndsAt: r.campaignEndsAt?.trim() || null,
+        campaignBullets: splitLines(r.campaignBullets ?? ""),
+        summary: r.summary?.trim() || null,
+        heroDescription: r.heroDescription?.trim() || null,
+        introSectionTitle: r.introSectionTitle?.trim() || null,
+        introSections: parseJsonArray(r.introSections ?? ""),
+        editorialComments: splitLines(r.editorialComments ?? ""),
+        features: splitLines(r.features ?? ""),
+        points: splitLines(r.points ?? ""),
+        recommendedFor: splitLines(r.recommendedFor ?? ""),
+        uniquenessTitle: r.uniquenessTitle?.trim() || null,
+        uniquenessBullets: splitLines(r.uniquenessBullets ?? ""),
+        tagsSectionTitle: r.tagsSectionTitle?.trim() || null,
+        tagsSectionSubtitle: r.tagsSectionSubtitle?.trim() || null,
+        recommendedTagsTitle: r.recommendedTagsTitle?.trim() || null,
+        featureTagsTitle: r.featureTagsTitle?.trim() || null,
+        keyFactsSectionTitle: r.keyFactsSectionTitle?.trim() || null,
+        keyFactsSectionSubtitle: r.keyFactsSectionSubtitle?.trim() || null,
+        basicDataSectionTitle: r.basicDataSectionTitle?.trim() || null,
+        methodologySectionTitle: r.methodologySectionTitle?.trim() || null,
+        methodologySectionSubtitle: r.methodologySectionSubtitle?.trim() || null,
+        featureSectionTitle: r.featureSectionTitle?.trim() || null,
+        reviewsSectionTitle: r.reviewsSectionTitle?.trim() || null,
+        reviewsSectionSubtitle: r.reviewsSectionSubtitle?.trim() || null,
+      };
+    } catch (e: any) {
+      errors.push(`${id}: ${e?.message ?? String(e)}`);
+      continue;
+    }
 
     try {
       await query(

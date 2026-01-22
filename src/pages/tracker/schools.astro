@@ -104,7 +104,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
 
     <section class="mt-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div class="scroll-x-contain w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
-        <table class="w-full min-w-[5200px] table-fixed border-separate border-spacing-0 text-left text-xs">
+        <table class="w-full min-w-[5800px] table-fixed border-separate border-spacing-0 text-left text-xs">
           <colgroup>
             <col style="width:140px" />
             <col style="width:220px" />
@@ -126,6 +126,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
             <col style="width:320px" />
             <col style="width:320px" />
             <col style="width:320px" />
+            <col style="width:520px" />
             <col style="width:520px" />
           </colgroup>
           <thead class="bg-zinc-50 text-[11px] font-extrabold text-zinc-600">
@@ -151,6 +152,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <th class="border-b border-zinc-200 px-3 py-2">おすすめ（recommendedFor, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">独自性（title / bullets）</th>
               <th class="border-b border-zinc-200 px-3 py-2">セクション見出し（任意）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">紹介（introSections, JSON）</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-200">
@@ -385,6 +387,28 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                             placeholder="口コミ サブタイトル"
                           />
                         </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <div class="grid gap-2">
+                      <input
+                        data-field="introSectionTitle"
+                        data-school-id={id}
+                        class="w-full rounded border border-zinc-200 px-2 py-1"
+                        value={d.introSectionTitle ?? ""}
+                        placeholder="セクションタイトル（例: 紹介 / 選ばれる理由）"
+                      />
+                      <textarea
+                        data-field="introSections"
+                        data-school-id={id}
+                        class="h-40 w-full rounded border border-zinc-200 px-2 py-1 font-mono text-[11px]"
+                        placeholder='例: [{"title":"...", "body":"...", "wideMedia":{"type":"image","src":"/img.png"}, "sideMedia":{"type":"iframe","src":"https://www.youtube.com/embed/..."} }]'
+                      >
+                        {Array.isArray(d.introSections) ? JSON.stringify(d.introSections, null, 2) : ""}
+                      </textarea>
+                      <div class="text-[10px] font-semibold text-zinc-500">
+                        ※JSONで編集します（title/bodyは必須）。wideMedia/sideMediaは {`{type:"image"|"iframe", src:"..."}`} を指定できます。
                       </div>
                     </div>
                   </td>

@@ -1,5 +1,21 @@
 import { defineCollection, z } from 'astro:content';
 
+const introMedia = z.discriminatedUnion('type', [
+	z.object({
+		type: z.literal('image'),
+		src: z.string(),
+		alt: z.string().nullable().optional(),
+		width: z.number().int().positive().nullable().optional(),
+		height: z.number().int().positive().nullable().optional(),
+	}),
+	z.object({
+		type: z.literal('iframe'),
+		src: z.string(),
+		width: z.number().int().positive().nullable().optional(),
+		height: z.number().int().positive().nullable().optional(),
+	}),
+]);
+
 const schools = defineCollection({
 	type: 'data',
 	schema: z.object({
@@ -14,6 +30,19 @@ const schools = defineCollection({
 		hoursText: z.string().nullable().optional(),
 		/** Optional hero paragraph shown under the title on detail pages. */
 		heroDescription: z.string().nullable().optional(),
+		/** Intro blocks shown on detail pages (image/embed + heading + body). */
+		introSectionTitle: z.string().nullable().optional(),
+		introSections: z
+			.array(
+				z.object({
+					title: z.string(),
+					body: z.string(),
+					wideMedia: introMedia.nullable().optional(),
+					sideMedia: introMedia.nullable().optional(),
+					reverse: z.boolean().optional(),
+				}),
+			)
+			.default([]),
 		/** Teacher quality score 0-5 in 0.5 steps (for the small table). */
 		teacherQuality: z
 			.number()

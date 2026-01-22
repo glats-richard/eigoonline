@@ -55,6 +55,8 @@ async function main() {
 
       summary: data.summary ?? "",
       heroDescription: data.heroDescription ?? "",
+      introSectionTitle: data.introSectionTitle ?? "",
+      introSections: Array.isArray(data.introSections) && data.introSections.length ? JSON.stringify(data.introSections) : "",
       editorialComments: joinLines(data.editorialComments),
       features: joinLines(data.features),
       points: joinLines(data.points),

@@ -317,6 +317,24 @@ const entityRows = [
   { k: "総合評価（集計）", v: ratingValue !== null ? `${ratingValue} / 5` : "—" },
 ];
 
+type IntroMedia =
+  | { type: "image"; src: string; alt?: string | null; width?: number | null; height?: number | null }
+  | { type: "iframe"; src: string; width?: number | null; height?: number | null };
+
+type IntroSection = {
+  title: string;
+  body: string;
+  wideMedia?: IntroMedia | null;
+  sideMedia?: IntroMedia | null;
+  reverse?: boolean;
+};
+
+const introSections: IntroSection[] = Array.isArray((school as any)?.introSections) ? (((school as any).introSections as any[]) as IntroSection[]) : [];
+
+function isNonEmptyString(v: unknown): v is string {
+  return typeof v === "string" && v.trim().length > 0;
+}
+
 const methodology =
   schoolId === "kimini"
     ? [
@@ -773,6 +791,85 @@ if (faqItems.length) {
           ))}
         </ul>
       </section>
+
+      {introSections.length ? (
+        <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">{school.introSectionTitle ?? "紹介"}</h2>
+          <div class="mt-4 space-y-6">
+            {introSections.map((sec) => {
+              const reverse = !!sec.reverse;
+              const wide = sec.wideMedia ?? null;
+              const side = sec.sideMedia ?? null;
+              return (
+                <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                  {wide && wide.type === "image" && isNonEmptyString(wide.src) ? (
+                    <div class="mb-4">
+                      <img
+                        src={wide.src}
+                        alt={wide.alt ?? ""}
+                        loading="lazy"
+                        decoding="async"
+                        width={typeof wide.width === "number" ? String(wide.width) : undefined}
+                        height={typeof wide.height === "number" ? String(wide.height) : undefined}
+                        class="h-auto w-full rounded-xl border border-zinc-200 bg-white object-contain"
+                      />
+                    </div>
+                  ) : null}
+                  {wide && wide.type === "iframe" && isNonEmptyString(wide.src) ? (
+                    <div class="mb-4">
+                      <div class="aspect-video w-full overflow-hidden rounded-xl border border-zinc-200 bg-black">
+                        <iframe
+                          src={wide.src}
+                          class="h-full w-full"
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowfullscreen={true}
+                          referrerpolicy="no-referrer"
+                          title="embed"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  <div class:list={["grid gap-4", side ? "lg:grid-cols-[1fr_240px]" : "", reverse ? "lg:[direction:rtl]" : ""]}>
+                    <div class:list={["min-w-0", reverse ? "lg:[direction:ltr]" : ""]}>
+                      <h3 class="text-base font-extrabold text-zinc-900">{sec.title}</h3>
+                      <p class="mt-2 text-sm font-semibold leading-7 text-zinc-700 whitespace-pre-wrap">{sec.body}</p>
+                    </div>
+                    {side && side.type === "image" && isNonEmptyString(side.src) ? (
+                      <div class:list={reverse ? "lg:[direction:ltr]" : ""}>
+                        <img
+                          src={side.src}
+                          alt={side.alt ?? ""}
+                          loading="lazy"
+                          decoding="async"
+                          width={typeof side.width === "number" ? String(side.width) : undefined}
+                          height={typeof side.height === "number" ? String(side.height) : undefined}
+                          class="h-auto w-full rounded-xl border border-zinc-200 bg-white object-contain"
+                        />
+                      </div>
+                    ) : null}
+                    {side && side.type === "iframe" && isNonEmptyString(side.src) ? (
+                      <div class:list={reverse ? "lg:[direction:ltr]" : ""}>
+                        <div class="aspect-video w-full overflow-hidden rounded-xl border border-zinc-200 bg-black">
+                          <iframe
+                            src={side.src}
+                            class="h-full w-full"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen={true}
+                            referrerpolicy="no-referrer"
+                            title="embed"
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <!-- Feature section -->
       <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">

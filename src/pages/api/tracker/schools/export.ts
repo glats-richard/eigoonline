@@ -51,6 +51,8 @@ export const GET: APIRoute = async () => {
 
         summary: d.summary ?? "",
         heroDescription: d.heroDescription ?? "",
+        introSectionTitle: d.introSectionTitle ?? "",
+        introSections: Array.isArray(d.introSections) && d.introSections.length ? JSON.stringify(d.introSections) : "",
         editorialComments: joinLines(d.editorialComments),
         features: joinLines(d.features),
         points: joinLines(d.points),
