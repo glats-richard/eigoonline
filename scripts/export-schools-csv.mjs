@@ -54,6 +54,7 @@ async function main() {
       campaignBullets: joinLines(data.campaignBullets),
 
       summary: data.summary ?? "",
+      heroDescription: data.heroDescription ?? "",
       editorialComments: joinLines(data.editorialComments),
       features: joinLines(data.features),
       points: joinLines(data.points),

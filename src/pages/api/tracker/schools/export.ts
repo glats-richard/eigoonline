@@ -50,6 +50,7 @@ export const GET: APIRoute = async () => {
         campaignBullets: joinLines(d.campaignBullets),
 
         summary: d.summary ?? "",
+        heroDescription: d.heroDescription ?? "",
         editorialComments: joinLines(d.editorialComments),
         features: joinLines(d.features),
         points: joinLines(d.points),

@@ -12,6 +12,8 @@ const schools = defineCollection({
 		benefitText: z.string().nullable().optional(),
 		/** Lesson hours text (e.g. "24時間", "朝5時〜深夜25時"). */
 		hoursText: z.string().nullable().optional(),
+		/** Optional hero paragraph shown under the title on detail pages. */
+		heroDescription: z.string().nullable().optional(),
 		/** Teacher quality score 0-5 in 0.5 steps (for the small table). */
 		teacherQuality: z
 			.number()

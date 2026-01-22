@@ -260,7 +260,17 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                     <textarea data-field="campaignBullets" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.campaignBullets)}</textarea>
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">
-                    <textarea data-field="summary" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{d.summary ?? ""}</textarea>
+                    <div class="grid gap-2">
+                      <textarea data-field="summary" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="概要（summary）">{d.summary ?? ""}</textarea>
+                      <textarea
+                        data-field="heroDescription"
+                        data-school-id={id}
+                        class="h-24 w-full rounded border border-zinc-200 px-2 py-1"
+                        placeholder="ヒーロー説明（heroDescription, 任意・3倍くらい長文OK）"
+                      >
+                        {d.heroDescription ?? ""}
+                      </textarea>
+                    </div>
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">
                     <textarea data-field="features" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.features)}</textarea>

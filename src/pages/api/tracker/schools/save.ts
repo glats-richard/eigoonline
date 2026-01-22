@@ -105,6 +105,7 @@ export const POST: APIRoute = async ({ request }) => {
     campaignEndsAt: toStringOrNull(patch.campaignEndsAt),
     campaignBullets,
     summary: toStringOrNull(patch.summary),
+    heroDescription: toStringOrNull(patch.heroDescription),
     editorialComments,
     features,
     points,

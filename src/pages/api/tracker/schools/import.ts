@@ -158,6 +158,7 @@ export const POST: APIRoute = async ({ request }) => {
       campaignEndsAt: r.campaignEndsAt?.trim() || null,
       campaignBullets: splitLines(r.campaignBullets ?? ""),
       summary: r.summary?.trim() || null,
+      heroDescription: r.heroDescription?.trim() || null,
       editorialComments: splitLines(r.editorialComments ?? ""),
       features: splitLines(r.features ?? ""),
       points: splitLines(r.points ?? ""),
