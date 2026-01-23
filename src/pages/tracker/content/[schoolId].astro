@@ -1,0 +1,348 @@
+---
+export const prerender = false;
+
+import Layout from "../../../layouts/Layout.astro";
+import TrackerHeader from "../../../components/TrackerHeader.astro";
+import { dbEnvError, query } from "../../../lib/db";
+import { getSchoolsMerged } from "../../../lib/schools";
+
+type Props = { schoolId: string };
+const { schoolId } = Astro.params as unknown as Props;
+
+type OverrideRow = { school_id: string; updated_at: string | null };
+
+const schools = await getSchoolsMerged();
+const entry = schools.find((s) => s.id === schoolId) ?? null;
+const school = entry?.data ?? null;
+
+let updatedAt: string | null = null;
+let overridesErr: string | null = null;
+if (!dbEnvError) {
+  try {
+    const r = await query<OverrideRow>("select school_id, updated_at from school_overrides where school_id = $1 limit 1", [schoolId]);
+    updatedAt = r.rows?.[0]?.updated_at ?? null;
+  } catch (e: any) {
+    overridesErr = e?.message ?? String(e);
+  }
+}
+
+function fmtDate(iso?: string | null) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("ja-JP");
+}
+
+function joinLines(xs: unknown): string {
+  if (!Array.isArray(xs)) return "";
+  return xs.map((x) => String(x ?? "").trim()).filter(Boolean).join("\n");
+}
+
+const errors: string[] = [];
+if (!schoolId) errors.push("schoolId is required");
+if (!entry) errors.push("Unknown schoolId");
+if (dbEnvError) errors.push(dbEnvError);
+if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
+---
+
+<Layout title="コンテンツ編集（詳細）" description="スクール情報を編集（DB上書き）" robots="noindex,nofollow" showHeader={false}>
+  <TrackerHeader />
+  <main class="mx-auto w-full max-w-4xl px-4 pb-14 pt-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="truncate text-2xl font-extrabold text-zinc-900">コンテンツ編集（詳細）</h1>
+        <p class="mt-1 text-sm text-zinc-600">
+          <a class="underline" href="/tracker/content">/tracker/content</a> / <span class="font-semibold">{schoolId}</span>
+        </p>
+      </div>
+      <div class="text-xs text-zinc-500">
+        上書き更新: <span class="font-semibold">{fmtDate(updatedAt)}</span>
+      </div>
+    </div>
+
+    {errors.length ? (
+      <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+        <div class="font-extrabold">エラー</div>
+        <ul class="mt-2 list-disc pl-5">
+          {errors.map((e) => (
+            <li>{e}</li>
+          ))}
+        </ul>
+      </div>
+    ) : null}
+
+    {school ? (
+      <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="text-sm font-semibold text-zinc-700">
+            保存するとDBの <code class="font-semibold">school_overrides</code> に保存され、サイト表示に反映されます。
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <a class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50" href={`/${encodeURIComponent(schoolId)}/`} target="_blank" rel="noopener noreferrer">
+              公開ページ →
+            </a>
+            <button type="button" data-action="clear" class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50">
+              上書き解除
+            </button>
+            <button type="button" data-action="save" class="btn-brand rounded-xl px-4 py-2 text-sm font-extrabold text-white shadow-sm">
+              保存
+            </button>
+          </div>
+        </div>
+        <div id="status" class="mt-3 text-sm font-semibold text-zinc-600"></div>
+      </section>
+    ) : null}
+
+    {school ? (
+      <form class="mt-6 space-y-6" data-school-id={schoolId}>
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">基本情報</h2>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">名前</span>
+              <input data-field="name" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.name ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">公式URL</span>
+              <input data-field="officialUrl" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.officialUrl ?? ""} />
+            </label>
+            <label class="grid gap-1 sm:col-span-2">
+              <span class="text-xs font-extrabold text-zinc-600">ロゴURL</span>
+              <input data-field="logoUrl" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.logoUrl ?? ""} />
+            </label>
+            <label class="grid gap-1 sm:col-span-2">
+              <span class="text-xs font-extrabold text-zinc-600">プランURL</span>
+              <input data-field="planUrl" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.planUrl ?? ""} />
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">ヒーロー（見出し/画像/説明）</h2>
+          <div class="mt-4 grid gap-4">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">ヒーロー画像URL</span>
+              <input data-field="heroImageUrl" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.heroImageUrl ?? ""} placeholder="/kimini_detail_banner.png など" />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">ヒーロー画像ALT</span>
+              <input data-field="heroImageAlt" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.heroImageAlt ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">ヒーロー説明（長文OK）</span>
+              <textarea data-field="heroDescription" class="h-36 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" placeholder="※JSONは貼らず、PR/紹介に入れてください。">{school.heroDescription ?? ""}</textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">料金・無料体験</h2>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">月額（priceText）</span>
+              <input data-field="priceText" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.priceText ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">無料体験（trialText）</span>
+              <input data-field="trialText" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.trialText ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">体験詳細（trialDetailText）</span>
+              <input data-field="trialDetailText" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.trialDetailText ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">特典（benefitText）</span>
+              <input data-field="benefitText" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.benefitText ?? ""} />
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">バナー（一覧/本文）</h2>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-1 sm:col-span-2">
+              <span class="text-xs font-extrabold text-zinc-600">バナー href</span>
+              <input data-field="bannerHref" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.bannerHref ?? ""} />
+            </label>
+            <label class="grid gap-1 sm:col-span-2">
+              <span class="text-xs font-extrabold text-zinc-600">バナー画像</span>
+              <input data-field="bannerImage" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.bannerImage ?? ""} />
+            </label>
+            <label class="grid gap-1 sm:col-span-2">
+              <span class="text-xs font-extrabold text-zinc-600">バナー alt</span>
+              <input data-field="bannerAlt" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.bannerAlt ?? ""} />
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">評価（上書き不可）</h2>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">総合</span>
+              <input class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-semibold text-zinc-700" value={school.rating ?? ""} disabled />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">講師</span>
+              <input class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-semibold text-zinc-700" value={school.teacherQuality ?? ""} disabled />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">教材</span>
+              <input class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-semibold text-zinc-700" value={school.materialQuality ?? ""} disabled />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">通信</span>
+              <input class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-semibold text-zinc-700" value={school.connectionQuality ?? ""} disabled />
+            </label>
+          </div>
+          <p class="mt-2 text-xs font-semibold text-zinc-500">※体験談（レビュー）集計を優先。管理画面からは上書きしません。</p>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">本文コンテンツ</h2>
+          <div class="mt-4 grid gap-4">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">概要（summary）</span>
+              <textarea data-field="summary" class="h-28 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold">{school.summary ?? ""}</textarea>
+            </label>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="grid gap-1">
+                <span class="text-xs font-extrabold text-zinc-600">特徴（features, 改行）</span>
+                <textarea data-field="features" class="h-36 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold">{joinLines(school.features)}</textarea>
+              </label>
+              <label class="grid gap-1">
+                <span class="text-xs font-extrabold text-zinc-600">おすすめ（recommendedFor, 改行）</span>
+                <textarea data-field="recommendedFor" class="h-36 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold">{joinLines(school.recommendedFor)}</textarea>
+              </label>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="grid gap-1">
+                <span class="text-xs font-extrabold text-zinc-600">ポイント（points, 改行）</span>
+                <textarea data-field="points" class="h-36 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold">{joinLines(school.points)}</textarea>
+              </label>
+              <label class="grid gap-1">
+                <span class="text-xs font-extrabold text-zinc-600">編集コメント（editorialComments, 改行）</span>
+                <textarea data-field="editorialComments" class="h-36 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold">{joinLines(school.editorialComments)}</textarea>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">PR（JSON / 最大5件表示）</h2>
+          <div class="mt-4 grid gap-4">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">セクションタイトル（prSectionTitle）</span>
+              <input data-field="prSectionTitle" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.prSectionTitle ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">PR（prSections, JSON）</span>
+              <textarea data-field="prSections" class="h-52 w-full rounded-lg border border-zinc-200 px-3 py-2 font-mono text-[12px]">
+                {Array.isArray((school as any).prSections) ? JSON.stringify((school as any).prSections, null, 2) : ""}
+              </textarea>
+              <div class="text-xs font-semibold text-zinc-500">iconText / iconUrl はどちらか。画像は image.src を指定します。</div>
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">紹介（JSON）</h2>
+          <div class="mt-4 grid gap-4">
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">セクションタイトル（introSectionTitle）</span>
+              <input data-field="introSectionTitle" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.introSectionTitle ?? ""} />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">表示位置（introPlacement）</span>
+              <select data-field="introPlacement" class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold">
+                <option value="" selected={!school.introPlacement}>セクション（デフォルト）</option>
+                <option value="section" selected={school.introPlacement === "section"}>セクション</option>
+                <option value="hero" selected={school.introPlacement === "hero"}>ヒーロー説明に入れる</option>
+              </select>
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">紹介（introSections, JSON）</span>
+              <textarea data-field="introSections" class="h-52 w-full rounded-lg border border-zinc-200 px-3 py-2 font-mono text-[12px]">
+                {Array.isArray((school as any).introSections) ? JSON.stringify((school as any).introSections, null, 2) : ""}
+              </textarea>
+            </label>
+          </div>
+        </section>
+      </form>
+    ) : null}
+
+    <script is:inline>
+(function () {
+  function qs(sel, root) { return (root || document).querySelector(sel); }
+  function qsa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+  var form = qs("form[data-school-id]");
+  var schoolId = form ? form.getAttribute("data-school-id") : "";
+  var statusEl = qs("#status");
+
+  function setStatus(msg, kind) {
+    if (!statusEl) return;
+    statusEl.textContent = msg || "";
+    statusEl.style.color = kind === "error" ? "#b91c1c" : kind === "ok" ? "#16a34a" : "";
+  }
+
+  function collectPatch() {
+    if (!form) return {};
+    var fields = qsa("[data-field]", form);
+    var patch = {};
+    for (var i = 0; i < fields.length; i++) {
+      var el = fields[i];
+      var key = el.getAttribute("data-field");
+      if (!key) continue;
+      var v = ("value" in el) ? el.value : (el.textContent || "");
+      patch[key] = v;
+    }
+    return patch;
+  }
+
+  async function postJson(url, body) {
+    var res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    var data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok || !data || data.ok !== true) {
+      var msg = (data && data.error) ? data.error : ("HTTP " + res.status);
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  async function save() {
+    setStatus("保存中…");
+    try {
+      await postJson("/api/tracker/schools/save", { schoolId: schoolId, patch: collectPatch() });
+      setStatus("保存しました", "ok");
+    } catch (e) {
+      setStatus("保存失敗: " + (e && e.message ? e.message : String(e)), "error");
+    }
+  }
+
+  async function clear() {
+    if (!confirm("上書きを解除しますか？（DBの上書きデータを削除）")) return;
+    setStatus("解除中…");
+    try {
+      await postJson("/api/tracker/schools/clear", { schoolId: schoolId });
+      setStatus("解除しました（再読み込みします）", "ok");
+      location.reload();
+    } catch (e) {
+      setStatus("解除失敗: " + (e && e.message ? e.message : String(e)), "error");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.getAttribute) return;
+    var act = t.getAttribute("data-action");
+    if (!act) return;
+    e.preventDefault();
+    if (act === "save") save();
+    if (act === "clear") clear();
+  });
+})();
+    </script>
+  </main>
+</Layout>
+

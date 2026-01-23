@@ -193,6 +193,12 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                       >
                         ページ →
                       </a>
+                      <a
+                        class="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-[11px] font-extrabold text-zinc-800 hover:bg-zinc-50"
+                        href={`/tracker/content/${encodeURIComponent(id)}`}
+                      >
+                        詳細編集 →
+                      </a>
                     </div>
                     <div class="mt-2 text-[11px] font-semibold text-zinc-500" id={`${rowKey}-status`}></div>
                   </td>

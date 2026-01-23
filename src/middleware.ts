@@ -78,8 +78,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
   // Editor can only access content editor UI + its APIs.
   const editorAllowed =
-    pathname === "/tracker/content" ||
-    pathname === "/tracker/content/" ||
+    pathname.startsWith("/tracker/content") ||
     pathname.startsWith("/api/tracker/schools");
 
   if (!editorAllowed) return forbidden();
