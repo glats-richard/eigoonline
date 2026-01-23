@@ -465,9 +465,9 @@ if (faqItems.length) {
     <main id="top" class="mx-auto w-full max-w-6xl px-4 pb-12 pt-6">
       <!-- Hero -->
       <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-start gap-3">
           {school.logoUrl ? (
-            <div class="flex h-14 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3">
+            <div class="flex h-14 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3">
               <img
                 src={school.logoUrl}
                 alt={`${school.name} ロゴ`}
@@ -479,12 +479,13 @@ if (faqItems.length) {
               />
             </div>
           ) : (
-            <div class="flex h-14 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-extrabold text-zinc-800">
+            <div class="flex h-14 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-extrabold text-zinc-800">
               LOGO
             </div>
           )}
 
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 whitespace-nowrap [-webkit-overflow-scrolling:touch]">
             <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">ランキング</span>
               <span class="text-zinc-700">
@@ -503,7 +504,7 @@ if (faqItems.length) {
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">レッスン満足度</span>
               {ratingValue !== null ? (
                 <span class="inline-flex items-center gap-2">
-                  <StarRating value={ratingValue} size={14} />
+                  <StarRating value={ratingValue} size={14} showValue={false} />
                   <span class="text-zinc-900">{ratingValue.toFixed(1)}</span>
                   <span class="text-zinc-500">（{reviewCount}件）</span>
                 </span>
@@ -515,6 +516,7 @@ if (faqItems.length) {
             <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">最安プラン</span>
               <span class="text-zinc-700">{cheapestPlanYen ? `${cheapestPlanYen}/月` : school.priceText ?? "—"}</span>
+            </div>
             </div>
           </div>
         </div>
