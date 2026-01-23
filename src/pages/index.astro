@@ -316,28 +316,6 @@ const faqJsonLd = {
 							/>
 						</picture>
 
-						<!-- Service logos (top picks) -->
-						<div class="pointer-events-none absolute inset-x-0 bottom-0 bg-white/65 backdrop-blur">
-							<div class="pointer-events-auto flex items-center gap-4 overflow-x-auto px-4 py-2 [-webkit-overflow-scrolling:touch]">
-								{overallItemsRated.slice(0, 8).map((x) =>
-									x.data.logoUrl ? (
-										<a
-											href={`#school-${x.id}`}
-											class="shrink-0 rounded-lg bg-white/70 px-3 py-2 ring-1 ring-black/5 hover:bg-white"
-											aria-label={`${x.data.name} の詳細へ`}
-										>
-											<img
-												src={x.data.logoUrl}
-												alt={`${x.data.name} ロゴ`}
-												loading="lazy"
-												decoding="async"
-												class="h-8 w-auto max-w-[140px] object-contain"
-											/>
-										</a>
-									) : null,
-								)}
-							</div>
-						</div>
 					</div>
 
 				<section id="ranking" class="w-full min-w-0">
@@ -518,10 +496,53 @@ const faqJsonLd = {
 				</section>
 
 				<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
-					<h2 class="text-xl font-extrabold text-zinc-900">【2026年最新】オンライン英会話とは？初心者向けの始め方・選び方</h2>
+					<!-- Eyecatch -->
+					<div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
+						<picture>
+							<source srcset="/fv_1.webp" type="image/webp" />
+							<img
+								src="/fv_1.jpg"
+								alt="オンライン英会話の始め方・選び方（初心者向け）"
+								loading="lazy"
+								decoding="async"
+								width="1024"
+								height="565"
+								class="block h-40 w-full object-cover sm:h-48"
+							/>
+						</picture>
+					</div>
+
+					<!-- Decorated title -->
+					<div class="mt-5">
+						<div class="flex flex-wrap items-center gap-2">
+							<span class="inline-flex items-center rounded-lg bg-pink-100 px-2 py-1 text-xs font-extrabold text-pink-700 ring-1 ring-pink-200">
+								初心者ガイド
+							</span>
+							<span class="text-xs font-extrabold text-zinc-500">2026年最新</span>
+						</div>
+						<h2 class="mt-2 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">
+							オンライン英会話とは？初心者向けの始め方・選び方
+						</h2>
+						<div class="mt-2 h-[3px] w-32 rounded-full bg-[linear-gradient(to_right,#ec4899,#f59e0b,transparent)]"></div>
+					</div>
+
 					<p class="mt-2 text-sm font-semibold leading-7 text-zinc-700">
 						「オンライン英会話って何？」「全く話せなくても大丈夫？」という不安を、初心者向けにわかりやすく整理しました。迷ったら、まずは無料体験で“続けられるか”を確認するのが近道です。
 					</p>
+
+					<!-- Table of contents -->
+					<nav aria-label="目次" class="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
+						<div class="text-sm font-extrabold text-zinc-900">目次</div>
+						<ul class="mt-3 grid gap-2 text-sm text-[color:var(--brand-link)] sm:grid-cols-2">
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-1">1. 定義とメリット</a></li>
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-2">2. 仕組みと通学型の違い</a></li>
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-3">3. 怖い・話せない不安の解消</a></li>
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-4">4. 選び方（3つの基準）</a></li>
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-5">5. 初心者におすすめ3選</a></li>
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-6">6. 英語力ゼロからの準備</a></li>
+							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-7">7. FAQ</a></li>
+						</ul>
+					</nav>
 
 					<div class="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
 						<p class="text-xs font-extrabold text-zinc-900">この記事の結論（300字以内）</p>
@@ -532,7 +553,7 @@ const faqJsonLd = {
 
 					<div class="mt-6 space-y-6">
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">1. オンライン英会話の定義とメリット</h3>
+							<h3 id="guide-1" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">1. オンライン英会話の定義とメリット</h3>
 							<ul class="mt-3 space-y-2 text-sm leading-7 text-zinc-700">
 								<li><span class="font-extrabold text-zinc-900">定義</span>：オンライン英会話＝インターネットで、講師と英会話レッスンを受ける学習サービス</li>
 								<li><span class="font-extrabold text-zinc-900">メリット1</span>：通学なしで、場所を選ばず受講できる</li>
@@ -545,7 +566,7 @@ const faqJsonLd = {
 						</section>
 
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">2. 仕組みと通学型との違い（比較表）</h3>
+							<h3 id="guide-2" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">2. 仕組みと通学型との違い（比較表）</h3>
 							<p class="mt-2 text-sm leading-7 text-zinc-700">
 								オンライン英会話の基本は「予約 → レッスン → 復習」。レッスン中は音声・ビデオ・チャットを使い、教材は画面共有やシステム上で進みます。
 							</p>
@@ -595,7 +616,7 @@ const faqJsonLd = {
 						</section>
 
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">3. 「怖い・話せない」は過去の話？初心者が安心できる3つの理由</h3>
+							<h3 id="guide-3" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">3. 「怖い・話せない」は過去の話？初心者が安心できる3つの理由</h3>
 							<ul class="mt-3 space-y-2 text-sm leading-7 text-zinc-700">
 								<li><span class="font-extrabold text-zinc-900">日本人講師・日本語サポート</span>：最初の不安を日本語で潰せる</li>
 								<li><span class="font-extrabold text-zinc-900">初心者向け教材</span>：自己紹介・あいさつなど“台本付き”で進められる</li>
@@ -607,7 +628,7 @@ const faqJsonLd = {
 						</section>
 
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">4. 【失敗しない】初心者のための選び方（3つの基準）</h3>
+							<h3 id="guide-4" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">4. 【失敗しない】初心者のための選び方（3つの基準）</h3>
 							<div class="mt-3 space-y-4 text-sm leading-7 text-zinc-700">
 								<div>
 									<p class="font-extrabold text-zinc-900">基準1：講師の国籍（日本人/フィリピン人/ネイティブ）</p>
@@ -629,7 +650,7 @@ const faqJsonLd = {
 						</section>
 
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">5. 初心者におすすめのオンライン英会話 3選</h3>
+							<h3 id="guide-5" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">5. 初心者におすすめのオンライン英会話 3選</h3>
 							<p class="mt-2 text-xs leading-6 text-zinc-600">
 								料金・無料体験は時期やプランで変動します。申し込み前に公式で最新条件をご確認ください。
 							</p>
@@ -672,7 +693,7 @@ const faqJsonLd = {
 						</section>
 
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">6. 英語力ゼロからの「3つの準備」</h3>
+							<h3 id="guide-6" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">6. 英語力ゼロからの「3つの準備」</h3>
 							<div class="mt-3 space-y-3 text-sm leading-7 text-zinc-700">
 								<p><span class="font-extrabold text-zinc-900">準備1</span>：PC/スマホ（迷ったらスマホで開始→必要ならPC）</p>
 								<p><span class="font-extrabold text-zinc-900">準備2</span>：通信環境（Wi‑Fi推奨。重いときは音声＋チャットでもOK）</p>
@@ -693,7 +714,7 @@ const faqJsonLd = {
 						</section>
 
 						<section>
-							<h3 class="text-lg font-extrabold text-zinc-900">7. FAQ（よくある質問）</h3>
+							<h3 id="guide-7" class="scroll-mt-28 text-lg font-extrabold text-zinc-900">7. FAQ（よくある質問）</h3>
 							<div class="mt-3 space-y-3">
 								<div class="rounded-xl border border-zinc-200 bg-white p-4">
 									<p class="text-sm font-extrabold text-zinc-900">Q：週に何回やればいい？</p>
