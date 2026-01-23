@@ -503,10 +503,12 @@ if (faqItems.length) {
             <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">レッスン満足度</span>
               {ratingValue !== null ? (
-                <span class="inline-flex items-center gap-2">
-                  <StarRating value={ratingValue} size={14} showValue={false} />
-                  <span class="text-zinc-900">{ratingValue.toFixed(1)}</span>
-                  <span class="text-zinc-500">（{reviewCount}件）</span>
+                <span class="inline-flex items-center gap-1 leading-none">
+                  <span class="shrink-0">
+                    <StarRating value={ratingValue} size={12} showValue={false} />
+                  </span>
+                  <span class="shrink-0 tabular-nums text-zinc-900">{ratingValue.toFixed(1)}</span>
+                  <span class="shrink-0 text-zinc-500">（{reviewCount}件）</span>
                 </span>
               ) : (
                 <span class="text-zinc-500">—</span>
