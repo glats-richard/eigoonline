@@ -62,6 +62,39 @@
       "type": "lp"
     }
   ],
+  "prSectionTitle": "ECCオンラインレッスンのPR（公式情報）",
+  "prSections": [
+    {
+      "iconText": "✓",
+      "title": "語学教育で実績のあるECCが運営",
+      "body": "学習設計や教材づくりのノウハウがある運営母体のサービスです。初学者でも安心して始めたい人に向いています。",
+      "image": { "src": "/pr/ecc/banner.webp", "alt": "ECCオンラインレッスン バナー" }
+    },
+    {
+      "iconText": "✓",
+      "title": "予習→マンツーマン→復習（チェック）を基本に設計",
+      "body": "学んだ内容をその場で終わらせず、定着まで見据えた学習サイクルが用意されています。学習習慣を作りたい人に向いています。",
+      "image": { "src": "/pr/ecc/logo.webp", "alt": "ECCオンラインレッスン ロゴ" }
+    },
+    {
+      "iconText": "✓",
+      "title": "日本人学習者向け教材で取り組みやすい",
+      "body": "つまずきやすいポイントを意識した教材構成で、基礎から積み上げたい人に向いています。",
+      "image": { "src": "/pr/ecc/banner.webp", "alt": "ECCオンラインレッスン バナー" }
+    },
+    {
+      "iconText": "✓",
+      "title": "デイタイムなど、受講時間に合わせたプラン",
+      "body": "日中に受講できる人は、時間帯限定プランでコストを調整しやすい場合があります。生活リズムに合わせて選びやすいのが特徴です。",
+      "image": { "src": "/pr/ecc/logo.webp", "alt": "ECCオンラインレッスン ロゴ" }
+    },
+    {
+      "iconText": "✓",
+      "title": "無料体験で相性を確認できる",
+      "body": "無料体験で、講師との相性や教材の雰囲気を事前に確認できます。入会前に不安を減らしたい人に向いています。",
+      "image": { "src": "/pr/ecc/banner.webp", "alt": "ECCオンラインレッスン バナー" }
+    }
+  ],
   "bannerImage": "/banners/company-71.webp",
   "bannerAlt": "ECCオンラインレッスン バナー",
   "bannerHref": "https://online.ecc.co.jp/"

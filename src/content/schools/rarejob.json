@@ -58,6 +58,39 @@
       "type": "lp"
     }
   ],
+  "prSectionTitle": "レアジョブ英会話のPR（公式情報）",
+  "prSections": [
+    {
+      "iconText": "✓",
+      "title": "日本人カウンセラーの学習相談で迷いにくい",
+      "body": "学習の進め方や目標設定を相談できるため、独学で続かなかった人でも方向性を作りやすいのが特徴です。",
+      "image": { "src": "/pr/rarejob/banner.webp", "alt": "レアジョブ英会話 バナー" }
+    },
+    {
+      "iconText": "✓",
+      "title": "CEFR準拠のレベルチェックで現状把握しやすい",
+      "body": "初回にレベルを可視化し、次に伸ばすべきポイントを明確にしやすい設計です。最短ルートで改善したい人に向いています。",
+      "image": { "src": "/pr/rarejob/logo.webp", "alt": "レアジョブ英会話 ロゴ" }
+    },
+    {
+      "iconText": "✓",
+      "title": "日常/ビジネスなど目的別に学習しやすい",
+      "body": "学習目的に合わせたコース設計と教材で、継続学習の導線があります。ゴールに合わせて学び方を変えたい人に向いています。",
+      "image": { "src": "/pr/rarejob/banner.webp", "alt": "レアジョブ英会話 バナー" }
+    },
+    {
+      "iconText": "✓",
+      "title": "無料トライアルで受講感を確認できる",
+      "body": "体験で講師との相性や教材の雰囲気を確認できます。入会前に不安を減らしたい人に向いています。",
+      "image": { "src": "/pr/rarejob/logo.webp", "alt": "レアジョブ英会話 ロゴ" }
+    },
+    {
+      "iconText": "✓",
+      "title": "キャンペーンで始めやすいことがある",
+      "body": "時期により初月割引などの施策が実施される場合があります。申し込み前に、公式の最新条件を確認するのがおすすめです。",
+      "image": { "src": "/pr/rarejob/banner.webp", "alt": "レアジョブ英会話 バナー" }
+    }
+  ],
   "bannerImage": "/banners/company-50.webp",
   "bannerAlt": "レアジョブ英会話 バナー",
   "bannerHref": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2"

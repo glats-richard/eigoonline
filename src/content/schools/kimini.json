@@ -59,48 +59,33 @@
   "prSections": [
     {
       "iconText": "✓",
-      "title": "『英語教材完全ガイド2025』でベストバイ1位を受賞",
-      "body": "教育業界を牽引する\"学研\"の教材開発ノウハウを活かし、「わかりやすさ」と「効果的なアウトプット」にこだわった教材で学習できます。\n消費者目線の独自評価で知られる『英語教材完全ガイド2025』では、「娯楽と学習が融合した子どもも大人も楽しめる新感覚スクール」として評価され、ベストバイ1位を獲得しています。",
-      "image": {
-        "src": "https://img1.kakaku.k-img.com/images/online_english/school/98/point1.png",
-        "alt": "ベストバイ1位"
-      }
+      "title": "学研監修のカリキュラムで「迷いにくい」学習設計",
+      "body": "教材とコースが体系化されているため、初心者でも「次は何をやる？」が決まりやすいのが特徴です。学習の順番が整理されているので、継続のハードルを下げたい人に向いています。",
+      "image": { "src": "/pr/kimini/hero.webp", "alt": "Kimini英会話 ヒーロー画像" }
     },
     {
       "iconText": "✓",
-      "title": "子どもから大人まで学べる豊富なコース",
-      "body": "小さなお子様向けの英語に親しむコースから、学生向けの学習指導要領に基づいたコース、英検対策や大人の学び直しまで、目的に合わせたコースが用意されています。\nコースを選んだら、あとは予約して受講していくだけでOK。学習の流れが整理されているので、毎回「何を勉強しよう」と迷いにくいです。",
-      "image": {
-        "src": "https://img1.kakaku.k-img.com/images/online_english/school/98/point2.png",
-        "alt": "コース紹介"
-      }
+      "title": "予習→レッスン→復習の学習サイクルを回しやすい",
+      "body": "レッスンだけで終わらせず、予習と復習の導線を用意。学んだ内容の定着まで意識した設計で、学習習慣を作りたい人に向いています。",
+      "image": { "src": "/pr/kimini/banner.webp", "alt": "Kimini英会話 バナー" }
     },
     {
       "iconText": "✓",
-      "title": "英検対策に強い（一次・二次対策）",
-      "body": "学研の参考書シリーズの内容をベースに、英検に特化した学習をコース化。\n重要ポイントが整理された教材で基礎を固めつつ、面接形式の二次試験対策コースも用意されています。",
-      "image": {
-        "src": "https://img1.kakaku.k-img.com/images/online_english/school/98/point3.png",
-        "alt": "英検対策"
-      }
+      "title": "目的別コース（学び直し・英検・ビジネスなど）",
+      "body": "日常英会話の基礎から、試験対策・ビジネスなど目的別にコースを選択できます。目標が変わっても同じサービス内で学習を続けやすいのがメリットです。",
+      "image": { "src": "/pr/kimini/logo.webp", "alt": "Kimini英会話 ロゴ" }
     },
     {
       "iconText": "✓",
-      "title": "24時間取り組めるスキル別トレーニング",
-      "body": "語彙・文法・リスニング・リーディング・クイックレスポンス・発音など、カテゴリー別にトレーニングできる機能が用意されています。\nスキマ時間で弱点をピンポイントに強化しやすいのが特徴です。",
-      "image": {
-        "src": "https://img1.kakaku.k-img.com/images/online_english/school/98/point5.png",
-        "alt": "スキル別トレーニング"
-      }
+      "title": "AI学習（Kimini Plus / Kimini AI）で弱点を補強",
+      "body": "学習状況に合わせたサポートやトレーニングで、レッスン外の時間も活用しやすい構成です。スキマ時間で弱点を補強したい人に向いています。",
+      "image": { "src": "/pr/kimini/banner.webp", "alt": "Kimini英会話 バナー" }
     },
     {
       "iconText": "✓",
-      "title": "AI学習サポート「KiminiAI β」",
-      "body": "文章添削や英会話トレーニング、予習・復習のサポートなど、英語学習を支援するAIチャットボットが用意されています。\nAI用のプロンプト不要で選択式で使えるため、直感的に利用しやすい設計です。",
-      "image": {
-        "src": "https://img1.kakaku.k-img.com/images/online_english/school/98/point7.png",
-        "alt": "KiminiAI β"
-      }
+      "title": "まずは無料体験から始めやすい",
+      "body": "無料体験で受講の流れや講師との相性を確認できます。入会前に不安を減らして始めたい人に向いています。",
+      "image": { "src": "/pr/kimini/hero.webp", "alt": "Kimini英会話 ヒーロー画像" }
     }
   ],
   "bannerImage": "/banners/company-30.webp",
