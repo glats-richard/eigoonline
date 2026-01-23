@@ -69,31 +69,31 @@
       "iconText": "✓",
       "title": "予約不要の「今すぐレッスン」で続けやすい",
       "body": "思い立ったタイミングで受講できるため、学習のハードルを下げやすい設計です。毎日少しでも話す機会を増やしたい人に向いています。",
-      "image": { "src": "/pr/nativecamp/banner.webp", "alt": "ネイティブキャンプ バナー" }
+      "image": { "src": "/pr/nativecamp/og-1.webp", "alt": "ネイティブキャンプ 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "24時間いつでも受講できる",
       "body": "早朝・深夜でも受講でき、生活リズムに合わせて学習を組み立てやすいのが特徴です。スキマ時間を最大化したい人に向いています。",
-      "image": { "src": "/pr/nativecamp/logo.webp", "alt": "ネイティブキャンプ ロゴ" }
+      "image": { "src": "/pr/nativecamp/og-2.webp", "alt": "ネイティブキャンプ 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "受け放題プランで会話量を増やせる（プランによる）",
       "body": "短時間でも回数を増やして、会話の場数を踏めるのが強みです。アウトプット量を優先したい人に向いています。",
-      "image": { "src": "/pr/nativecamp/banner.webp", "alt": "ネイティブキャンプ バナー" }
+      "image": { "src": "/pr/nativecamp/og-1.webp", "alt": "ネイティブキャンプ 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "コインで予約やオプションを組み合わせやすい",
       "body": "予約レッスンや特定条件の講師など、必要に応じて学習スタイルを調整しやすい仕組みがあります。",
-      "image": { "src": "/pr/nativecamp/logo.webp", "alt": "ネイティブキャンプ ロゴ" }
+      "image": { "src": "/pr/nativecamp/og-2.webp", "alt": "ネイティブキャンプ 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "無料トライアルで受講感を確認できる",
       "body": "無料期間中に、受講の流れや使い勝手、講師との相性を確認できます。入会前に不安を減らしたい人に向いています。",
-      "image": { "src": "/pr/nativecamp/banner.webp", "alt": "ネイティブキャンプ バナー" }
+      "image": { "src": "/pr/nativecamp/og-1.webp", "alt": "ネイティブキャンプ 公式OG画像" }
     }
   ],
   "bannerImage": "/banners/company-70.webp",

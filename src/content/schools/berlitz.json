@@ -68,31 +68,31 @@
       "iconText": "✓",
       "title": "ベルリッツ・メソッド®（没入型）で会話に慣れやすい",
       "body": "レッスン中は学習言語で進行するスタイルを採用。翻訳を挟まずに理解・発話する練習を積みたい人に向いています。",
-      "image": { "src": "/pr/berlitz/banner.webp", "alt": "Berlitz バナー" }
+      "image": { "src": "/pr/berlitz/og-1.webp", "alt": "Berlitz 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "ネイティブ講師のマンツーマンで実践練習",
       "body": "発話量を確保しながら、実際の会話に近い形でトレーニングできます。ビジネス英語を含め、アウトプット中心で伸ばしたい人に向いています。",
-      "image": { "src": "/pr/berlitz/logo.webp", "alt": "Berlitz ロゴ" }
+      "image": { "src": "/pr/berlitz/og-2.webp", "alt": "Berlitz 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "オンライン/教室など受講形態を選びやすい",
       "body": "生活スタイルや目的に合わせて、学習環境を調整しやすいのが特徴です。通学も検討したい人に向いています。",
-      "image": { "src": "/pr/berlitz/banner.webp", "alt": "Berlitz バナー" }
+      "image": { "src": "/pr/berlitz/og-1.webp", "alt": "Berlitz 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "AI×教師プログラム（Flex）で学習を組み立てやすい",
       "body": "AI学習とレッスンを組み合わせることで、インプットとアウトプットのバランスを取りやすい構成です。",
-      "image": { "src": "/pr/berlitz/logo.webp", "alt": "Berlitz ロゴ" }
+      "image": { "src": "/pr/berlitz/og-2.webp", "alt": "Berlitz 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "目的・レベルに合わせた設計で短期集中にも",
       "body": "目標設定→反復→実践→フィードバックの流れで、必要な場面に寄せて学習しやすいのが特徴です。",
-      "image": { "src": "/pr/berlitz/banner.webp", "alt": "Berlitz バナー" }
+      "image": { "src": "/pr/berlitz/og-1.webp", "alt": "Berlitz 公式OG画像" }
     }
   ],
   "bannerImage": "/banners/company-51.webp",

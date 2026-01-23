@@ -12,7 +12,8 @@
     "start": "HOST=0.0.0.0 PORT=${PORT:-4321} node ./dist/server/entry.mjs",
     "astro": "astro",
     "export:schools:csv": "node scripts/export-schools-csv.mjs",
-    "build:pr:assets": "node scripts/build-pr-assets.mjs"
+    "build:pr:assets": "node scripts/build-pr-assets.mjs",
+    "fetch:pr:images": "node scripts/fetch-pr-images.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",

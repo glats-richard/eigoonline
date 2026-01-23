@@ -66,31 +66,31 @@
       "iconText": "✓",
       "title": "24時間いつでも受講しやすい",
       "body": "早朝・深夜を含めて受講できるため、生活リズムが不規則でも続けやすいのが強みです。スキマ時間で学習を積み上げたい人に向いています。",
-      "image": { "src": "/pr/dmm/banner.webp", "alt": "DMM英会話 バナー" }
+      "image": { "src": "/pr/dmm/og-1.webp", "alt": "DMM英会話 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "世界各国の講師と会話できる",
       "body": "多様なアクセント・話し方に触れられるため、実践に近い聞き取り練習になりやすいです。英語に慣れる場数を増やしたい人に向いています。",
-      "image": { "src": "/pr/dmm/logo.webp", "alt": "DMM英会話 ロゴ" }
+      "image": { "src": "/pr/dmm/og-2.webp", "alt": "DMM英会話 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "ブラウザで完結するレッスンシステム",
       "body": "ビデオ通話・教材・チャットなどを一つの画面で扱えるため、学習の準備がシンプルです。PC/スマホで手軽に始めたい人に向いています。",
-      "image": { "src": "/pr/dmm/banner.webp", "alt": "DMM英会話 バナー" }
+      "image": { "src": "/pr/dmm/og-1.webp", "alt": "DMM英会話 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "英語学習アプリ「iKnow!」が利用できる（対象条件は公式で要確認）",
       "body": "インプット学習を補助する仕組みがあるため、単語・フレーズの積み上げと会話練習を組み合わせやすい構成です。",
-      "image": { "src": "/pr/dmm/logo.webp", "alt": "DMM英会話 ロゴ" }
+      "image": { "src": "/pr/dmm/og-2.webp", "alt": "DMM英会話 公式OG画像" }
     },
     {
       "iconText": "✓",
       "title": "キャンペーンで始めやすいことがある",
       "body": "時期により初月割引などのキャンペーンが実施される場合があります。まずは公式の最新条件を確認してから申し込むのがおすすめです。",
-      "image": { "src": "/pr/dmm/banner.webp", "alt": "DMM英会話 バナー" }
+      "image": { "src": "/pr/dmm/og-1.webp", "alt": "DMM英会話 公式OG画像" }
     }
   ],
   "bannerImage": "/banners/company-39.webp",

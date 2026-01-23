@@ -73,31 +73,31 @@
       "iconText": "✓",
       "title": "1つのプランで家族最大6名までシェア",
       "body": "家族それぞれがアカウントを持ちつつ、レッスン枠を分け合って使える設計です。家族で英語学習を続けたい人に向いています。",
-      "image": { "src": "/pr/clouty/banner.webp", "alt": "クラウティ バナー" }
+      "image": { "src": "/pr/clouty/og-1.webp", "alt": "クラウティ 公式画像" }
     },
     {
       "iconText": "✓",
       "title": "10分/25分のレッスン時間を選べる",
       "body": "短時間でサッと学びたい日と、しっかり会話したい日で使い分けやすいのが特徴です。学習の継続ハードルを下げたい人に向いています。",
-      "image": { "src": "/pr/clouty/logo.webp", "alt": "クラウティ ロゴ" }
+      "image": { "src": "/pr/clouty/og-1.webp", "alt": "クラウティ 公式画像" }
     },
     {
       "iconText": "✓",
       "title": "ゲーム感覚のレッスン（Arcade）で続けやすい",
       "body": "勉強っぽさを下げて取り組めるコンテンツがあり、特に子どもが飽きにくい設計です。親子で一緒に学びたい人に向いています。",
-      "image": { "src": "/pr/clouty/banner.webp", "alt": "クラウティ バナー" }
+      "image": { "src": "/pr/clouty/og-1.webp", "alt": "クラウティ 公式画像" }
     },
     {
       "iconText": "✓",
       "title": "AI学習（TerraTalk）でスキマ時間も活用",
       "body": "レッスン以外の時間も使って練習しやすい仕組みがあります。復習や弱点補強を習慣化したい人に向いています。",
-      "image": { "src": "/pr/clouty/logo.webp", "alt": "クラウティ ロゴ" }
+      "image": { "src": "/pr/clouty/og-1.webp", "alt": "クラウティ 公式画像" }
     },
     {
       "iconText": "✓",
       "title": "キャンペーンで始めやすいことがある",
       "body": "時期により初月割引などが実施される場合があります。申し込み前に、公式で最新の適用条件を確認するのがおすすめです。",
-      "image": { "src": "/pr/clouty/banner.webp", "alt": "クラウティ バナー" }
+      "image": { "src": "/pr/clouty/og-1.webp", "alt": "クラウティ 公式画像" }
     }
   ],
   "bannerImage": "/banners/company-62.webp",
