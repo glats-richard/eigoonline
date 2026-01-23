@@ -470,7 +470,14 @@ if (faqItems.length) {
               ) : null}
             </div>
 
-            <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">{school.name}</h1>
+            <h1
+              class:list={[
+                "font-extrabold tracking-tight text-zinc-900",
+                school.logoUrl ? "mt-3 text-xl sm:text-2xl" : "mt-4 text-2xl sm:text-3xl",
+              ]}
+            >
+              {school.name}
+            </h1>
             {school.heroImageUrl ? (
               <div class="mt-3">
                 <img
