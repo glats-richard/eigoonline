@@ -29,7 +29,7 @@
   "materialQuality": 4,
   "connectionQuality": 4,
   "trialDetailText": null,
-  "planUrl": null,
+  "planUrl": "https://h.accesstrade.net/sp/cc?rk=0100pwdb00on48",
   "editorialComments": [],
   "campaignEndsAt": "2026-01-31",
   "campaignBullets": [
@@ -95,5 +95,5 @@
   ],
   "bannerImage": "/banners/company-39.webp",
   "bannerAlt": "DMM英会話 バナー",
-  "bannerHref": "https://eikaiwa.dmm.com/"
+  "bannerHref": "https://h.accesstrade.net/sp/cc?rk=0100pwdb00on48"
 }

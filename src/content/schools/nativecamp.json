@@ -28,7 +28,7 @@
   "materialQuality": 3.5,
   "connectionQuality": 4,
   "trialDetailText": null,
-  "planUrl": null,
+  "planUrl": "https://h.accesstrade.net/sp/cc?rk=0100pfoc00on48",
   "editorialComments": [],
   "campaignEndsAt": null,
   "campaignBullets": [
@@ -98,5 +98,5 @@
   ],
   "bannerImage": "/banners/company-70.webp",
   "bannerAlt": "ネイティブキャンプ バナー",
-  "bannerHref": "https://nativecamp.net/"
+  "bannerHref": "https://h.accesstrade.net/sp/cc?rk=0100pfoc00on48"
 }

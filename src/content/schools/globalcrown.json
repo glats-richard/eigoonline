@@ -1,0 +1,54 @@
+{
+  "name": "グローバルクラウン",
+  "priceText": null,
+  "trialText": null,
+  "benefitText": null,
+  "rating": null,
+  "features": [
+    "子ども向け（3歳〜）のオンライン英会話",
+    "日英バイリンガル講師"
+  ],
+  "logoUrl": null,
+  "officialUrl": "https://www.global-crown.com/",
+  "planUrl": "https://h.accesstrade.net/sp/cc?rk=0100puvv00on48",
+  "campaignText": null,
+  "summary": "子ども向けオンライン英会話。日英バイリンガル講師によるマンツーマンで、英語が初めてのお子さまでも取り組みやすい設計です。",
+  "source": {
+    "url": "https://www.global-crown.com/",
+    "note": "公式サイト"
+  },
+  "hoursText": null,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
+  "trialDetailText": null,
+  "editorialComments": [],
+  "campaignEndsAt": null,
+  "campaignBullets": [],
+  "points": [
+    "子ども向けに特化",
+    "バイリンガル講師"
+  ],
+  "recommendedFor": [
+    "子どもに英語を楽しく始めさせたい",
+    "日本語サポートがあると安心"
+  ],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "日英バイリンガル講師で、英語が初めてでも不安を下げやすい",
+    "子ども向けに、継続しやすい導線（習慣化）を重視した設計"
+  ],
+  "primarySources": [
+    {
+      "label": "公式サイト",
+      "url": "https://www.global-crown.com/",
+      "type": "official"
+    }
+  ],
+  "prSectionTitle": "グローバルクラウンのPR（公式情報）",
+  "prSections": [],
+  "bannerImage": null,
+  "bannerAlt": null,
+  "bannerHref": "https://h.accesstrade.net/sp/cc?rk=0100puvv00on48"
+}
+

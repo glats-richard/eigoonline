@@ -10,9 +10,20 @@ type Props = {
 const { href, offerId, label = "公式サイトを見る", fullWidth = false } = Astro.props satisfies Props;
 
 const isExternal = href.startsWith("http://") || href.startsWith("https://");
+const isAccesstrade = (() => {
+  if (!isExternal) return false;
+  try {
+    const u = new URL(href);
+    return u.hostname.endsWith("accesstrade.net");
+  } catch {
+    return false;
+  }
+})();
 const trackedHref =
   isExternal && offerId
-    ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
+    ? isAccesstrade
+      ? href
+      : `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
     : href;
 ---
 
@@ -24,7 +35,7 @@ const trackedHref =
   href={trackedHref}
   target="_blank"
   rel="nofollow sponsored noopener noreferrer"
-  referrerpolicy="no-referrer"
+  referrerpolicy={isAccesstrade ? "no-referrer-when-downgrade" : "no-referrer"}
 >
   <span class="cta-sweep__content inline-flex items-center gap-2">
     <span>{label}</span>

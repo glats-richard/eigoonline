@@ -117,6 +117,18 @@ export const GET: APIRoute = async ({ request, url }) => {
 
   const clickId = randomId();
 
+  // Ensure offer exists (clicks.offer_id has FK to offers.id).
+  // This prevents 23503 (foreign key violation) when the offers table isn't pre-seeded.
+  try {
+    await query("insert into offers (id) values ($1) on conflict (id) do nothing", [offerId]);
+  } catch (e: any) {
+    // If offers table doesn't exist yet, surface a clear error.
+    if (e?.code === "42P01") {
+      return serverError("Tracker DB schema is not up to date (missing offers table)");
+    }
+    // Otherwise, continue best-effort.
+  }
+
   // Persist click record (best-effort).
   try {
     await query(
@@ -124,7 +136,19 @@ export const GET: APIRoute = async ({ request, url }) => {
       [offerId, clickId, toUrl.toString(), referrer, userAgent, ip, ipHash, ipVer],
     );
   } catch (e: any) {
+    // If FK still fails (e.g., constraints differ), retry with null offer_id so users aren't blocked.
+    if (e?.code === "23503") {
+      try {
+        await query(
+          "insert into clicks (offer_id, click_id, url, referrer, user_agent, ip, ip_hash, ip_version) values ($1,$2,$3,$4,$5,$6,$7,$8)",
+          [null, clickId, toUrl.toString(), referrer, userAgent, ip, ipHash, ipVer],
+        );
+      } catch (e2: any) {
+        return serverError(e2?.message ?? String(e2));
+      }
+    } else {
     return serverError(e?.message ?? String(e));
+    }
   }
 
   // Append click_id for partner-side persistence.

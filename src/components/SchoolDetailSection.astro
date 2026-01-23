@@ -42,8 +42,18 @@ const planHref = item.planUrl || item.officialUrl;
 const bannerHref = item.bannerHref || planHref;
 const stats = reviewStats ?? getReviewStats(reviews);
 
+const isAccesstrade = (href: string) => {
+  if (!(href.startsWith("http://") || href.startsWith("https://"))) return false;
+  try {
+    const u = new URL(href);
+    return u.hostname.endsWith("accesstrade.net");
+  } catch {
+    return false;
+  }
+};
+
 const trackHref = (href: string) =>
-  href.startsWith("http://") || href.startsWith("https://")
+  (href.startsWith("http://") || href.startsWith("https://")) && !isAccesstrade(href)
     ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
     : href;
 ---
