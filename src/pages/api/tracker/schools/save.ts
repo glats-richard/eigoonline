@@ -50,6 +50,20 @@ function toJsonArrayOrEmpty(v: unknown): any[] | undefined {
   return parsed;
 }
 
+function toJsonArrayOrEmptyWithLabel(v: unknown, label: string): any[] | undefined {
+  if (v === undefined || v === null) return undefined;
+  const s = String(v).trim();
+  if (!s) return [];
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(s);
+  } catch {
+    throw new Error(`${label} must be valid JSON`);
+  }
+  if (!Array.isArray(parsed)) throw new Error(`${label} must be a JSON array`);
+  return parsed;
+}
+
 function parsePrimarySources(lines: string[] | undefined): { label: string; url: string; type: "official" | "lp" | "pr" }[] | undefined {
   if (!lines) return undefined;
   const out: { label: string; url: string; type: "official" | "lp" | "pr" }[] = [];
@@ -110,9 +124,11 @@ export const POST: APIRoute = async ({ request }) => {
   const recommendedFor = toArrayFromTextarea(patch.recommendedFor);
   const uniquenessBullets = toArrayFromTextarea(patch.uniquenessBullets);
   let introSections: any[] | undefined = undefined;
+  let prSections: any[] | undefined = undefined;
   let introPlacement: "section" | "hero" | null | undefined = undefined;
   try {
     introSections = toJsonArrayOrEmpty(patch.introSections);
+    prSections = toJsonArrayOrEmptyWithLabel(patch.prSections, "prSections");
     introPlacement = parseIntroPlacement(patch.introPlacement);
   } catch (e: any) {
     return json({ ok: false, error: e?.message ?? String(e) }, 400);
@@ -139,6 +155,8 @@ export const POST: APIRoute = async ({ request }) => {
     heroDescription: toStringOrNull(patch.heroDescription),
     heroImageUrl: toStringOrNull(patch.heroImageUrl),
     heroImageAlt: toStringOrNull(patch.heroImageAlt),
+    prSectionTitle: toStringOrNull(patch.prSectionTitle),
+    prSections,
     introSectionTitle: toStringOrNull(patch.introSectionTitle),
     introPlacement,
     introSections,

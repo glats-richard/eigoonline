@@ -16,6 +16,13 @@ const introMedia = z.discriminatedUnion('type', [
 	}),
 ]);
 
+const prMedia = z.object({
+	src: z.string(),
+	alt: z.string().nullable().optional(),
+	width: z.number().int().positive().nullable().optional(),
+	height: z.number().int().positive().nullable().optional(),
+});
+
 const schools = defineCollection({
 	type: 'data',
 	schema: z.object({
@@ -33,6 +40,20 @@ const schools = defineCollection({
 		/** Optional hero image shown above heroDescription. */
 		heroImageUrl: z.string().nullable().optional(),
 		heroImageAlt: z.string().nullable().optional(),
+		/** PR blocks shown under hero (icon + title, then 2-col text/image). */
+		prSectionTitle: z.string().nullable().optional(),
+		prSections: z
+			.array(
+				z.object({
+					iconText: z.string().nullable().optional(),
+					iconUrl: z.string().nullable().optional(),
+					title: z.string(),
+					body: z.string(),
+					image: prMedia.nullable().optional(),
+					reverse: z.boolean().optional(),
+				}),
+			)
+			.default([]),
 		/** Intro blocks shown on detail pages (image/embed + heading + body). */
 		introSectionTitle: z.string().nullable().optional(),
 		/** Where to show introSections: as a section (default) or in hero description. */

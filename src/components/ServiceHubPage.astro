@@ -355,6 +355,18 @@ function fmtYenFromPriceText(v: unknown): string | null {
 
 const cheapestPlanYen = fmtYenFromPriceText(school?.priceText);
 
+type PrMedia = { src: string; alt?: string | null; width?: number | null; height?: number | null };
+type PrSection = {
+  iconText?: string | null;
+  iconUrl?: string | null;
+  title: string;
+  body: string;
+  image?: PrMedia | null;
+  reverse?: boolean;
+};
+
+const prSections: PrSection[] = Array.isArray((school as any)?.prSections) ? (((school as any).prSections as any[]) as PrSection[]) : [];
+
 const introHeroText =
   introPlacement === "hero" && introSections.length
     ? introSections
@@ -685,6 +697,67 @@ if (faqItems.length) {
           </a>
         </div>
       </section>
+
+      {prSections.length ? (
+        <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-zinc-900">{school.prSectionTitle ?? "PR"}</h2>
+          <div class="mt-4 space-y-6">
+            {prSections.slice(0, 5).map((sec) => {
+              const reverse = !!sec.reverse;
+              const hasIconUrl = typeof sec.iconUrl === "string" && sec.iconUrl.trim().length > 0;
+              const hasIconText = typeof sec.iconText === "string" && sec.iconText.trim().length > 0;
+              const img = sec.image ?? null;
+              const hasImg = img && typeof img.src === "string" && img.src.trim().length > 0;
+
+              return (
+                <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                  <div class="flex items-center gap-3">
+                    {hasIconUrl ? (
+                      <img
+                        src={String(sec.iconUrl)}
+                        alt=""
+                        width="22"
+                        height="22"
+                        loading="lazy"
+                        decoding="async"
+                        class="h-6 w-6 rounded-md object-contain"
+                      />
+                    ) : hasIconText ? (
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-orange-50 text-sm font-extrabold text-orange-700 ring-1 ring-orange-200">
+                        {String(sec.iconText).slice(0, 2)}
+                      </span>
+                    ) : (
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-zinc-50 text-sm font-extrabold text-zinc-600 ring-1 ring-zinc-200">
+                        PR
+                      </span>
+                    )}
+                    <h3 class="text-base font-extrabold text-zinc-900">{sec.title}</h3>
+                  </div>
+
+                  <div class:list={["mt-4 grid gap-5", hasImg ? "lg:grid-cols-[1fr_320px]" : "", reverse ? "lg:[direction:rtl]" : ""]}>
+                    <div class:list={["min-w-0", reverse ? "lg:[direction:ltr]" : ""]}>
+                      <p class="text-sm font-semibold leading-7 text-zinc-700 whitespace-pre-wrap">{sec.body}</p>
+                    </div>
+                    {hasImg ? (
+                      <div class:list={reverse ? "lg:[direction:ltr]" : ""}>
+                        <img
+                          src={String(img?.src)}
+                          alt={(img?.alt ?? "") as string}
+                          loading="lazy"
+                          decoding="async"
+                          width={typeof img?.width === "number" ? String(img.width) : undefined}
+                          height={typeof img?.height === "number" ? String(img.height) : undefined}
+                          class="h-auto w-full rounded-xl border border-zinc-200 bg-white object-cover"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <!-- Summary -->
       <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">

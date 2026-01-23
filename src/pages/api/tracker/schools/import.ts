@@ -129,6 +129,19 @@ function parseJsonArray(v: string): any[] {
   return parsed;
 }
 
+function parseJsonArrayWithLabel(v: string, label: string): any[] {
+  const s = String(v ?? "").trim();
+  if (!s) return [];
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(s);
+  } catch {
+    throw new Error(`${label} must be valid JSON`);
+  }
+  if (!Array.isArray(parsed)) throw new Error(`${label} must be a JSON array`);
+  return parsed;
+}
+
 function parseIntroPlacement(v: string): "section" | "hero" | null {
   const s = String(v ?? "").trim();
   if (!s) return null;
@@ -183,9 +196,11 @@ export const POST: APIRoute = async ({ request }) => {
         heroDescription: r.heroDescription?.trim() || null,
         heroImageUrl: r.heroImageUrl?.trim() || null,
         heroImageAlt: r.heroImageAlt?.trim() || null,
+        prSectionTitle: r.prSectionTitle?.trim() || null,
+        prSections: parseJsonArrayWithLabel(r.prSections ?? "", "prSections"),
         introSectionTitle: r.introSectionTitle?.trim() || null,
         introPlacement: parseIntroPlacement(r.introPlacement ?? ""),
-        introSections: parseJsonArray(r.introSections ?? ""),
+        introSections: parseJsonArrayWithLabel(r.introSections ?? "", "introSections"),
         editorialComments: splitLines(r.editorialComments ?? ""),
         features: splitLines(r.features ?? ""),
         points: splitLines(r.points ?? ""),
