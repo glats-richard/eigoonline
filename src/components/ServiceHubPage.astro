@@ -30,6 +30,16 @@ const overallRanking = rankings.find((r) => r.data.category === "overall")?.data
 const overallRankIndex = overallRanking ? overallRanking.items.indexOf(schoolId) : -1;
 const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
 
+function rankFor(category: string): number | null {
+  const r = rankings.find((x) => x.data.category === category)?.data ?? null;
+  if (!r) return null;
+  const idx = r.items.indexOf(schoolId);
+  return idx >= 0 ? idx + 1 : null;
+}
+
+const businessRank = rankFor("business");
+const kidsRank = rankFor("kids");
+
 // Radar chart quality metrics:
 // - Prefer averages from approved user reviews (DB)
 // - Fall back to editorial scores in `src/content/schools/*.json`
@@ -332,6 +342,19 @@ function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
 }
 
+function fmtYenFromPriceText(v: unknown): string | null {
+  const s = String(v ?? "").replace(/\s+/g, " ").trim();
+  if (!s) return null;
+  // Prefer a number like "1,210" or "1210" followed by 円
+  const m = s.match(/([\d,]{3,})\s*円/);
+  if (!m) return null;
+  const n = Number(String(m[1]).replace(/,/g, ""));
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return `¥${n.toLocaleString("ja-JP")}`;
+}
+
+const cheapestPlanYen = fmtYenFromPriceText(school?.priceText);
+
 const introHeroText =
   introPlacement === "hero" && introSections.length
     ? introSections
@@ -461,11 +484,39 @@ if (faqItems.length) {
             </div>
           )}
 
-          {overallRank ? (
+          <div class="flex flex-wrap items-center gap-2">
             <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
-              総合ランキング：{overallRank}位
+              <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">ランキング</span>
+              <span class="text-zinc-700">
+                {overallRank ? `総合:${overallRank}位` : "総合:—"}
+                {typeof businessRank === "number" ? `　ビジネス:${businessRank}位` : ""}
+                {typeof kidsRank === "number" ? `　子供向け:${kidsRank}位` : ""}
+              </span>
             </div>
-          ) : null}
+
+            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
+              <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">無料体験</span>
+              <span class="text-zinc-700">{school.trialText ?? "—"}</span>
+            </div>
+
+            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
+              <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">レッスン満足度</span>
+              {ratingValue !== null ? (
+                <span class="inline-flex items-center gap-2">
+                  <StarRating value={ratingValue} size={14} />
+                  <span class="text-zinc-900">{ratingValue.toFixed(1)}</span>
+                  <span class="text-zinc-500">（{reviewCount}件）</span>
+                </span>
+              ) : (
+                <span class="text-zinc-500">—</span>
+              )}
+            </div>
+
+            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
+              <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">最安プラン</span>
+              <span class="text-zinc-700">{cheapestPlanYen ? `${cheapestPlanYen}/月` : school.priceText ?? "—"}</span>
+            </div>
+          </div>
         </div>
 
         <h1
@@ -476,8 +527,6 @@ if (faqItems.length) {
         >
           {school.name}
         </h1>
-
-        <p class="mt-2 whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700 sm:text-base">{heroDescription}</p>
 
         <div class:list={["mt-4 grid gap-6", school.heroImageUrl ? "lg:grid-cols-[1fr_320px] lg:items-stretch" : "lg:grid-cols-[1fr_320px] lg:items-start"]}>
           <div class="min-w-0">
@@ -611,6 +660,8 @@ if (faqItems.length) {
             </div>
           </aside>
         </div>
+
+        <p class="mt-4 whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700 sm:text-base">{heroDescription}</p>
 
         <div class="mt-6 flex flex-wrap gap-3">
           <a
