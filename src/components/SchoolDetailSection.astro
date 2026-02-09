@@ -37,7 +37,6 @@ type Props = {
 
 const { rank, offerId, item, reviews = [], reviewStats = null } = Astro.props satisfies Props;
 
-const quality = typeof item.teacherQuality === "number" ? item.teacherQuality : null;
 const planHref = item.planUrl || item.officialUrl;
 const bannerHref = item.bannerHref || planHref;
 const stats = reviewStats ?? getReviewStats(reviews);
@@ -129,19 +128,15 @@ const trackHref = (href: string) =>
   ) : null}
 
   <div class="mt-5 overflow-x-auto">
-    <table class="min-w-[520px] w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
+    <table class="min-w-[420px] w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
       <thead>
         <tr class="bg-zinc-50 text-left text-xs font-extrabold text-zinc-700">
-          <th class="p-3">講師の質</th>
           <th class="p-3">無料体験</th>
           <th class="p-3">受講可能時間</th>
         </tr>
       </thead>
       <tbody class="text-sm text-zinc-800">
         <tr class="[&_td]:border-t [&_td]:border-zinc-200">
-          <td class="p-3">
-            <StarRating value={quality} label="講師の質" showValue={false} size={16} />
-          </td>
           <td class="p-3">
             <div class="font-extrabold text-zinc-900">{item.trialText ?? "—"}</div>
             {item.trialDetailText ? <div class="text-sm text-zinc-700">{item.trialDetailText}</div> : null}

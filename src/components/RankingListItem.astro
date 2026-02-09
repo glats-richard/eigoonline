@@ -11,6 +11,8 @@ type Item = {
   trialText?: string | null;
   priceText?: string | null;
   benefitText?: string | null;
+  points?: string[] | null;
+  features?: string[] | null;
 };
 
 type Props = {
@@ -23,6 +25,21 @@ type Props = {
 
 const { item, offerId, rank, reviews = [], reviewStats = null } = Astro.props satisfies Props;
 const stats = reviewStats ?? getReviewStats(reviews);
+
+const stripLeadingBullet = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/^[\s\u3000]+/, "")
+    .replace(/^(?:[・•\-–—*]\s*)+/, "")
+    .trim();
+
+const highlightItems = (item.points?.length ? item.points : item.features) ?? [];
+const highlightText =
+  highlightItems
+    .map(stripLeadingBullet)
+    .filter(Boolean)
+    .slice(0, 6)
+    .join("、") ||
+  (item.benefitText ? stripLeadingBullet(item.benefitText) : "");
 ---
 
 <article class="surface rounded-2xl border border-white/30 shadow-sm">
@@ -99,10 +116,10 @@ const stats = reviewStats ?? getReviewStats(reviews);
         </span>
       </div>
 
-      {item.benefitText ? (
+      {highlightText ? (
         <div class="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-[#ffe8f2] px-3 py-2 ring-1 ring-[#ffc3dd]">
-          <span class="inline-flex items-center rounded-md bg-[#ff7ab6] px-2 py-1 text-xs font-extrabold text-white">特典</span>
-          <span class="text-sm font-semibold text-zinc-800">{item.benefitText}</span>
+          <span class="inline-flex items-center rounded-md bg-[#ff7ab6] px-2 py-1 text-xs font-extrabold text-white">特徴</span>
+          <span class="text-sm font-semibold text-zinc-800">{highlightText}</span>
         </div>
       ) : null}
     </div>
