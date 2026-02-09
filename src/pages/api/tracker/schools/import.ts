@@ -13,6 +13,9 @@ function json(resBody: any, status = 200) {
 
 // Minimal RFC4180 CSV parser (supports quoted fields with commas/newlines)
 function parseCsv(text: string): { headers: string[]; records: Record<string, string>[] } {
+  // Strip UTF-8 BOM (Excel export sometimes includes it).
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
@@ -84,9 +87,27 @@ function parseCsv(text: string): { headers: string[]; records: Record<string, st
   pushField();
   if (row.length) pushRow();
 
-  const headers = (rows[0] ?? []).map((h) => String(h ?? "").trim());
+  const normalizeHeader = (h: unknown) =>
+    String(h ?? "")
+      .replace(/^\uFEFF/, "")
+      .trim();
+
+  // Some Excel exports add a title row before the header (e.g. "schools (1),,,,,").
+  // Find the first row that looks like a header row (contains required columns).
+  const findHeaderIndex = () => {
+    const limit = Math.min(rows.length, 20);
+    for (let r = 0; r < limit; r++) {
+      const hs = (rows[r] ?? []).map(normalizeHeader).map((x) => x.toLowerCase());
+      const set = new Set(hs.filter(Boolean));
+      if (set.has("id") && (set.has("name") || set.has("officialurl"))) return r;
+    }
+    return 0;
+  };
+
+  const headerIdx = findHeaderIndex();
+  const headers = (rows[headerIdx] ?? []).map((h) => normalizeHeader(h));
   const records: Record<string, string>[] = [];
-  for (let r = 1; r < rows.length; r++) {
+  for (let r = headerIdx + 1; r < rows.length; r++) {
     const vals = rows[r];
     if (!vals || !vals.length) continue;
     const rec: Record<string, string> = {};
