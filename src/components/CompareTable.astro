@@ -299,7 +299,7 @@ const stripLeadingBullet = (v: unknown): string =>
               <div class="text-xs font-extrabold text-zinc-700">こんな人におすすめ</div>
               {x.data.recommendedFor?.length ? (
                 <ul class="mt-2 space-y-1 text-sm font-semibold text-zinc-900">
-                  {x.data.recommendedFor.slice(0, 3).map((p) => (
+                  {x.data.recommendedFor.slice(0, 4).map((p) => (
                     <li class="flex gap-1.5">
                       <span class="shrink-0" aria-hidden="true">・</span>
                       <span class="min-w-0">{stripLeadingBullet(p)}</span>
@@ -572,7 +572,7 @@ const stripLeadingBullet = (v: unknown): string =>
               <td class="border-t border-zinc-200 px-3 py-3 text-left text-sm font-semibold text-zinc-900" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
                 {x.data.recommendedFor?.length ? (
                   <ul class="space-y-1">
-                    {x.data.recommendedFor.slice(0, 3).map((p) => (
+                    {x.data.recommendedFor.slice(0, 4).map((p) => (
                       <li class="flex gap-1.5">
                         <span class="shrink-0" aria-hidden="true">・</span>
                         <span class="min-w-0">{stripLeadingBullet(p)}</span>
