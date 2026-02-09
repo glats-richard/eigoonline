@@ -160,6 +160,22 @@ function parseJsonArrayWithLabel(v: string, label: string): any[] {
     throw new Error(`${label} must be valid JSON`);
   }
   if (!Array.isArray(parsed)) throw new Error(`${label} must be a JSON array`);
+
+  // Normalize common data issues from spreadsheet exports.
+  if (label === "prSections") {
+    for (const it of parsed) {
+      const img = it && typeof it === "object" ? (it as any).image : null;
+      if (!img || typeof img !== "object") continue;
+      const src = String((img as any).src ?? "").trim();
+      if (!src) continue;
+      // Fix paths like "/pr/dmmog-1.webp" -> "/pr/dmm/og-1.webp"
+      const m = src.match(/^\/pr\/([a-z0-9_-]+)og-(\d+)\.webp$/i);
+      if (m) {
+        (img as any).src = `/pr/${m[1]}/og-${m[2]}.webp`;
+      }
+    }
+  }
+
   return parsed;
 }
 

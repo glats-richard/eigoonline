@@ -241,6 +241,11 @@ async function main() {
       pages: ["https://www.rarejob.com/", "https://www.rarejob.com/experiences/trial/"],
       maxImages: 2,
     },
+    {
+      schoolId: "globalcrown",
+      pages: ["https://www.global-crown.com/", "https://www.global-crown.com/get_start"],
+      maxImages: 2,
+    },
   ];
 
   for (const s of services) {
