@@ -19,6 +19,12 @@ type Props = {
 };
 
 const { item, rank } = Astro.props satisfies Props;
+
+const stripLeadingBullet = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/^[\s\u3000]+/, "")
+    .replace(/^(?:[・•\-–—*]\s*)+/, "")
+    .trim();
 ---
 
 <article class="surface relative overflow-hidden rounded-2xl border border-white/30 p-5 shadow-sm">
@@ -64,7 +70,7 @@ const { item, rank } = Astro.props satisfies Props;
           {item.features.slice(0, 6).map((f) => (
             <li class="flex gap-2">
               <span class="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-[#42cfc3]" aria-hidden="true"></span>
-              <span>{f}</span>
+              <span>{stripLeadingBullet(f)}</span>
             </li>
           ))}
         </ul>

@@ -91,6 +91,12 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
   // Only flag when the copy explicitly indicates an increase/extension.
   return /増量|延長|追加|アップ|増や/.test(s);
 };
+
+const stripLeadingBullet = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/^[\s\u3000]+/, "")
+    .replace(/^(?:[・•\-–—*]\s*)+/, "")
+    .trim();
 ---
 
 {variant === "stack" ? (
@@ -278,7 +284,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
               {x.data.points?.length ? (
                 <ul class="mt-2 text-sm font-semibold text-zinc-900">
                   {x.data.points.slice(0, 3).map((p) => (
-                    <li class="mb-1 last:mb-0">・{p}</li>
+                    <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
                   ))}
                 </ul>
               ) : (
@@ -291,7 +297,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
               {x.data.recommendedFor?.length ? (
                 <ul class="mt-2 text-sm font-semibold text-zinc-900">
                   {x.data.recommendedFor.slice(0, 3).map((p) => (
-                    <li class="mb-1 last:mb-0">・{p}</li>
+                    <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
                   ))}
                 </ul>
               ) : (
@@ -539,7 +545,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                 {x.data.points?.length ? (
                   <ul>
                     {x.data.points.slice(0, 3).map((p) => (
-                      <li class="mb-1 last:mb-0">・{p}</li>
+                      <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
                     ))}
                   </ul>
                 ) : (
@@ -558,7 +564,7 @@ const isTrialBoosted = (benefitText: string | null | undefined, campaignText: st
                 {x.data.recommendedFor?.length ? (
                   <ul>
                     {x.data.recommendedFor.slice(0, 3).map((p) => (
-                      <li class="mb-1 last:mb-0">・{p}</li>
+                      <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
                     ))}
                   </ul>
                 ) : (

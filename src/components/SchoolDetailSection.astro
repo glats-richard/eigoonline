@@ -52,6 +52,12 @@ const isAccesstrade = (href: string) => {
   }
 };
 
+const stripLeadingBullet = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/^[\s\u3000]+/, "")
+    .replace(/^(?:[・•\-–—*]\s*)+/, "")
+    .trim();
+
 const trackHref = (href: string) =>
   (href.startsWith("http://") || href.startsWith("https://")) && !isAccesstrade(href)
     ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
@@ -154,7 +160,7 @@ const trackHref = (href: string) =>
       {item.recommendedFor?.length ? (
         <ul class="mt-3 list-disc pl-5 text-sm text-zinc-800">
           {item.recommendedFor.slice(0, 6).map((t) => (
-            <li>{t}</li>
+            <li>{stripLeadingBullet(t)}</li>
           ))}
         </ul>
       ) : (
@@ -170,7 +176,7 @@ const trackHref = (href: string) =>
       {item.editorialComments?.length ? (
         <ul class="mt-3 list-disc pl-5 text-sm text-zinc-800">
           {item.editorialComments.slice(0, 6).map((t) => (
-            <li>{t}</li>
+            <li>{stripLeadingBullet(t)}</li>
           ))}
         </ul>
       ) : (
@@ -204,7 +210,7 @@ const trackHref = (href: string) =>
         {item.campaignBullets?.length ? (
           <ul class="mt-2 list-disc pl-5 text-sm text-[#2f46b6]/90">
             {item.campaignBullets.slice(0, 6).map((t) => (
-              <li>{t}</li>
+              <li>{stripLeadingBullet(t)}</li>
             ))}
           </ul>
         ) : item.campaignText ? (
