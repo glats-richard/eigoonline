@@ -282,9 +282,12 @@ const stripLeadingBullet = (v: unknown): string =>
             <div class="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
               <div class="text-xs font-extrabold text-zinc-700">おすすめポイント</div>
               {x.data.points?.length ? (
-                <ul class="mt-2 text-sm font-semibold text-zinc-900">
+                <ul class="mt-2 space-y-1 text-sm font-semibold text-zinc-900">
                   {x.data.points.slice(0, 3).map((p) => (
-                    <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
+                    <li class="flex gap-1.5">
+                      <span class="shrink-0" aria-hidden="true">・</span>
+                      <span class="min-w-0">{stripLeadingBullet(p)}</span>
+                    </li>
                   ))}
                 </ul>
               ) : (
@@ -295,9 +298,12 @@ const stripLeadingBullet = (v: unknown): string =>
             <div class="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
               <div class="text-xs font-extrabold text-zinc-700">こんな人におすすめ</div>
               {x.data.recommendedFor?.length ? (
-                <ul class="mt-2 text-sm font-semibold text-zinc-900">
+                <ul class="mt-2 space-y-1 text-sm font-semibold text-zinc-900">
                   {x.data.recommendedFor.slice(0, 3).map((p) => (
-                    <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
+                    <li class="flex gap-1.5">
+                      <span class="shrink-0" aria-hidden="true">・</span>
+                      <span class="min-w-0">{stripLeadingBullet(p)}</span>
+                    </li>
                   ))}
                 </ul>
               ) : (
@@ -543,9 +549,12 @@ const stripLeadingBullet = (v: unknown): string =>
             return (
               <td class="border-t border-zinc-200 px-3 py-3 text-left text-sm font-semibold text-zinc-900" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
                 {x.data.points?.length ? (
-                  <ul>
+                  <ul class="space-y-1">
                     {x.data.points.slice(0, 3).map((p) => (
-                      <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
+                      <li class="flex gap-1.5">
+                        <span class="shrink-0" aria-hidden="true">・</span>
+                        <span class="min-w-0">{stripLeadingBullet(p)}</span>
+                      </li>
                     ))}
                   </ul>
                 ) : (
@@ -562,9 +571,12 @@ const stripLeadingBullet = (v: unknown): string =>
             return (
               <td class="border-t border-zinc-200 px-3 py-3 text-left text-sm font-semibold text-zinc-900" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
                 {x.data.recommendedFor?.length ? (
-                  <ul>
+                  <ul class="space-y-1">
                     {x.data.recommendedFor.slice(0, 3).map((p) => (
-                      <li class="mb-1 last:mb-0">・{stripLeadingBullet(p)}</li>
+                      <li class="flex gap-1.5">
+                        <span class="shrink-0" aria-hidden="true">・</span>
+                        <span class="min-w-0">{stripLeadingBullet(p)}</span>
+                      </li>
                     ))}
                   </ul>
                 ) : (
