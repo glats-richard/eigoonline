@@ -4,6 +4,8 @@ import type { APIRoute } from "astro";
 import crypto from "node:crypto";
 import { dbEnvError, query } from "../../../lib/db";
 
+const TRACKING_ENABLED = process.env.EIGOONLINE_TRACKING_ENABLED === "1";
+
 type SchoolLike = {
   officialUrl?: string | null;
   planUrl?: string | null;
@@ -81,8 +83,6 @@ function serverError(message: string) {
 }
 
 export const GET: APIRoute = async ({ request, url }) => {
-  if (dbEnvError) return serverError(dbEnvError);
-
   const offerId = String(url.searchParams.get("offer_id") ?? "").trim();
   if (!offerId) return badRequest("offer_id is required");
 
@@ -100,6 +100,19 @@ export const GET: APIRoute = async ({ request, url }) => {
 
   const allowed = HOSTS_BY_OFFER.get(offerId);
   if (!allowed || !allowed.has(toUrl.hostname)) return badRequest("to host is not allowed for this offer_id");
+
+  // Tracking disabled: keep navigation working, but don't issue click_id or persist anything.
+  if (!TRACKING_ENABLED) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: toUrl.toString(),
+        "cache-control": "no-store",
+      },
+    });
+  }
+
+  if (dbEnvError) return serverError(dbEnvError);
 
   const h = request.headers;
   const referrer = h.get("referer");

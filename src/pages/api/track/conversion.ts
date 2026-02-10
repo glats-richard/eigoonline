@@ -4,6 +4,8 @@ import type { APIRoute } from "astro";
 import crypto from "node:crypto";
 import { dbEnvError, query } from "../../../lib/db";
 
+const TRACKING_ENABLED = process.env.EIGOONLINE_TRACKING_ENABLED === "1";
+
 const STATUS_ALLOWED = new Set(["pending", "check", "approved", "rejected"]);
 
 function riskCommentFromReasons(reasons: string[]) {
@@ -136,6 +138,12 @@ export const OPTIONS: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
+  // Tracking disabled: accept requests but don't persist anything.
+  // Keep response 200 so partners/clients aren't broken by temporary shutdown.
+  if (!TRACKING_ENABLED) {
+    return json(200, { ok: true, disabled: true }, corsHeaders(request));
+  }
+
   if (dbEnvError) {
     return json(500, { ok: false, error: dbEnvError }, corsHeaders(request));
   }

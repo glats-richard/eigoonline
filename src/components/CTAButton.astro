@@ -1,7 +1,7 @@
 ---
 type Props = {
   href: string;
-  /** If provided, external clicks are routed via /api/track/click to issue click_id. */
+  /** If provided, external clicks can be routed via /api/track/click (enabled only when EIGOONLINE_TRACKING_ENABLED=1). */
   offerId?: string;
   label?: string;
   fullWidth?: boolean;
