@@ -355,6 +355,20 @@ function fmtYenFromPriceText(v: unknown): string | null {
 
 const cheapestPlanYen = fmtYenFromPriceText(school?.priceText);
 
+function minYenFromPriceText(v: unknown): number | null {
+  const s = String(v ?? "").replace(/\s+/g, " ").trim();
+  if (!s) return null;
+  const matches = Array.from(s.matchAll(/([\d,]{3,})\s*円/g));
+  if (!matches.length) return null;
+  const nums = matches
+    .map((m) => Number(String(m[1]).replace(/,/g, "")))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  if (!nums.length) return null;
+  return Math.min(...nums);
+}
+
+const minPriceYen = minYenFromPriceText(school?.priceText);
+
 type PrMedia = { src: string; alt?: string | null; width?: number | null; height?: number | null };
 type PrSection = {
   iconText?: string | null;
@@ -428,19 +442,65 @@ const faqItems: { q: string; a: string }[] =
 
 const jsonLd: any[] = [];
 if (school) {
-  const product: any = {
-    "@context": "https://schema.org",
-    "@type": "Product",
+  const baseUrl = new URL(pageUrl);
+  const orgUrl = baseUrl.origin;
+  const webpageId = `${pageUrl}#webpage`; // matches Layout.astro
+  const offerUrl = school.planUrl || school.officialUrl || pageUrl;
+
+  const service: any = {
+    "@type": "Service",
+    "@id": `${pageUrl}#service`,
     name: school.name,
     url: pageUrl,
     description,
+    serviceType: "オンライン英会話",
+    category: "Education",
+    areaServed: { "@type": "Country", name: "Japan" },
+    inLanguage: "ja-JP",
+    provider: {
+      "@type": "Organization",
+      name: school.name,
+      url: school.officialUrl || pageUrl,
+    },
+    isPartOf: { "@id": `${orgUrl}#website` },
+    mainEntityOfPage: { "@id": webpageId },
   };
-  if (logoAbs) product.image = [logoAbs];
-  if (schoolId === "kimini") {
-    product.brand = { "@type": "Brand", name: "学研グループ" };
+
+  if (logoAbs) {
+    service.image = [
+      {
+        "@type": "ImageObject",
+        url: logoAbs,
+      },
+    ];
   }
+
+  if (minPriceYen) {
+    service.offers = {
+      "@type": "Offer",
+      url: offerUrl,
+      priceCurrency: "JPY",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        priceCurrency: "JPY",
+        minPrice: minPriceYen,
+        unitText: "MONTH",
+      },
+      availability: "https://schema.org/InStock",
+    };
+  } else if (school.priceText) {
+    // Keep a human-readable offer snippet even when we can't parse a number
+    service.offers = {
+      "@type": "Offer",
+      url: offerUrl,
+      priceCurrency: "JPY",
+      description: String(school.priceText),
+      availability: "https://schema.org/InStock",
+    };
+  }
+
   if (ratingValue !== null && reviewCount > 0) {
-    product.aggregateRating = {
+    service.aggregateRating = {
       "@type": "AggregateRating",
       ratingValue,
       reviewCount,
@@ -448,13 +508,36 @@ if (school) {
       worstRating: 1,
     };
   }
-  jsonLd.push(product);
+
+  // Attach latest reviews (DB-approved preferred, with static fallback)
+  if (displayLatest.length) {
+    service.review = displayLatest
+      .filter((r) => typeof r.rating === "number" && Number.isFinite(r.rating) && r.rating > 0 && r.body)
+      .slice(0, 10)
+      .map((r) => {
+        const review: any = {
+          "@type": "Review",
+          author: { "@type": "Person", name: r.label || "ユーザー" },
+          reviewBody: r.body,
+          reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+        };
+        if (r.createdAt) review.datePublished = r.createdAt;
+        return review;
+      });
+  }
+
+  if (schoolId === "kimini") {
+    service.brand = { "@type": "Brand", name: "学研グループ" };
+  }
+
+  jsonLd.push(service);
 }
 
 if (faqItems.length) {
   jsonLd.push({
-    "@context": "https://schema.org",
     "@type": "FAQPage",
+    "@id": `${pageUrl}#faq`,
+    mainEntityOfPage: { "@id": `${pageUrl}#webpage` },
     mainEntity: faqItems.map((f) => ({
       "@type": "Question",
       name: f.q,
@@ -466,7 +549,7 @@ if (faqItems.length) {
 
 <Layout title={title} description={description}>
   <Fragment slot="head">
-    {jsonLd.length ? <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} /> : null}
+    {jsonLd.length ? <script type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@graph": jsonLd })} /> : null}
   </Fragment>
 
   {!school ? (

@@ -11,6 +11,31 @@ function splitLines(s) {
     .filter(Boolean);
 }
 
+function stripLeadingBullet(v) {
+  return String(v ?? "")
+    .replace(/^[\s\u3000]+/, "")
+    .replace(/^(?:[・•\-–—*]\s*)+/, "")
+    .trim();
+}
+
+function looksLikeJsonValue(v) {
+  if (typeof v !== "string") return false;
+  const s = v.trim();
+  if (!s) return false;
+  // Common corruption from spreadsheet exports: JSON array/object text in a single cell.
+  if ((s.startsWith("[") && s.endsWith("]")) || (s.startsWith("{") && s.endsWith("}"))) return true;
+  // Heuristic: PR section JSON often contains these keys.
+  if (s.includes('"iconText"') || s.includes('"title"') || s.includes('"body"') || s.includes('"image"')) return true;
+  return false;
+}
+
+function parseBulletsFromCell(s) {
+  if (looksLikeJsonValue(String(s ?? ""))) return [];
+  return splitLines(s)
+    .map(stripLeadingBullet)
+    .filter(Boolean);
+}
+
 // Minimal RFC4180 CSV parser (supports quoted fields with commas/newlines)
 function parseCsv(text) {
   if (text.charCodeAt(0) === 0xfeff) text = text.slice(1); // BOM
@@ -159,11 +184,17 @@ async function writeSchoolJson(fp, data) {
 }
 
 async function main() {
-  const csvPath = process.argv[2];
+  const args = process.argv.slice(2);
+  const csvPath = args.find((x) => x && !x.startsWith("-"));
   if (!csvPath) {
-    console.error("Usage: node scripts/apply-schools-csv-to-content.mjs <path-to-csv>");
+    console.error(
+      "Usage: node scripts/apply-schools-csv-to-content.mjs <path-to-csv> [--only-editorial-comments] [--fill-empty-only]",
+    );
     process.exit(1);
   }
+
+  const onlyEditorial = args.includes("--only-editorial-comments");
+  const fillEmptyOnly = args.includes("--fill-empty-only");
 
   const csvText = await fs.readFile(csvPath, "utf8");
   const { records } = parseCsv(csvText);
@@ -177,15 +208,24 @@ async function main() {
     try {
       const { fp, data } = await readSchoolJson(id);
 
-      // Safety-first: this script only applies PR fields.
-      // (Spreadsheet exports often contain mixed/corrupted values in other columns.)
-      if (!shouldSkipPlaceholder(r.prSectionTitle)) {
-        data.prSectionTitle = String(r.prSectionTitle).trim();
+      if (!onlyEditorial) {
+        // Safety-first: apply PR fields only (spreadsheet exports can contain corrupted values).
+        if (!shouldSkipPlaceholder(r.prSectionTitle)) {
+          data.prSectionTitle = String(r.prSectionTitle).trim();
+        }
+
+        const prSections = parseJsonArrayOrEmpty(r.prSections ?? "", "prSections");
+        if (Array.isArray(prSections) && prSections.length) {
+          data.prSections = prSections;
+        }
       }
 
-      const prSections = parseJsonArrayOrEmpty(r.prSections ?? "", "prSections");
-      if (Array.isArray(prSections) && prSections.length) {
-        data.prSections = prSections;
+      const editorialComments = parseBulletsFromCell(r.editorialComments ?? "");
+      if (editorialComments.length) {
+        const current = Array.isArray(data.editorialComments) ? data.editorialComments : [];
+        if (!fillEmptyOnly || current.length === 0) {
+          data.editorialComments = editorialComments;
+        }
       }
 
       await writeSchoolJson(fp, data);
