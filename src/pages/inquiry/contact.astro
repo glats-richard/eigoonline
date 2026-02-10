@@ -1,14 +1,174 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+const supportEmail = "support@eigoonline.com";
 ---
 
-<Layout title="掲載のお問い合わせ（準備中）" description="お問い合わせページ（準備中）">
+<Layout title="掲載のお問い合わせ" description="掲載に関するご相談・お問い合わせはこちらから送信できます。">
   <main class="mx-auto w-full max-w-3xl px-4 py-10">
-    <h1 class="text-2xl font-extrabold text-zinc-900">掲載のお問い合わせ（準備中）</h1>
-    <p class="mt-3 text-zinc-600">このページはこれから実装します。お問い合わせは下記までご連絡ください。</p>
-    <p class="mt-4 text-sm font-semibold text-zinc-800">
-      <a class="link-brand underline" href="mailto:support@eigoonline.com">support@eigoonline.com</a>
-    </p>
-    <a class="btn-brand mt-6 inline-block rounded-xl px-4 py-2 text-sm font-extrabold text-white" href="/">トップへ戻る</a>
+    <header class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900">掲載のお問い合わせ</h1>
+      <p class="mt-3 text-sm font-semibold text-zinc-600">
+        掲載のご相談・ご質問は、下記フォームからお送りください（送信後、お使いのメールアプリが起動します）。
+      </p>
+      <p class="mt-2 text-xs font-semibold text-zinc-500">
+        メールが起動しない場合は、
+        <a class="link-brand font-semibold underline underline-offset-2" href={`mailto:${supportEmail}`}>{supportEmail}</a>
+        までご連絡ください。
+      </p>
+    </header>
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <form id="inquiry-form" class="space-y-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="text-sm font-extrabold text-zinc-900">お名前</span>
+            <input
+              name="name"
+              required
+              autocomplete="name"
+              class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm outline-none ring-0 focus:border-[#7ac6ff] focus:ring-2 focus:ring-[#7ac6ff]/30"
+              placeholder="例）山田 太郎"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-extrabold text-zinc-900">貴社名</span>
+            <input
+              name="company"
+              autocomplete="organization"
+              class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm outline-none ring-0 focus:border-[#7ac6ff] focus:ring-2 focus:ring-[#7ac6ff]/30"
+              placeholder="例）◯◯株式会社"
+            />
+          </label>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="text-sm font-extrabold text-zinc-900">お電話番号</span>
+            <input
+              name="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm outline-none ring-0 focus:border-[#7ac6ff] focus:ring-2 focus:ring-[#7ac6ff]/30"
+              placeholder="例）03-xxxx-xxxx"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-extrabold text-zinc-900">メールアドレス</span>
+            <input
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm outline-none ring-0 focus:border-[#7ac6ff] focus:ring-2 focus:ring-[#7ac6ff]/30"
+              placeholder="example@company.com"
+            />
+          </label>
+        </div>
+
+        <label class="block">
+          <span class="text-sm font-extrabold text-zinc-900">お問い合わせ内容</span>
+          <textarea
+            name="message"
+            required
+            rows={6}
+            class="mt-2 w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm outline-none ring-0 focus:border-[#7ac6ff] focus:ring-2 focus:ring-[#7ac6ff]/30"
+            placeholder="掲載のご相談内容をご記入ください。"
+          ></textarea>
+        </label>
+
+        <label class="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <input
+            type="checkbox"
+            name="agree"
+            required
+            class="mt-1 h-4 w-4 rounded border-zinc-300 text-[color:var(--brand-link)]"
+          />
+          <span class="text-sm font-semibold text-zinc-800">
+            <a class="link-brand font-extrabold underline underline-offset-2" href="/info/policy">プライバシーポリシー</a>
+            を確認し、同意しました
+          </span>
+        </label>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div id="inquiry-hint" class="text-xs font-semibold text-zinc-500">
+            送信ボタンを押すと、メール本文が自動入力された状態でメールアプリが起動します。
+          </div>
+          <button
+            type="submit"
+            class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white"
+          >
+            送信する
+          </button>
+        </div>
+
+        <p id="inquiry-error" class="hidden text-sm font-semibold text-red-600"></p>
+      </form>
+    </section>
+
+    <div class="mt-6">
+      <a class="btn-brand inline-block rounded-xl px-4 py-2 text-sm font-extrabold text-white" href="/">トップへ戻る</a>
+    </div>
   </main>
 </Layout>
+
+<script is:inline>
+  const form = document.getElementById("inquiry-form");
+  const errorEl = document.getElementById("inquiry-error");
+  const to = "{supportEmail}";
+
+  function showError(msg) {
+    if (!errorEl) return;
+    errorEl.textContent = msg || "";
+    errorEl.classList.toggle("hidden", !msg);
+  }
+
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    showError("");
+
+    const fd = new FormData(form);
+    const name = String(fd.get("name") || "").trim();
+    const company = String(fd.get("company") || "").trim();
+    const tel = String(fd.get("tel") || "").trim();
+    const email = String(fd.get("email") || "").trim();
+    const message = String(fd.get("message") || "").trim();
+    const agree = fd.get("agree");
+
+    if (!name || !email || !message) {
+      showError("必須項目を入力してください。");
+      return;
+    }
+    if (!agree) {
+      showError("プライバシーポリシーに同意してください。");
+      return;
+    }
+
+    const subject = "掲載のお問い合わせ";
+    const body = [
+      "掲載のお問い合わせ",
+      "",
+      `お名前: ${name}`,
+      `貴社名: ${company || "—"}`,
+      `お電話番号: ${tel || "—"}`,
+      `メールアドレス: ${email}`,
+      "",
+      "お問い合わせ内容:",
+      message,
+      "",
+      "----",
+      "※このメールはフォームから作成されました。",
+    ].join("\n");
+
+    const href =
+      "mailto:" +
+      encodeURIComponent(to) +
+      "?subject=" +
+      encodeURIComponent(subject) +
+      "&body=" +
+      encodeURIComponent(body);
+
+    window.location.href = href;
+  });
+</script>
