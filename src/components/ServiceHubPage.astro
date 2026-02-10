@@ -134,7 +134,7 @@ let dbErr: string | null = null;
 
 try {
   const statsRes = await query<{ count: number; avg: number | null }>(
-    "select count(*)::bigint as count, avg(overall_rating)::numeric as avg from reviews where status = 'approved' and school_id = $1 and overall_rating is not null",
+    "select count(*)::bigint as count, avg(overall_rating)::numeric as avg from reviews where status = 'approved' and featured_rank is not null and school_id = $1 and overall_rating is not null",
     [schoolId],
   );
   dbCount = statsRes.rows?.[0]?.count ?? 0;
@@ -161,6 +161,7 @@ try {
       avg(satisfaction_rating)::numeric as sr
     from reviews
     where status = 'approved'
+      and featured_rank is not null
       and school_id = any($1::text[])
     group by school_id
     `,
@@ -184,7 +185,7 @@ try {
     `
     select created_at, overall_rating, body, birth_year, birth_month, age
     from reviews
-    where status = 'approved' and school_id = $1 and overall_rating is not null and body is not null
+    where status = 'approved' and featured_rank is not null and school_id = $1 and overall_rating is not null and body is not null
     order by created_at desc
     limit ${LATEST_REVIEW_LIMIT}
     `,
@@ -566,7 +567,7 @@ if (faqItems.length) {
     <main id="top" class="mx-auto w-full max-w-6xl px-4 pb-12 pt-6">
       <!-- Hero -->
       <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="flex items-start gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
           {school.logoUrl ? (
             <div class="flex h-14 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3">
               <img
@@ -585,7 +586,7 @@ if (faqItems.length) {
             </div>
           )}
 
-          <div class="min-w-0 flex-1">
+          <div class="w-full min-w-0 sm:flex-1">
             <div class="flex flex-wrap items-center gap-2">
             <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">ランキング</span>

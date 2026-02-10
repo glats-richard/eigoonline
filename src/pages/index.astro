@@ -61,7 +61,7 @@ type DbReviewRow = DBReviewRow & {
 let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
   const dbReviewsWithSchoolId = await query<DbReviewRow>(
-    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age from reviews where status = 'approved'",
+    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age from reviews where status = 'approved' and featured_rank is not null",
   );
   for (const r of dbReviewsWithSchoolId.rows ?? []) {
     const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
@@ -95,7 +95,7 @@ for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
 }
 for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
   const valid = dbReviews
-    .filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body)
+    .filter((r) => r.featured_rank !== null && r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body)
     .slice()
     .sort((a, b) => {
       const at = a.created_at ? new Date(a.created_at).getTime() : 0;
@@ -122,7 +122,7 @@ for (const [schoolId] of schoolsById) {
   const staticItems = staticReviewsBySchoolId.get(schoolId) ?? [];
   const dbItems = dbReviewsBySchoolId.get(schoolId) ?? [];
   const dbForStats = dbItems
-    .filter((r) => r.overall_rating !== null && Number.isFinite(r.overall_rating))
+    .filter((r) => r.featured_rank !== null && r.overall_rating !== null && Number.isFinite(r.overall_rating))
     .map((r) => ({ rating: r.overall_rating! }));
   const stats = getReviewStats([
     ...staticItems,

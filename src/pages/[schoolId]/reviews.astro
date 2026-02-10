@@ -34,6 +34,7 @@ type DbApprovedReviewRow = DBReviewRow & {
   id: number;
   created_at: string;
   body: string;
+  featured_rank?: number | null;
   birth_year?: number | null;
   birth_month?: number | null;
   age?: string | null; // legacy
@@ -46,6 +47,7 @@ try {
     select
       id,
       created_at,
+      featured_rank,
       overall_rating,
       teacher_quality,
       material_quality,
@@ -55,7 +57,7 @@ try {
       birth_month,
       age
     from reviews
-    where status = 'approved' and school_id = $1
+    where status = 'approved' and featured_rank is not null and school_id = $1
     order by created_at desc
     limit 200
     `,
