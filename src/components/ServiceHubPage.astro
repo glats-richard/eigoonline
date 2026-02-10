@@ -587,21 +587,21 @@ if (faqItems.length) {
 
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700 whitespace-nowrap">
+            <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">ランキング</span>
-              <span class="text-zinc-700">
-                {overallRank ? `総合:${overallRank}位` : "総合:—"}
-                {typeof businessRank === "number" ? `　ビジネス:${businessRank}位` : ""}
-                {typeof kidsRank === "number" ? `　子供向け:${kidsRank}位` : ""}
+              <span class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-zinc-700">
+                <span class="whitespace-nowrap">{overallRank ? `総合:${overallRank}位` : "総合:—"}</span>
+                {typeof businessRank === "number" ? <span class="whitespace-nowrap">{`ビジネス:${businessRank}位`}</span> : null}
+                {typeof kidsRank === "number" ? <span class="whitespace-nowrap">{`子供向け:${kidsRank}位`}</span> : null}
               </span>
             </div>
 
-            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700 whitespace-nowrap">
+            <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">無料体験</span>
-              <span class="text-zinc-700">{school.trialText ?? "—"}</span>
+              <span class="min-w-0 break-words text-zinc-700">{school.trialText ?? "—"}</span>
             </div>
 
-            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700 whitespace-nowrap">
+            <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">レッスン満足度</span>
               {ratingValue !== null ? (
                 <span class="inline-flex items-center gap-1 leading-none">
@@ -616,9 +616,9 @@ if (faqItems.length) {
               )}
             </div>
 
-            <div class="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700 whitespace-nowrap">
+            <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">最安プラン</span>
-              <span class="text-zinc-700">{school.priceText ?? (cheapestPlanYen ? `${cheapestPlanYen}/月` : "—")}</span>
+              <span class="min-w-0 break-words text-zinc-700">{school.priceText ?? (cheapestPlanYen ? `${cheapestPlanYen}/月` : "—")}</span>
             </div>
             </div>
           </div>
@@ -633,8 +633,13 @@ if (faqItems.length) {
           {school.name}
         </h1>
 
-        <div class:list={["mt-4 grid gap-6", school.heroImageUrl ? "lg:grid-cols-[1fr_320px] lg:items-stretch" : "lg:grid-cols-[1fr_320px] lg:items-start"]}>
-          <div class="min-w-0">
+        <div
+          class:list={[
+            "mt-4 flex flex-col gap-6",
+            school.heroImageUrl ? "lg:grid lg:grid-cols-[1fr_320px] lg:items-stretch" : "lg:grid lg:grid-cols-[1fr_320px] lg:items-start",
+          ]}
+        >
+          <div class="min-w-0 order-1 empty:hidden lg:order-none lg:col-start-1 lg:row-start-1">
             {school.heroImageUrl ? (
               <div class="h-full overflow-hidden rounded-2xl border border-zinc-200 bg-white">
                 <img
@@ -648,7 +653,29 @@ if (faqItems.length) {
             ) : null}
           </div>
 
-          <aside class="h-full rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+          <div class="order-2 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-start-2">
+            <p class="whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700 sm:text-base">{heroDescription}</p>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a
+                class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                href={school.officialUrl}
+                target="_blank"
+                rel="nofollow sponsored noopener noreferrer"
+                referrerpolicy="no-referrer"
+              >
+                公式サイトを見る
+              </a>
+              <a
+                class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+                href={`/${encodeURIComponent(schoolId)}/reviews`}
+              >
+                口コミを見る
+              </a>
+            </div>
+          </div>
+
+          <aside class="order-3 h-full rounded-2xl border border-zinc-200 bg-zinc-50 p-3 lg:order-none lg:col-start-2 lg:row-start-1">
             <div class="flex items-end justify-between gap-3">
               <div>
                 <div class="text-xs font-extrabold text-zinc-600">総合評価（口コミ{reviewCount}件）</div>
@@ -765,26 +792,6 @@ if (faqItems.length) {
             </div>
           </aside>
         </div>
-
-        <p class="mt-4 whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700 sm:text-base">{heroDescription}</p>
-
-        <div class="mt-6 flex flex-wrap gap-3">
-          <a
-            class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            href={school.officialUrl}
-            target="_blank"
-            rel="nofollow sponsored noopener noreferrer"
-            referrerpolicy="no-referrer"
-          >
-            公式サイトを見る
-          </a>
-          <a
-            class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
-            href={`/${encodeURIComponent(schoolId)}/reviews`}
-          >
-            口コミを見る
-          </a>
-        </div>
       </section>
 
       {prSections.length ? (
@@ -831,12 +838,9 @@ if (faqItems.length) {
                     <h3 class="text-base font-extrabold text-zinc-900">{sec.title}</h3>
                   </div>
 
-                  <div class:list={["mt-4 grid gap-5", hasImg ? "lg:grid-cols-[1fr_340px] lg:items-start" : "", reverse ? "lg:[direction:rtl]" : ""]}>
-                    <div class:list={["min-w-0", reverse ? "lg:[direction:ltr]" : ""]}>
-                      <p class="text-sm font-semibold leading-7 text-zinc-700 whitespace-pre-wrap">{sec.body}</p>
-                    </div>
+                  <div class="mt-4 space-y-4">
                     {hasImg ? (
-                      <div class:list={reverse ? "lg:[direction:ltr]" : ""}>
+                      <div>
                         <img
                           src={String(img?.src)}
                           alt={(img?.alt ?? "") as string}
@@ -848,6 +852,10 @@ if (faqItems.length) {
                         />
                       </div>
                     ) : null}
+
+                    <div class="min-w-0">
+                      <p class="whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700">{sec.body}</p>
+                    </div>
                   </div>
                 </div>
               );

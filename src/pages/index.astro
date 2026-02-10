@@ -8,6 +8,7 @@ import CompareTableTabs from "../components/CompareTableTabs.astro";
 import PickupCard from "../components/PickupCard.astro";
 import Sidebar from "../components/Sidebar.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
+import ReviewSubmitCard from "../components/ReviewSubmitCard.astro";
 import { getReviewStats, getDetailedReviewStatsFromDB, type DBReviewRow } from "../utils/reviewStats";
 import { query } from "../lib/db";
 import { getSchoolsMerged } from "../lib/schools";
@@ -445,6 +446,8 @@ const faqJsonLd = {
 						</section>
 					</div>
 				</section>
+
+				<ReviewSubmitCard className="lg:hidden" />
 
 				<section id="compare">
 					<div class="mb-4">

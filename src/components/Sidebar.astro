@@ -1,6 +1,7 @@
 ---
 import SidebarBanner from "./SidebarBanner.astro";
 import CategoryIcon from "./CategoryIcon.astro";
+import ReviewSubmitCard from "./ReviewSubmitCard.astro";
 
 type School = { offerId: string; name: string; officialUrl: string; logoUrl?: string | null };
 
@@ -28,26 +29,7 @@ const trackHref = (offerId: string, href: string) =>
 <aside class="space-y-4">
   {topBanner.length ? <SidebarBanner heading="おすすめバナー" items={topBanner} /> : null}
 
-  <section class="rounded-2xl border-2 border-[#F49BB5] bg-linear-to-br from-[#ffe8f2] to-white p-5 shadow-sm">
-    <h3 class="text-base font-extrabold text-zinc-900 mb-3">体験談を投稿</h3>
-    <p class="text-xs text-zinc-600 mb-4">
-      オンライン英会話サービスの体験談を投稿して、他のユーザーの参考にしてください。
-    </p>
-    <div class="flex flex-col gap-2">
-      <a
-        href="/review/submit"
-        class="inline-flex items-center justify-center rounded-xl bg-[color:var(--brand-link)] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm hover:opacity-90 transition-opacity"
-      >
-        レビューを投稿する
-      </a>
-      <a
-        href="/review/howto"
-        class="text-xs font-semibold text-[color:var(--brand-link)] underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)] text-center"
-      >
-        投稿方法を見る
-      </a>
-    </div>
-  </section>
+  <ReviewSubmitCard className="hidden lg:block" />
 
   {uniqueCategories.length ? (
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
