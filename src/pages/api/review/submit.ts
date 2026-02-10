@@ -44,10 +44,20 @@ function readRecaptchaSecret() {
   return process.env.RECAPTCHA_SECRET_KEY ?? (import.meta as any).env?.RECAPTCHA_SECRET_KEY ?? undefined;
 }
 
+function readRecaptchaSiteKey() {
+  return process.env.RECAPTCHA_SITE_KEY ?? (import.meta as any).env?.RECAPTCHA_SITE_KEY ?? undefined;
+}
+
 function readRecaptchaMinScore() {
   const raw = process.env.RECAPTCHA_MIN_SCORE ?? (import.meta as any).env?.RECAPTCHA_MIN_SCORE ?? "0.5";
   const n = Number(raw);
   return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.5;
+}
+
+function wantsHtml(request: Request) {
+  const accept = request.headers.get("accept") ?? "";
+  const mode = request.headers.get("sec-fetch-mode") ?? "";
+  return accept.includes("text/html") || mode === "navigate";
 }
 
 function isAllowedRecaptchaHost(hostname: string | undefined | null): boolean {
@@ -60,7 +70,10 @@ function isAllowedRecaptchaHost(hostname: string | undefined | null): boolean {
 
 async function verifyRecaptchaV3(opts: { token: string; action: string; ip: string | null }) {
   const secret = readRecaptchaSecret();
-  if (!secret) {
+  const siteKey = readRecaptchaSiteKey();
+  // Require both site+secret keys to be configured.
+  // If only one side is set, skip verification to avoid blocking submissions.
+  if (!secret || !siteKey) {
     return { skipped: true as const };
   }
 
@@ -259,6 +272,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   if ("skipped" in recaptchaRes && recaptchaRes.skipped) {
     // If not configured, allow submission (best-effort).
   } else if ("ok" in recaptchaRes && !recaptchaRes.ok) {
+    if (wantsHtml(request)) {
+      const q = new URLSearchParams();
+      q.set("error", "recaptcha");
+      q.set("school_id", schoolId);
+      return redirect(`/review/submit?${q.toString()}`, 303);
+    }
     return new Response(JSON.stringify({ ok: false, error: recaptchaRes.error }), {
       status: recaptchaRes.status,
       headers: { "content-type": "application/json" },

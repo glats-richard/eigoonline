@@ -10,6 +10,7 @@ const schoolsList = schools
   .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
 const submitted = Astro.url.searchParams.get("submitted") === "true";
+const error = Astro.url.searchParams.get("error")?.trim() || "";
 const preselectedSchoolId = Astro.url.searchParams.get("school_id")?.trim() || "";
 const RATING_VALUES = [1, 2, 3, 4, 5];
 const currentYear = new Date().getFullYear();
@@ -57,6 +58,17 @@ const recaptchaAction = "review_submit";
       </div>
     ) : (
       <>
+        {error ? (
+          <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5">
+            <div class="text-sm font-extrabold text-rose-900">送信に失敗しました</div>
+            <p class="mt-2 text-sm font-semibold text-rose-800">
+              {error === "recaptcha"
+                ? "スパム対策の確認に失敗しました。しばらく待って再度お試しください（広告ブロッカー等の影響で失敗する場合があります）。"
+                : "入力内容を確認して、もう一度お試しください。"}
+            </p>
+          </div>
+        ) : null}
+
         {enableRecaptcha ? (
           <script src={`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(recaptchaSiteKey)}`} async defer></script>
         ) : null}
