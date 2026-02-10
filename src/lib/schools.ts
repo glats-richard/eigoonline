@@ -21,6 +21,15 @@ function safeJsonParse(v: string): any {
   }
 }
 
+function looksLikePlaceholderText(v: unknown): v is string {
+  if (typeof v !== "string") return false;
+  const s = v.trim();
+  if (!s) return false;
+  // Common placeholders coming from tracker/CSV (e.g. "〇〇円から", "○○円から").
+  if (s.includes("〇〇") || s.includes("○○")) return true;
+  return false;
+}
+
 function sanitizeMergedSchool(base: any, merged: any) {
   // Fix common tracker CSV import mistakes:
   // Some cells contain JSON text (e.g. `["a","b"]` or `[{...}]`) which gets stored
@@ -53,10 +62,20 @@ function sanitizeMergedSchool(base: any, merged: any) {
     }
   };
 
+  const normalizeNullableStringField = (key: string) => {
+    const v = out?.[key];
+    if (typeof v === "string" && (looksLikeJsonArrayString(v) || looksLikePlaceholderText(v))) {
+      out[key] = typeof base?.[key] === "string" || base?.[key] === null ? base?.[key] ?? null : null;
+    }
+  };
+
   // List fields shown as bullet lists / tag lists.
   for (const key of ["editorialComments", "features", "points", "recommendedFor"]) {
     normalizeStringArrayField(key);
   }
+
+  // Price text sometimes gets imported as placeholders like "〇〇円から".
+  normalizeNullableStringField("priceText");
 
   // Intro fields.
   normalizeStringField("introSectionTitle");

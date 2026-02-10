@@ -23,32 +23,37 @@ declare global {
   var __EIGOONLINE_PG_POOL__: Pool | undefined;
 }
 
-export const pool: Pool | null = (() => {
+export let pool: Pool | null = null;
+
+function getPool(): Pool | null {
   if (!dbUrl) return null;
   if (globalThis.__EIGOONLINE_PG_POOL__) return globalThis.__EIGOONLINE_PG_POOL__;
+  if (pool) return pool;
 
   // Railway internal URLs usually don't need SSL. If you use a public proxy URL,
   // set PGSSLMODE=require (or supply ssl options) in the environment.
-  const ssl =
-    process.env.PGSSLMODE === "require"
-      ? { rejectUnauthorized: false }
-      : undefined;
+  const ssl = process.env.PGSSLMODE === "require" ? { rejectUnauthorized: false } : undefined;
 
-  const p = new Pool({
+  // Lazily create the pool so importing this module never forces a DB lookup
+  // (important for build/prerender environments where DB may be unreachable).
+  pool = new Pool({
     connectionString: dbUrl,
     ssl,
     max: 5,
   });
-
-  globalThis.__EIGOONLINE_PG_POOL__ = p;
-  return p;
-})();
+  // Prevent unhandled 'error' events from crashing the process when the DB
+  // is temporarily unreachable (e.g. during build/prerender).
+  pool.on("error", () => {});
+  globalThis.__EIGOONLINE_PG_POOL__ = pool;
+  return pool;
+}
 
 export async function query<T extends Record<string, any> = Record<string, any>>(
   text: string,
   params: any[] = [],
 ) {
-  if (!pool) throw new Error(dbEnvError ?? "Postgres pool is not initialized");
-  return pool.query<T>(text, params);
+  const p = getPool();
+  if (!p) throw new Error(dbEnvError ?? "Postgres pool is not initialized");
+  return p.query<T>(text, params);
 }
 
