@@ -109,9 +109,12 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Parse the JSON output from the script
+        // npm prefixes stdout with log lines like "> script-name", so extract only the JSON object
         let result;
         try {
-            result = JSON.parse(stdout);
+            const jsonStart = stdout.indexOf('{');
+            const jsonStr = jsonStart >= 0 ? stdout.slice(jsonStart) : stdout;
+            result = JSON.parse(jsonStr);
         } catch (e) {
             return serverError(`Failed to parse script output: ${stdout}`);
         }
