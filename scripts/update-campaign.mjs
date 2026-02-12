@@ -68,6 +68,30 @@ async function main() {
         // Write updated data back to file
         await writeFile(filePath, JSON.stringify(schoolData, null, 2) + '\n', 'utf-8');
 
+        // Persist to database (school_overrides) to survive deployments
+        // 1. Fetch existing override
+        const overrideRes = await pool.query('SELECT data FROM school_overrides WHERE school_id = $1', [schoolId]);
+        let overrideData = {};
+        if (overrideRes.rows.length > 0) {
+            overrideData = overrideRes.rows[0].data || {};
+        }
+
+        // 2. Merge campaign data into overrideData
+        if (campaignData.campaignText !== undefined) overrideData.campaignText = campaignData.campaignText;
+        if (campaignData.campaignEndsAt !== undefined) overrideData.campaignEndsAt = campaignData.campaignEndsAt;
+        if (campaignData.benefitText !== undefined) overrideData.benefitText = campaignData.benefitText;
+        if (campaignData.campaignBullets !== undefined) overrideData.campaignBullets = campaignData.campaignBullets;
+
+        // 3. Upsert into school_overrides
+        await pool.query(
+            `INSERT INTO school_overrides (school_id, data, updated_at)
+             VALUES ($1, $2, NOW())
+             ON CONFLICT (school_id) DO UPDATE SET
+               data = $2,
+               updated_at = NOW()`,
+            [schoolId, overrideData]
+        );
+
         // Log to database
         await pool.query(
             `INSERT INTO campaign_logs 
