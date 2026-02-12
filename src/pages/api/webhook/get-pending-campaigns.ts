@@ -51,7 +51,7 @@ export const GET: APIRoute = async ({ request }) => {
 
     try {
         // Run the fetch-campaigns script
-        const { stdout, stderr } = await execAsync('npm run fetch:campaigns', {
+        const { stdout, stderr } = await execAsync('npm run --silent fetch:campaigns', {
             cwd: process.cwd(),
             env: process.env,
         });
@@ -61,12 +61,9 @@ export const GET: APIRoute = async ({ request }) => {
         }
 
         // Parse the JSON output from the script
-        // npm prefixes stdout with log lines like "> script-name", so extract only the JSON object
         let result;
         try {
-            const jsonStart = stdout.indexOf('{');
-            const jsonStr = jsonStart >= 0 ? stdout.slice(jsonStart) : stdout;
-            result = JSON.parse(jsonStr);
+            result = JSON.parse(stdout);
         } catch (e) {
             return serverError(`Failed to parse script output: ${stdout}`);
         }

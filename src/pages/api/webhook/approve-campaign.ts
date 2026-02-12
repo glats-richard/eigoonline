@@ -119,7 +119,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Run the update-campaign script
-        const { stdout, stderr } = await execAsync(`npm ${args.map(a => JSON.stringify(a)).join(' ')}`, {
+        const { stdout, stderr } = await execAsync(`npm --silent ${args.map(a => JSON.stringify(a)).join(' ')}`, {
             cwd: process.cwd(),
             env: process.env,
         });
@@ -129,12 +129,9 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Parse the JSON output from the script
-        // npm prefixes stdout with log lines like "> script-name", so extract only the JSON object
         let result;
         try {
-            const jsonStart = stdout.indexOf('{');
-            const jsonStr = jsonStart >= 0 ? stdout.slice(jsonStart) : stdout;
-            result = JSON.parse(jsonStr);
+            result = JSON.parse(stdout);
         } catch (e) {
             return serverError(`Failed to parse script output: ${stdout}`);
         }
