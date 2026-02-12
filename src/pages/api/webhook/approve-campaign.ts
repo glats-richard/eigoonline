@@ -83,11 +83,11 @@ export const POST: APIRoute = async ({ request }) => {
         // Nested format (legacy)
         campaignData = payload.campaignData;
     } else {
-        // Flat format (from N8N)
+        // Flat format (from N8N) - support both naming conventions
         campaignData = {
             campaignText: payload.campaignText || null,
-            campaignEndsAt: payload.deadline || null,
-            benefitText: payload.benefit || null,
+            campaignEndsAt: payload.campaignEndsAt || payload.deadline || null,
+            benefitText: payload.benefitText || payload.benefit || null,
             campaignBullets: payload.campaignBullets || [],
         };
     }
