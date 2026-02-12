@@ -152,7 +152,7 @@ const schools = defineCollection({
 		campaignText: z.string().nullable().optional(),
 		summary: z.string(),
 		source: z.object({
-			url: z.string().url(),
+			url: z.string().url().nullable().optional(),
 			note: z.string().optional(),
 		}),
 	}),
@@ -187,7 +187,7 @@ const rankings = defineCollection({
 		/** Ordered list of school IDs (filenames in src/content/schools). */
 		items: z.array(z.string().min(1)).min(1),
 		source: z.object({
-			url: z.string().url(),
+			url: z.string().url().nullable().optional(),
 			note: z.string().optional(),
 		}),
 	}),
@@ -251,7 +251,7 @@ const reviews = defineCollection({
 			.default([]),
 		source: z
 			.object({
-				url: z.string().url(),
+				url: z.string().url().nullable().optional(),
 				note: z.string().optional(),
 			})
 			.optional(),
