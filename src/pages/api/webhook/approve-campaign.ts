@@ -40,15 +40,16 @@ function jsonResponse(data: any, status = 200) {
  * POST endpoint to approve and update campaign data
  * Called by N8N after Slack approval
  * 
- * Expected payload:
+ * Expected payload (flat format from N8N):
  * {
- *   "schoolId": "kimini",
- *   "campaignData": {
- *     "campaignText": "【〜2月28日】初月50%OFF",
- *     "campaignEndsAt": "2026-02-28",
- *     "benefitText": "初月50%OFF",
- *     "campaignBullets": ["期間：2026/2/1〜2/28"]
- *   },
+ *   "schoolId": "berlitz",
+ *   "schoolName": "Berlitz",
+ *   "status": "active",
+ *   "campaignText": "入学金無料キャンペーン",
+ *   "benefit": "入学金33,000円が0円",
+ *   "deadline": "2026-04-30",
+ *   "officialUrl": "https://www.berlitz.com/ja-jp",
+ *   "campaignBullets": ["条件1", "条件2"],
  *   "approvedBy": "user_slack_id",
  *   "slackMessageTs": "1234567890.123456"
  * }
@@ -69,15 +70,34 @@ export const POST: APIRoute = async ({ request }) => {
         return badRequest('Invalid JSON body');
     }
 
-    const { schoolId, campaignData, approvedBy, slackMessageTs } = payload;
+    // Support both flat format (from N8N) and nested format
+    const schoolId = payload.schoolId;
 
     if (!schoolId || typeof schoolId !== 'string') {
         return badRequest('schoolId is required and must be a string');
     }
 
-    if (!campaignData || typeof campaignData !== 'object') {
-        return badRequest('campaignData is required and must be an object');
+    // Build campaignData from flat or nested format
+    let campaignData: any;
+    if (payload.campaignData) {
+        // Nested format (legacy)
+        campaignData = payload.campaignData;
+    } else {
+        // Flat format (from N8N)
+        campaignData = {
+            campaignText: payload.campaignText || null,
+            campaignEndsAt: payload.deadline || null,
+            benefitText: payload.benefit || null,
+            campaignBullets: payload.campaignBullets || [],
+        };
     }
+
+    if (!campaignData.campaignText) {
+        return badRequest('campaignText is required');
+    }
+
+    const approvedBy = payload.approvedBy || null;
+    const slackMessageTs = payload.slackMessageTs || null;
 
     try {
         // Build command arguments
