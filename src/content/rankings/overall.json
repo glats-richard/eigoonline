@@ -4,7 +4,7 @@
   "description": "はじめての人でも比較しやすい総合ランキング。",
   "items": ["kimini", "rarejob", "bizmate", "nativecamp", "dmm", "berlitz", "globalcrown", "clouty"],
   "source": {
-    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "url": null,
     "note": "参照元をベースに、当サイト内基準で表示順を調整（Kimini=1位、レアジョブ=2位固定）"
   }
 }

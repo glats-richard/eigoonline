@@ -4,7 +4,7 @@
   "description": "日曜にゆっくり英会話を続けたい人向けに、続けやすさ・学びやすさを重視したランキング。",
   "items": ["rarejob", "kimini", "dmm", "nativecamp"],
   "source": {
-    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "url": null,
     "note": "参照元をベースに、日常英会話目的として編集した表示順（暫定）"
   }
 }

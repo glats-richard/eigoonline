@@ -4,7 +4,7 @@
   "description": "仕事で使える英語を伸ばしたい人向けのランキング。",
   "items": ["rarejob", "bizmate", "nativecamp", "dmm", "kimini", "berlitz", "ecc", "clouty"],
   "source": {
-    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "url": null,
     "note": "参照元をベースに、ビジネス英会話目的として編集した表示順（レアジョブ=1位固定）"
   }
 }

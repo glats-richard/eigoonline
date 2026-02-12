@@ -11,11 +11,11 @@
   "logoUrl": "/logos/company-50.webp",
   "heroImageUrl": "/heroes/rarejob.webp",
   "heroImageAlt": "レアジョブ英会話 公式OG画像",
-  "officialUrl": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2",
+  "officialUrl": "https://www.rarejob.com/",
   "campaignText": "初月50%OFF（登録後7日以内／コード：7dayscpn ※条件あり）",
   "summary": "初心者の日常英会話や、日本人講師のレッスンも検討したい人向けのオンライン英会話。",
   "source": {
-    "url": "https://search-online-eikaiwa.com/ranking/top2",
+    "url": null,
     "note": "ページ内に「5位 レアジョブ英会話」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
   },
   "hoursText": "朝6時〜深夜1時",
@@ -112,5 +112,5 @@
   ],
   "bannerImage": "/banners/company-50.webp",
   "bannerAlt": "レアジョブ英会話 バナー",
-  "bannerHref": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2"
+  "bannerHref": "https://www.rarejob.com/"
 }
