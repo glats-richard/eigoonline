@@ -49,7 +49,7 @@ on conflict (id) do nothing;`}</code></pre>
 
       <div class="mt-4 text-sm font-extrabold text-zinc-900">3-1. 先方サイトの全ページで click_id を保存（常時発火）</div>
       <p class="mt-2 text-sm text-zinc-700">
-        先方サイト（例: <code class="font-semibold">br.glats.online</code>）の全ページで、URLの
+        先方サイト（例: <code class="font-semibold">kimini.online</code>）の全ページで、URLの
         <code class="font-semibold">?click_id=...</code> を <code class="font-semibold">localStorage + cookie</code> に保存します（<span class="font-semibold">14日間</span>保持）。
       </p>
       <div class="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
@@ -235,12 +235,12 @@ on conflict (id) do nothing;`}</code></pre>
       <div class="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
         <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-zinc-800"><code>{`# 1) DBにテスト用 click_id を作成（psqlで実行）
 insert into clicks (offer_id, click_id, url)
-values ('kimini', 'test_click_id_001', 'https://br.glats.online/')
+values ('kimini', 'test_click_id_001', 'https://kimini.online/')
 returning id;
 
 # 2) CVを送信
 curl -i -X POST "https://eigoonline.com/api/track/conversion" \\
-  -H "Origin: https://br.glats.online" \\
+  -H "Origin: https://kimini.online" \\
   -H "Content-Type: application/json" \\
   --data '{"offer_id":"kimini","click_id":"test_click_id_001","status":"approved","reward":1500}'`}</code></pre>
       </div>

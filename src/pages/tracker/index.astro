@@ -169,7 +169,7 @@ function shortText(s?: string | null, max = 64) {
   return t.length > max ? `${t.slice(0, max - 1)}…` : t;
 }
 
-const ALLOWED_ORIGINS = new Set(["https://eigoonline.com", "https://www.eigoonline.com", "https://br.glats.online"]);
+const ALLOWED_ORIGINS = new Set(["https://eigoonline.com", "https://www.eigoonline.com", "https://kimini.online"]);
 
 function isSuspicious(cv: ConversionRow) {
   // Heuristics (best-effort): missing/unknown origin or country, very long UA, etc.

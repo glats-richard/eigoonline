@@ -67,7 +67,7 @@ function json(status: number, body: unknown, extraHeaders?: Record<string, strin
 const ALLOWED_ORIGINS = new Set([
   "https://eigoonline.com",
   "https://www.eigoonline.com",
-  "https://br.glats.online",
+  "https://kimini.online",
 ]);
 
 function corsHeaders(request: Request) {
@@ -277,11 +277,11 @@ export const POST: APIRoute = async ({ request }) => {
     const risk =
       riskReasons.length > 0
         ? {
-            score: riskReasons.length,
-            reasons: riskReasons,
-            needs_review: needsReview,
-            computed_at_ms: nowMs,
-          }
+          score: riskReasons.length,
+          reasons: riskReasons,
+          needs_review: needsReview,
+          computed_at_ms: nowMs,
+        }
         : null;
 
     // If needs_review, force manual review workflow.
