@@ -129,8 +129,52 @@ export async function getSchoolOverridesMap(): Promise<Map<string, any>> {
   }
 }
 
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Helper to read school data from filesystem at runtime (for SSR updates)
+async function getSchoolsFromFs() {
+  try {
+    const schoolsDir = path.join(process.cwd(), 'src/content/schools');
+    const files = await fs.readdir(schoolsDir);
+    const jsonFiles = files.filter(f => f.endsWith('.json'));
+
+    const schools = await Promise.all(jsonFiles.map(async (file) => {
+      const id = file.replace('.json', '');
+      const content = await fs.readFile(path.join(schoolsDir, file), 'utf-8');
+      const data = JSON.parse(content);
+
+      return {
+        id,
+        slug: id,
+        body: '',
+        collection: 'schools',
+        data: data
+      };
+    }));
+
+    return schools;
+  } catch (e) {
+    console.warn('Failed to read schools from FS:', e);
+    return [];
+  }
+}
+
 export async function getSchoolsMerged() {
-  const schools = await getCollection("schools");
+  let schools;
+
+  // In production (SSR), read from file system to pick up runtime changes
+  // In dev, use getCollection for better DX (reloading etc)
+  if (import.meta.env.PROD) {
+    schools = await getSchoolsFromFs();
+    if (!schools || schools.length === 0) {
+      console.warn('Fallback to getCollection in PROD (FS read returned empty)');
+      schools = await getCollection("schools");
+    }
+  } else {
+    schools = await getCollection("schools");
+  }
+
   const overrides = await getSchoolOverridesMap();
   return schools.map((s) => {
     const o = overrides.get(s.id) ?? null;
