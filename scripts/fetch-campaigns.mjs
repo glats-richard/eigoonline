@@ -24,7 +24,7 @@ async function main() {
 
   try {
     const changes = [];
-    
+
     // Read all school JSON files
     const files = await readdir(SCHOOLS_DIR);
     const schoolFiles = files.filter(f => f.endsWith('.json'));
@@ -41,8 +41,8 @@ async function main() {
         const now = new Date();
         const daysUntilEnd = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
 
-        // Detect campaigns that have ended or will end within 3 days
-        if (daysUntilEnd <= 3) {
+        // Detect campaigns that have already expired
+        if (daysUntilEnd < 0) {
           const change = {
             schoolId,
             schoolName: schoolData.name,
@@ -52,7 +52,7 @@ async function main() {
               benefitText: schoolData.benefitText,
               campaignBullets: schoolData.campaignBullets || [],
             },
-            status: daysUntilEnd < 0 ? 'expired' : 'expiring_soon',
+            status: 'expired',
             daysUntilEnd,
             officialUrl: schoolData.officialUrl,
           };
@@ -69,7 +69,7 @@ async function main() {
               'detected',
               change.currentCampaign,
               schoolData.officialUrl,
-              daysUntilEnd < 0 
+              daysUntilEnd < 0
                 ? `Campaign expired ${Math.abs(daysUntilEnd)} days ago`
                 : `Campaign expires in ${daysUntilEnd} days`,
             ]
