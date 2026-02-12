@@ -9,6 +9,8 @@
     "月額費用を抑えたい。"
   ],
   "logoUrl": "/logos/company-30.webp",
+  "heroImageUrl": "/heroes/kimini.webp",
+  "heroImageAlt": "Kimini英会話 紹介画像（価格.com）",
   "officialUrl": "https://kimini.online/",
   "campaignText": "【〜1月31日】特典：TOEIC® L&Rテスト講座（Shikaku Pass）が無料（対象プラン）",
   "summary": "学研が運営するオンライン英会話。基礎から学び直したい人や、月額を抑えて始めたい人向け。",
@@ -24,9 +26,9 @@
     "月額を抑えて、毎日コツコツ学習を習慣化したい",
     "TOEIC/英検など、目的別コースも視野に入れたい"
   ],
-  "teacherQuality": 4,
-  "materialQuality": 4.5,
-  "connectionQuality": 4,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [

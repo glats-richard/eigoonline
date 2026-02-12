@@ -9,6 +9,8 @@
     "比較的安く始めやすい"
   ],
   "logoUrl": "/logos/company-39.webp",
+  "heroImageUrl": "/heroes/dmm.webp",
+  "heroImageAlt": "DMM英会話 公式OG画像",
   "officialUrl": "https://eikaiwa.dmm.com/",
   "campaignText": "【〜1月31日】初月1円（新規・再入会／2ヶ月継続条件などあり）",
   "summary": "幅広い目的に対応し、始めやすさを打ち出しているオンライン英会話。",
@@ -25,9 +27,9 @@
     "とにかく安く始めたい",
     "英語初心者で不安がある"
   ],
-  "teacherQuality": 4,
-  "materialQuality": 4,
-  "connectionQuality": 4,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
   "trialDetailText": null,
   "planUrl": "https://h.accesstrade.net/sp/cc?rk=0100pwdb00on48",
   "editorialComments": [

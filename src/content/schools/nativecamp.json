@@ -8,6 +8,8 @@
     "24時間スマホから受けられて続けやすい"
   ],
   "logoUrl": "/logos/company-70.webp",
+  "heroImageUrl": "/heroes/nativecamp.webp",
+  "heroImageAlt": "ネイティブキャンプ 公式OG画像",
   "officialUrl": "https://nativecamp.net/",
   "campaignText": "Amazonギフト券5,000円＆コイン5,000円分プレゼント（条件・申請あり）",
   "summary": "レッスン受け放題プランなど、学習ペースに合わせて続けやすいオンライン英会話。",
@@ -24,9 +26,9 @@
     "スキマ時間で学びたい",
     "料金を抑えて続けたい"
   ],
-  "teacherQuality": 4,
-  "materialQuality": 3.5,
-  "connectionQuality": 4,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
   "trialDetailText": null,
   "planUrl": "https://h.accesstrade.net/sp/cc?rk=0100pfoc00on48",
   "editorialComments": [

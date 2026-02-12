@@ -9,6 +9,8 @@
     "仕事でもプライベートでも使える、英会話の基礎を固めたい方"
   ],
   "logoUrl": "/logos/company-27.webp",
+  "heroImageUrl": "/heroes/bizmates.webp",
+  "heroImageAlt": "Bizmates（ビズメイツ）公式OG画像",
   "officialUrl": "https://www.bizmates.jp/",
   "campaignText": "初月50%OFF（無料会員登録から3日以内の申込）＋無料体験レッスン1回",
   "summary": "ビジネス英会話に強みがあるオンライン英会話。スキマ時間で実践的に学びたい人向け。",
@@ -17,9 +19,9 @@
     "note": "ページ内に「1位 Bizmate」「こんな人におすすめ」「期間限定キャンペーン」表記あり"
   },
   "hoursText": "朝5時〜深夜25時",
-  "teacherQuality": 4.5,
-  "materialQuality": 4,
-  "connectionQuality": 4,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [

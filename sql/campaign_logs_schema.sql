@@ -17,7 +17,7 @@ create table if not exists campaign_logs (
   approved_by text,
   approved_at timestamptz,
   
-  -- Metadata
+  -- Metadata 
   source_url text,
   notes text
 );

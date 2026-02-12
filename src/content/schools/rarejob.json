@@ -9,6 +9,8 @@
     "日本人講師のレッスンを受けたい"
   ],
   "logoUrl": "/logos/company-50.webp",
+  "heroImageUrl": "/heroes/rarejob.webp",
+  "heroImageAlt": "レアジョブ英会話 公式OG画像",
   "officialUrl": "https://search-online-eikaiwa.com/jump/rarejob.html?para=ranking_2",
   "campaignText": "初月50%OFF（登録後7日以内／コード：7dayscpn ※条件あり）",
   "summary": "初心者の日常英会話や、日本人講師のレッスンも検討したい人向けのオンライン英会話。",
@@ -19,9 +21,9 @@
   "hoursText": "朝6時〜深夜1時",
   "points": [],
   "recommendedFor": [],
-  "teacherQuality": 4.5,
-  "materialQuality": 4,
-  "connectionQuality": 4,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
   "trialDetailText": null,
   "planUrl": null,
   "editorialComments": [

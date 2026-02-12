@@ -8,6 +8,8 @@
     "語学学習機関として長い実績のあるECCが運営"
   ],
   "logoUrl": "/logos/company-71.webp",
+  "heroImageUrl": "/heroes/ecc.webp",
+  "heroImageAlt": "ECCオンラインレッスン 公式OG画像",
   "officialUrl": "https://online.ecc.co.jp/",
   "campaignText": "【〜1月25日 22:00】受講料10%OFF×最大3ヶ月（コード：E1A312242831）",
   "summary": "ECCが運営するオンライン英会話。日本人向け教材やカリキュラムを訴求。",
@@ -16,9 +18,9 @@
     "note": "ランキング本文の表記を参照"
   },
   "hoursText": "朝6時～深夜24時",
-  "teacherQuality": 3,
-  "materialQuality": 4,
-  "connectionQuality": 4,
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
   "trialDetailText": "2回",
   "planUrl": "https://online.ecc.co.jp/",
   "editorialComments": [
