@@ -14,7 +14,9 @@
     "export:schools:csv": "node scripts/export-schools-csv.mjs",
     "build:pr:assets": "node scripts/build-pr-assets.mjs",
     "fetch:pr:images": "node scripts/fetch-pr-images.mjs",
-    "apply:schools:csv": "node scripts/apply-schools-csv-to-content.mjs"
+    "apply:schools:csv": "node scripts/apply-schools-csv-to-content.mjs",
+    "fetch:campaigns": "node scripts/fetch-campaigns.mjs",
+    "update:campaign": "node scripts/update-campaign.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",
