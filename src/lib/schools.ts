@@ -105,7 +105,7 @@ function mergeShallow(base: any, override: any) {
   if (!isPlainObject(base) || !isPlainObject(override)) return { ...(base ?? {}), ...(override ?? {}) };
   const out: any = { ...base };
   // These fields must not be overridden via tracker (derived from user reviews).
-  const NO_OVERRIDE_KEYS = new Set(["rating", "teacherQuality", "materialQuality", "connectionQuality", "prSections"]);
+  const NO_OVERRIDE_KEYS = new Set(["rating", "teacherQuality", "materialQuality", "connectionQuality", "prSections", "officialUrl", "bannerHref"]);
   for (const [k, v] of Object.entries(override)) {
     if (v === undefined) continue;
     if (NO_OVERRIDE_KEYS.has(k)) continue;
