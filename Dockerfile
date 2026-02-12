@@ -18,6 +18,7 @@ ENV HOST=0.0.0.0
 
 # Copy only what we need to run
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
