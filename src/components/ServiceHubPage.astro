@@ -419,8 +419,8 @@ const heroDescription =
   school?.summary ??
   "オンライン英会話の料金・特徴・口コミをまとめています。";
 const methodologyRaw = school?.methodology?.length ? school.methodology : null;
-const methodology =
-  methodologyRaw ??
+const methodology: string[] =
+  (methodologyRaw as string[] | null | undefined) ??
   (schoolId === "kimini"
     ? [
         "Kimini英会話は教材と学習ステップがコース化されているため、学習者が「次に何をやるか」で迷いにくいです。",
@@ -817,6 +817,8 @@ if (faqItems.length) {
               const hasIconText = typeof sec.iconText === "string" && sec.iconText.trim().length > 0;
               const img = sec.image ?? null;
               const isYoutube = img && "youtube" in img;
+              const youtubeUrl = isYoutube ? String((img as PrYoutube).youtube ?? "") : null;
+              const youtubeId = isYoutube ? getYoutubeId(youtubeUrl) : null;
               const hasImg = img && !isYoutube && typeof (img as PrMedia).src === "string" && (img as PrMedia).src.trim().length > 0;
 
               return (
@@ -845,16 +847,29 @@ if (faqItems.length) {
                   </div>
 
                   <div class="mt-4 flex flex-col gap-4 md:flex-row-reverse md:items-start md:gap-6">
-                    {isYoutube ? (
+                    {isYoutube && youtubeId ? (
                       <div class="w-full md:w-[280px] md:shrink-0">
-                        <iframe
-                          src={`https://www.youtube.com/embed/${getYoutubeId((img as PrYoutube).youtube)}?rel=0&playsinline=1`}
-                          title={(img as PrYoutube).title ?? "YouTube video"}
-                          class="aspect-video w-full rounded-lg shadow-sm"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowfullscreen
-                          loading="lazy"
-                        ></iframe>
+                        <a
+                          href={youtubeUrl ?? `https://www.youtube.com/watch?v=${youtubeId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="group block overflow-hidden rounded-lg shadow-sm ring-1 ring-zinc-200"
+                        >
+                          <div class="relative aspect-video w-full bg-black">
+                            <img
+                              src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+                              alt={(img as PrYoutube).title ?? "YouTube動画"}
+                              loading="lazy"
+                              decoding="async"
+                              class="h-full w-full object-cover transition-opacity group-hover:opacity-90"
+                            />
+                            <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+                              <span class="inline-flex items-center justify-center rounded-full bg-black/70 px-4 py-2 text-xs font-extrabold text-white">
+                                ▶ 動画を再生（YouTube）
+                              </span>
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     ) : hasImg ? (
                       <div class="w-full md:w-[280px] md:shrink-0">
