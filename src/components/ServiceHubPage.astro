@@ -371,12 +371,13 @@ function minYenFromPriceText(v: unknown): number | null {
 const minPriceYen = minYenFromPriceText(school?.priceText);
 
 type PrMedia = { src: string; alt?: string | null; width?: number | null; height?: number | null };
+type PrYoutube = { youtube: string; title?: string | null };
 type PrSection = {
   iconText?: string | null;
   iconUrl?: string | null;
   title: string;
   body: string;
-  image?: PrMedia | null;
+  image?: PrMedia | PrYoutube | null;
   reverse?: boolean;
 };
 
@@ -812,7 +813,8 @@ if (faqItems.length) {
               const hasIconUrl = typeof sec.iconUrl === "string" && sec.iconUrl.trim().length > 0;
               const hasIconText = typeof sec.iconText === "string" && sec.iconText.trim().length > 0;
               const img = sec.image ?? null;
-              const hasImg = img && typeof img.src === "string" && img.src.trim().length > 0;
+              const isYoutube = img && "youtube" in img;
+              const hasImg = img && !isYoutube && typeof (img as PrMedia).src === "string" && (img as PrMedia).src.trim().length > 0;
 
               return (
                 <div class="p-6">
@@ -840,23 +842,30 @@ if (faqItems.length) {
                   </div>
 
                   <div class="mt-4 flex flex-col gap-4 md:flex-row-reverse md:items-start md:gap-6">
-                    {hasImg ? (
+                    {isYoutube ? (
+                      <div class="w-full md:w-[280px] md:shrink-0">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${(img as PrYoutube).youtube.split("/").pop()}`}
+                          title={(img as PrYoutube).title ?? "YouTube video"}
+                          class="aspect-video w-full rounded-lg shadow-sm"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen
+                        ></iframe>
+                      </div>
+                    ) : hasImg ? (
                       <div class="w-full md:w-[280px] md:shrink-0">
                         <img
-                          src={String(img?.src)}
-                          alt={(img?.alt ?? "") as string}
+                          src={String((img as PrMedia).src)}
+                          alt={((img as PrMedia).alt ?? "") as string}
                           loading="lazy"
                           decoding="async"
-                          width={typeof img?.width === "number" ? String(img.width) : undefined}
-                          height={typeof img?.height === "number" ? String(img.height) : undefined}
-                          class="h-auto w-full rounded-xl border border-zinc-200 bg-white object-contain"
+                          width={typeof (img as PrMedia).width === "number" ? String((img as PrMedia).width) : undefined}
+                          height={typeof (img as PrMedia).height === "number" ? String((img as PrMedia).height) : undefined}
+                          class="h-auto w-full rounded-lg object-cover shadow-sm"
                         />
                       </div>
                     ) : null}
-
-                    <div class="min-w-0 flex-1">
-                      <p class="whitespace-pre-wrap text-sm font-semibold leading-7 text-zinc-700">{sec.body}</p>
-                    </div>
+                    <div class="flex-1 whitespace-pre-wrap text-[13px] leading-relaxed text-zinc-600">{sec.body}</div>
                   </div>
                 </div>
               );

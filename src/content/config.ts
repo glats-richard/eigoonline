@@ -23,6 +23,11 @@ const prMedia = z.object({
 	height: z.number().int().positive().nullable().optional(),
 });
 
+const prYoutube = z.object({
+	youtube: z.string(),
+	title: z.string().nullable().optional(),
+});
+
 const schools = defineCollection({
 	type: 'data',
 	schema: z.object({
@@ -49,7 +54,7 @@ const schools = defineCollection({
 					iconUrl: z.string().nullable().optional(),
 					title: z.string(),
 					body: z.string(),
-					image: prMedia.nullable().optional(),
+					image: z.union([prMedia, prYoutube]).nullable().optional(),
 					reverse: z.boolean().optional(),
 				}),
 			)
