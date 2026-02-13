@@ -13,16 +13,7 @@ export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
   integrations: [
-    sitemap({
-      // Exclude admin pages from sitemap
-      filter: (page) => {
-        try {
-          return !new URL(page).pathname.startsWith('/tracker');
-        } catch {
-          return true;
-        }
-      },
-    }),
+    // sitemap({ ... }),
   ],
   // Astro 5.4+ adds host allowlist checks (preview/dev).
   // Allow custom domain + Railway host headers to avoid "Blocked request".
