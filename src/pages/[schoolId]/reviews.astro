@@ -4,7 +4,11 @@ export const prerender = false;
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import StarRating from "../../components/StarRating.astro";
-import { getDetailedReviewStatsFromDB, getReviewStats, type DBReviewRow } from "../../utils/reviewStats";
+import {
+  getDetailedReviewStatsFromDB,
+  getReviewStats,
+  type DBReviewRow,
+} from "../../utils/reviewStats";
 import { query } from "../../lib/db";
 import { getSchoolsMerged } from "../../lib/schools";
 
@@ -21,8 +25,11 @@ const school = schoolEntry?.data ?? null;
 
 // Overall ranking position (1-based) from content collection
 const rankings = await getCollection("rankings");
-const overallRanking = rankings.find((r) => r.data.category === "overall")?.data ?? null;
-const overallRankIndex = overallRanking ? overallRanking.items.indexOf(schoolId) : -1;
+const overallRanking =
+  rankings.find((r) => r.data.category === "overall")?.data ?? null;
+const overallRankIndex = overallRanking
+  ? overallRanking.items.indexOf(schoolId)
+  : -1;
 const overallRank = overallRankIndex >= 0 ? overallRankIndex + 1 : null;
 
 // Static (editorial) reviews from content collection
@@ -38,6 +45,8 @@ type DbApprovedReviewRow = DBReviewRow & {
   birth_year?: number | null;
   birth_month?: number | null;
   age?: string | null; // legacy
+  nickname: string | null;
+  duration_months: number | null;
 };
 
 let dbApprovedReviews: DbApprovedReviewRow[] = [];
@@ -55,13 +64,18 @@ try {
       body,
       birth_year,
       birth_month,
-      age
+      body,
+      birth_year,
+      birth_month,
+      age,
+      nickname,
+      duration_months
     from reviews
     where status = 'approved' and featured_rank is not null and school_id = $1
     order by created_at desc
     limit 200
     `,
-    [schoolId],
+    [schoolId]
   );
   dbApprovedReviews = res.rows ?? [];
 } catch {
@@ -69,19 +83,165 @@ try {
 }
 
 const dbDisplayReviews = dbApprovedReviews.map((r) => ({
-  age:
-    typeof r.birth_year === "number" && typeof r.birth_month === "number"
-      ? `${r.birth_year}年${r.birth_month}月`
-      : (r as any).age ?? "年齢非公開",
+  age: r.nickname || "ユーザー",
   rating: typeof r.overall_rating === "number" ? r.overall_rating : 0,
   body: r.body,
   createdAt: r.created_at,
+  studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
+  teacherQuality: r.teacher_quality,
+  materialQuality: r.material_quality,
+  connectionQuality: r.connection_quality,
+  priceRating: (r as any).price_rating,
+  satisfactionRating: (r as any).satisfaction_rating,
 }));
 
 const combinedForStats = [
   ...staticReviews,
-  ...dbDisplayReviews.map((r) => ({ age: r.age, rating: r.rating, body: r.body })),
+  ...dbDisplayReviews.map((r) => ({
+    age: r.age,
+    rating: r.rating,
+    body: r.body,
+  })),
+  ...dbDisplayReviews.map((r) => ({
+    age: r.age,
+    rating: r.rating,
+    body: r.body,
+  })),
 ];
+
+// Radar Logic (Copied from ServiceHubPage)
+type RadarQuality = {
+  teacherQuality: number | null;
+  materialQuality: number | null;
+  connectionQuality: number | null;
+  priceRating: number | null;
+  satisfactionRating: number | null;
+};
+
+function asQualityNumber(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+const radarQualityById = new Map<string, RadarQuality>(
+  schools.map((s) => [
+    s.id,
+    {
+      teacherQuality: asQualityNumber(s.data.teacherQuality),
+      materialQuality: asQualityNumber(s.data.materialQuality),
+      connectionQuality: asQualityNumber(s.data.connectionQuality),
+      priceRating: null,
+      satisfactionRating: null,
+    },
+  ])
+);
+
+const RADAR_CX = 110;
+const RADAR_CY = 110;
+const RADAR_R = 78;
+const RADAR_AXES = [
+  { key: "teacherQuality", label: "講師" },
+  { key: "materialQuality", label: "教材" },
+  { key: "connectionQuality", label: "通信" },
+  { key: "priceRating", label: "安さ" },
+  { key: "satisfactionRating", label: "満足度" },
+] as const;
+
+function clampRadar(v: unknown): number {
+  if (typeof v !== "number" || !Number.isFinite(v)) return 0;
+  if (v < 0) return 0;
+  if (v > 5) return 5;
+  return v;
+}
+
+function radarPoints(model: Record<string, unknown> | null, scale = 1): string {
+  return RADAR_AXES.map((a, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+    const val = clampRadar(model ? model[a.key] : 0);
+    const rr = RADAR_R * (val / 5) * scale;
+    const x = RADAR_CX + rr * Math.cos(ang);
+    const y = RADAR_CY + rr * Math.sin(ang);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function radarGridPoints(level: number): string {
+  const t = clampRadar(level) / 5;
+  return RADAR_AXES.map((_, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+    const rr = RADAR_R * t;
+    const x = RADAR_CX + rr * Math.cos(ang);
+    const y = RADAR_CY + rr * Math.sin(ang);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+// Populate radarQualityById with DB averages
+try {
+  const qRes = await query<{
+    school_id: string;
+    count: number;
+    tq: number | null;
+    mq: number | null;
+    cq: number | null;
+    pr: number | null;
+    sr: number | null;
+  }>(
+    "select school_id, count(*)::int as count, avg(teacher_quality)::numeric as tq, avg(material_quality)::numeric as mq, avg(connection_quality)::numeric as cq, avg(price_rating)::numeric as pr, avg(satisfaction_rating)::numeric as sr from reviews where status = 'approved' and overall_rating is not null group by school_id"
+  );
+
+  for (const row of qRes.rows ?? []) {
+    if (!row?.school_id) continue;
+    if (!radarQualityById.has(row.school_id)) continue;
+    if ((row.count ?? 0) <= 0) continue;
+    radarQualityById.set(row.school_id, {
+      teacherQuality: asQualityNumber(row.tq),
+      materialQuality: asQualityNumber(row.mq),
+      connectionQuality: asQualityNumber(row.cq),
+      priceRating: asQualityNumber(row.pr),
+      satisfactionRating: asQualityNumber(row.sr),
+    });
+  }
+} catch {
+  // Ignore DB errors for radar
+}
+
+const radarBaseQuality = radarQualityById.get(schoolId) ?? {
+  teacherQuality: asQualityNumber(school?.teacherQuality),
+  materialQuality: asQualityNumber(school?.materialQuality),
+  connectionQuality: asQualityNumber(school?.connectionQuality),
+  priceRating: null,
+  satisfactionRating: null,
+};
+
+const compareOptions = schools
+  .map((s) => {
+    const q = radarQualityById.get(s.id) ?? {
+      teacherQuality: asQualityNumber(s.data.teacherQuality),
+      materialQuality: asQualityNumber(s.data.materialQuality),
+      connectionQuality: asQualityNumber(s.data.connectionQuality),
+      priceRating: null,
+      satisfactionRating: null,
+    };
+    return {
+      id: s.id,
+      name: s.data.name,
+      teacherQuality: q.teacherQuality,
+      materialQuality: q.materialQuality,
+      connectionQuality: q.connectionQuality,
+      priceRating: q.priceRating,
+      satisfactionRating: q.satisfactionRating,
+    };
+  })
+  .filter((s) => s.id !== schoolId)
+  .filter(
+    (s) =>
+      s.teacherQuality !== null ||
+      s.materialQuality !== null ||
+      s.connectionQuality !== null ||
+      s.priceRating !== null ||
+      s.satisfactionRating !== null
+  )
+  .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
 const stats = getReviewStats(combinedForStats);
 const detailed = getDetailedReviewStatsFromDB(dbApprovedReviews);
@@ -94,196 +254,386 @@ const pageDescription = school
 const formatJpDate = (isoLike: string) => {
   const d = new Date(isoLike);
   if (Number.isNaN(d.getTime())) return isoLike;
-  return d.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
+  return d.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 };
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
   <main id="top" class="mx-auto w-full max-w-6xl px-4 pb-10 pt-6">
-    {!school ? (
-      <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h1 class="text-xl font-extrabold text-zinc-900">ページが見つかりません</h1>
-        <p class="mt-3 text-sm text-zinc-700">指定されたサービスが見つかりませんでした。</p>
-        <div class="mt-4">
-          <a class="link-brand font-semibold underline" href="/">TOPへ戻る</a>
-        </div>
-      </section>
-    ) : (
-      <>
-        <header class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div class="flex flex-wrap items-center gap-3">
-                {school.logoUrl ? (
-                  <div class="flex h-14 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3">
-                    <img
-                      src={school.logoUrl}
-                      alt={`${school.name} ロゴ`}
-                      width="160"
-                      height="56"
-                      loading="eager"
-                      decoding="async"
-                      class="h-10 w-auto max-w-[160px] object-contain"
-                    />
-                  </div>
-                ) : null}
-
-                <div class="flex items-center gap-2">
-                  {overallRank ? (
-                    overallRank <= 3 ? (
-                      <img
-                        src={`/rank${overallRank}.webp`}
-                        alt={`総合ランキング ${overallRank}位`}
-                        width="36"
-                        height="36"
-                        loading="eager"
-                        decoding="async"
-                        class="h-9 w-9 shrink-0 object-contain"
-                      />
-                    ) : (
-                      <div class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f4f0ff] text-xs font-extrabold text-[#6a56d6] ring-1 ring-[#d8ceff]">
-                        {overallRank}
-                      </div>
-                    )
-                  ) : (
-                    <div class="inline-flex h-8 items-center justify-center rounded-full bg-zinc-100 px-3 text-xs font-extrabold text-zinc-700">
-                      —
-                    </div>
-                  )}
-                  <div class="text-xs font-semibold text-zinc-600">
-                    総合ランキング{overallRank ? `：${overallRank}位` : "：—"}
-                  </div>
-                </div>
-              </div>
-
-              <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900">{school.name}の口コミ・評判</h1>
-              <p class="mt-2 text-sm text-zinc-600">ユーザーの体験談（承認済み）と、参考レビューをまとめて確認できます。</p>
-            </div>
-            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-              <div class="text-xs font-extrabold text-zinc-700">総合評価</div>
-              <div class="mt-1 flex items-center gap-3">
-                <StarRating value={stats.avg} size={18} />
-                <div class="text-sm font-extrabold text-zinc-900">
-                  {stats.avg ? `${stats.avg} / 5` : "—"}
-                  <span class="ml-2 text-xs font-semibold text-zinc-500">（口コミ{stats.count}件）</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
-            <table class="w-full table-fixed border-separate border-spacing-0" style="min-width:560px">
-              <colgroup>
-                <col style="width:140px" />
-                <col style="width:140px" />
-                <col style="width:140px" />
-                <col style="width:140px" />
-              </colgroup>
-              <thead>
-                <tr class="text-left">
-                  <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">項目</th>
-                  <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">評価</th>
-                  <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">口コミ数</th>
-                  <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">対象</th>
-                </tr>
-              </thead>
-              <tbody class="align-top">
-                <tr>
-                  <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">講師の質</th>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                    {detailed.teacherQualityAvg ? `${detailed.teacherQualityAvg} / 5` : "—"}
-                  </td>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                    {detailed.count ? `${detailed.count}件` : "—"}
-                  </td>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">ユーザー投稿（承認済み）</td>
-                </tr>
-                <tr>
-                  <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">教材の質</th>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                    {detailed.materialQualityAvg ? `${detailed.materialQualityAvg} / 5` : "—"}
-                  </td>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                    {detailed.count ? `${detailed.count}件` : "—"}
-                  </td>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">ユーザー投稿（承認済み）</td>
-                </tr>
-                <tr>
-                  <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">通信の質</th>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                    {detailed.connectionQualityAvg ? `${detailed.connectionQualityAvg} / 5` : "—"}
-                  </td>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                    {detailed.count ? `${detailed.count}件` : "—"}
-                  </td>
-                  <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">ユーザー投稿（承認済み）</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="mt-5 flex flex-wrap gap-2">
-            <a
-              class="inline-flex items-center justify-center rounded-xl bg-[color:var(--brand-link)] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm hover:opacity-90 transition-opacity"
-              href={`/review/submit?school_id=${encodeURIComponent(schoolId)}`}
-            >
-              このサービスのレビューを投稿する
-            </a>
-            <a class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50" href="/">
+    {
+      !school ? (
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h1 class="text-xl font-extrabold text-zinc-900">
+            ページが見つかりません
+          </h1>
+          <p class="mt-3 text-sm text-zinc-700">
+            指定されたサービスが見つかりませんでした。
+          </p>
+          <div class="mt-4">
+            <a class="link-brand font-semibold underline" href="/">
               TOPへ戻る
             </a>
           </div>
-        </header>
-
-        <section class="mt-6 grid gap-6">
-          <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 class="text-lg font-extrabold text-zinc-900">ユーザー投稿の口コミ（承認済み）</h2>
-            {dbDisplayReviews.length ? (
-              <div class="mt-4 grid gap-3">
-                {dbDisplayReviews.map((r) => (
-                  <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                      <div class="text-sm font-extrabold text-zinc-800">
-                        {r.age}
-                        <span class="ml-2 text-xs font-semibold text-zinc-500">{formatJpDate(r.createdAt)}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <StarRating value={r.rating} />
-                        <span class="text-xs font-semibold text-zinc-500">{r.rating.toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <p class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">{r.body}</p>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p class="mt-3 text-sm text-zinc-600">まだ承認済みのユーザー投稿レビューがありません。</p>
-            )}
-          </section>
-
-          {staticReviews.length ? (
-            <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 class="text-lg font-extrabold text-zinc-900">参考レビュー</h2>
-              <p class="mt-2 text-sm text-zinc-600">過去の掲載レビュー（参考）です。</p>
-              <div class="mt-4 grid gap-3">
-                {staticReviews.map((r) => (
-                  <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                      <div class="text-sm font-extrabold text-zinc-800">{r.age}</div>
-                      <div class="flex items-center gap-2">
-                        <StarRating value={r.rating} />
-                        <span class="text-xs font-semibold text-zinc-500">{r.rating.toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <p class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">{r.body}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
         </section>
-      </>
-    )}
+      ) : (
+        <>
+          <header class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div class="flex flex-wrap items-center gap-3">
+                  {school.logoUrl ? (
+                    <div class="flex h-14 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3">
+                      <img
+                        src={school.logoUrl}
+                        alt={`${school.name} ロゴ`}
+                        width="160"
+                        height="56"
+                        loading="eager"
+                        decoding="async"
+                        class="h-10 w-auto max-w-[160px] object-contain"
+                      />
+                    </div>
+                  ) : null}
+
+                  <div class="flex items-center gap-2">
+                    {overallRank ? (
+                      overallRank <= 3 ? (
+                        <img
+                          src={`/rank${overallRank}.webp`}
+                          alt={`総合ランキング ${overallRank}位`}
+                          width="36"
+                          height="36"
+                          loading="eager"
+                          decoding="async"
+                          class="h-9 w-9 shrink-0 object-contain"
+                        />
+                      ) : (
+                        <div class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f4f0ff] text-xs font-extrabold text-[#6a56d6] ring-1 ring-[#d8ceff]">
+                          {overallRank}
+                        </div>
+                      )
+                    ) : (
+                      <div class="inline-flex h-8 items-center justify-center rounded-full bg-zinc-100 px-3 text-xs font-extrabold text-zinc-700">
+                        —
+                      </div>
+                    )}
+                    <div class="text-xs font-semibold text-zinc-600">
+                      総合ランキング{overallRank ? `：${overallRank}位` : "：—"}
+                    </div>
+                  </div>
+                </div>
+
+                <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900">
+                  {school.name}の口コミ・評判
+                </h1>
+                <p class="mt-2 text-sm text-zinc-600">
+                  ユーザーの体験談（承認済み）と、参考レビューをまとめて確認できます。
+                </p>
+              </div>
+              <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <div class="text-xs font-extrabold text-zinc-700">総合評価</div>
+                <div class="mt-1 flex items-center gap-3">
+                  <StarRating value={stats.avg} size={18} />
+                  <div class="text-sm font-extrabold text-zinc-900">
+                    {stats.avg ? `${stats.avg} / 5` : "—"}
+                    <span class="ml-2 text-xs font-semibold text-zinc-500">
+                      （口コミ{stats.count}件）
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
+              <table
+                class="w-full table-fixed border-separate border-spacing-0"
+                style="min-width:560px"
+              >
+                <colgroup>
+                  <col style="width:140px" />
+                  <col style="width:140px" />
+                  <col style="width:140px" />
+                  <col style="width:140px" />
+                </colgroup>
+                <thead>
+                  <tr class="text-left">
+                    <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      項目
+                    </th>
+                    <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      評価
+                    </th>
+                    <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      口コミ数
+                    </th>
+                    <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      対象
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="align-top">
+                  <tr>
+                    <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      講師の質
+                    </th>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.teacherQualityAvg
+                        ? `${detailed.teacherQualityAvg} / 5`
+                        : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.count ? `${detailed.count}件` : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
+                      ユーザー投稿（承認済み）
+                    </td>
+                  </tr>
+                  <tr>
+                    <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      教材の質
+                    </th>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.materialQualityAvg
+                        ? `${detailed.materialQualityAvg} / 5`
+                        : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.count ? `${detailed.count}件` : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
+                      ユーザー投稿（承認済み）
+                    </td>
+                  </tr>
+                  <tr>
+                    <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      通信の質
+                    </th>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.connectionQualityAvg
+                        ? `${detailed.connectionQualityAvg} / 5`
+                        : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.count ? `${detailed.count}件` : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
+                      ユーザー投稿（承認済み）
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+              <a
+                class="inline-flex items-center justify-center rounded-xl bg-[color:var(--brand-link)] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm hover:opacity-90 transition-opacity"
+                href={`/review/submit?school_id=${encodeURIComponent(
+                  schoolId
+                )}`}
+              >
+                このサービスのレビューを投稿する
+              </a>
+              <a
+                class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+                href="/"
+              >
+                TOPへ戻る
+              </a>
+            </div>
+          </header>
+
+        {/* Radar Chart & Comparison Section */}
+        <section class="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
+          <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-extrabold text-zinc-900">他社との評価比較</h2>
+            <p class="mt-2 text-sm text-zinc-600">
+              {school.name}と、他の人気オンライン英会話サービスの評価（ユーザー投稿の平均）を比較できます。
+            </p>
+
+            <div class="mt-6 flex flex-col gap-8 sm:flex-row sm:items-start">
+              {/* Radar Chart */}
+              <div class="flex-shrink-0 flex justify-center">
+                <div class="relative h-[220px] w-[220px]">
+                  <svg viewBox="0 0 220 220" class="h-full w-full overflow-visible">
+                    {/* Background Grid */}
+                    <polygon points={radarGridPoints(5)} fill="#f4f4f5" stroke="none" />
+                    <polygon points={radarGridPoints(4)} fill="none" stroke="#e4e4e7" stroke-width="1" />
+                    <polygon points={radarGridPoints(3)} fill="none" stroke="#e4e4e7" stroke-width="1" />
+                    <polygon points={radarGridPoints(2)} fill="none" stroke="#e4e4e7" stroke-width="1" />
+                    <polygon points={radarGridPoints(1)} fill="none" stroke="#e4e4e7" stroke-width="1" />
+
+                    {/* Axes */}
+                    {RADAR_AXES.map((_, i) => {
+                      const ang = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+                      const x = RADAR_CX + RADAR_R * Math.cos(ang);
+                      const y = RADAR_CY + RADAR_R * Math.sin(ang);
+                      return <line x1={RADAR_CX} y1={RADAR_CY} x2={x} y2={y} stroke="#e4e4e7" stroke-width="1" />;
+                    })}
+
+                    {/* Data Polygon */}
+                    <polygon
+                      points={radarPoints(radarBaseQuality)}
+                      fill="rgba(59, 130, 246, 0.2)"
+                      stroke="#3b82f6"
+                      stroke-width="2"
+                    />
+
+                    {/* Labels */}
+                    {RADAR_AXES.map((a, i) => {
+                      const ang = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+                      const r = RADAR_R + 24;
+                      const x = RADAR_CX + r * Math.cos(ang);
+                      const y = RADAR_CY + r * Math.sin(ang);
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          text-anchor="middle"
+                          dominant-baseline="middle"
+                          class="text-[10px] font-bold fill-zinc-600"
+                        >
+                          {a.label}
+                        </text>
+                      );
+                    })}
+                  </svg>
+                </div>
+              </div>
+
+              {/* Comparison Text/Select */}
+              <div class="flex-1 min-w-0">
+                <div class="rounded-xl bg-zinc-50 p-4">
+                  <div class="text-xs font-bold text-zinc-500 mb-2">比較するサービスを選択</div>
+                  <select
+                    id="radar-compare-select"
+                    class="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">比較しない</option>
+                    {compareOptions.map((s) => (
+                      <option
+                        value={s.id}
+                        data-tq={s.teacherQuality ?? 0}
+                        data-mq={s.materialQuality ?? 0}
+                        data-cq={s.connectionQuality ?? 0}
+                        data-pr={s.priceRating ?? 0}
+                        data-sr={s.satisfactionRating ?? 0}
+                      >
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div id="radar-compare-legend" class="mt-4 hidden text-xs">
+                    <div class="flex items-center gap-4">
+                      <div class="flex items-center gap-1.5">
+                        <span class="h-2.5 w-2.5 rounded-full bg-blue-500 opacity-50"></span>
+                        <span class="font-bold text-zinc-700">{school.name}</span>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="h-2.5 w-2.5 rounded-full bg-rose-500 opacity-50"></span>
+                        <span class="font-bold text-zinc-700" id="radar-compare-name">
+                          比較対象
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h3 class="text-sm font-extrabold text-zinc-900 mb-4">評価詳細（平均）</h3>
+            <div class="space-y-3">
+              {[
+                { label: "講師の質", value: detailed.teacherQualityAvg, count: detailed.count },
+                { label: "教材の質", value: detailed.materialQualityAvg, count: detailed.count },
+                { label: "通信の質", value: detailed.connectionQualityAvg, count: detailed.count },
+                { label: "料金の安さ", value: detailed.priceRatingAvg, count: detailed.count },
+                { label: "満足度", value: detailed.satisfactionRatingAvg, count: detailed.count },
+              ].map((item) => (
+                <div class="flex items-center justify-between text-sm">
+                  <div class="font-bold text-zinc-600">{item.label}</div>
+                  <div class="flex items-center gap-2">
+                    <StarRating value={item.value} size={14} />
+                    <span class="font-bold text-zinc-900 w-12 text-right">
+                      {item.value ? item.value.toFixed(1) : "-"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Comparison Script */}
+        <script define:vars={{ RADAR_CX, RADAR_CY, RADAR_R, RADAR_AXES }}>
+          const select = document.getElementById("radar-compare-select");
+          const svg = document.querySelector("svg");
+          const legend = document.getElementById("radar-compare-legend");
+          const legendName = document.getElementById("radar-compare-name");
+
+          let comparisonPath = null;
+
+          if (select && svg) {
+            select.addEventListener("change", (e) => {
+              const opt = select.options[select.selectedIndex];
+              const sid = opt.value;
+
+              // Remove existing comparison path
+              if (comparisonPath) {
+                comparisonPath.remove();
+                comparisonPath = null;
+              }
+
+              if (!sid) {
+                if (legend) legend.classList.add("hidden");
+                return;
+              }
+
+              const data = {
+                teacherQuality: Number(opt.dataset.tq || 0),
+                materialQuality: Number(opt.dataset.mq || 0),
+                connectionQuality: Number(opt.dataset.cq || 0),
+                priceRating: Number(opt.dataset.pr || 0),
+                satisfactionRating: Number(opt.dataset.sr || 0),
+              };
+
+              const points = RADAR_AXES.map((a, i) => {
+                const ang = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+                const val = Math.max(0, Math.min(5, data[a.key] || 0));
+                const rr = RADAR_R * (val / 5);
+                const x = RADAR_CX + rr * Math.cos(ang);
+                const y = RADAR_CY + rr * Math.sin(ang);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+              }).join(" ");
+
+              const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+              polygon.setAttribute("points", points);
+              polygon.setAttribute("fill", "rgba(244, 63, 94, 0.2)");
+              polygon.setAttribute("stroke", "#f43f5e");
+              polygon.setAttribute("stroke-width", "2");
+              
+              svg.appendChild(polygon);
+              comparisonPath = polygon;
+
+              if (legend) legend.classList.remove("hidden");
+              if (legendName) legendName.textContent = opt.text;
+            });
+          }
+        </script>
+
+        </>
+      )
+    }
   </main>
 </Layout>
-
+        </>
+      )
+    }
+  </main>
+</Layout>
