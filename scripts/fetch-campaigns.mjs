@@ -69,12 +69,36 @@ async function main() {
               'detected',
               change.currentCampaign,
               schoolData.officialUrl,
-              daysUntilEnd < 0
-                ? `Campaign expired ${Math.abs(daysUntilEnd)} days ago`
-                : `Campaign expires in ${daysUntilEnd} days`,
+              `Campaign expired ${Math.abs(daysUntilEnd)} days ago`,
             ]
           );
         }
+      } else {
+        // No campaign information present
+        const change = {
+          schoolId,
+          schoolName: schoolData.name,
+          currentCampaign: null,
+          status: 'missing_info',
+          daysUntilEnd: null,
+          officialUrl: schoolData.officialUrl,
+        };
+
+        changes.push(change);
+
+        // Log to database
+        await pool.query(
+          `INSERT INTO campaign_logs 
+           (school_id, action, old_campaign_data, source_url, notes) 
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            schoolId,
+            'detected',
+            null,
+            schoolData.officialUrl,
+            'No campaign information found',
+          ]
+        );
       }
     }
 
