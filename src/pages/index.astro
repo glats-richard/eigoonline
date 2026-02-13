@@ -9,7 +9,11 @@ import PickupCard from "../components/PickupCard.astro";
 import Sidebar from "../components/Sidebar.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
 import ReviewSubmitCard from "../components/ReviewSubmitCard.astro";
-import { getReviewStats, getDetailedReviewStatsFromDB, type DBReviewRow } from "../utils/reviewStats";
+import {
+	getReviewStats,
+	getDetailedReviewStatsFromDB,
+	type DBReviewRow,
+} from "../utils/reviewStats";
 import { query } from "../lib/db";
 import { getSchoolsMerged } from "../lib/schools";
 
@@ -21,7 +25,9 @@ const banners = await getCollection("banners");
 const reviews = await getCollection("reviews");
 
 const schoolsById = new Map(schools.map((s) => [s.id, s.data] as const));
-const rankingByCategory = new Map(rankings.map((r) => [r.data.category, r.data] as const));
+const rankingByCategory = new Map(
+	rankings.map((r) => [r.data.category, r.data] as const)
+);
 
 const overall = rankingByCategory.get("overall");
 const exam = rankingByCategory.get("exam");
@@ -29,131 +35,191 @@ const daily = rankingByCategory.get("daily");
 const business = rankingByCategory.get("business");
 
 const resolveItems = (items: string[] | undefined) =>
-	(items ?? []).map((id) => ({ id, data: schoolsById.get(id) })).filter((x): x is { id: string; data: NonNullable<typeof x.data> } => Boolean(x.data));
+	(items ?? [])
+		.map((id) => ({ id, data: schoolsById.get(id) }))
+		.filter((x): x is { id: string; data: NonNullable<typeof x.data> } =>
+			Boolean(x.data)
+		);
 
 const overallItems = resolveItems(overall?.items);
 const examItems = resolveItems(exam?.items);
 const dailyItems = resolveItems(daily?.items);
 const businessItems = resolveItems(business?.items);
 
-const catLevel = categories.filter((c) => c.data.group === "level").map((c) => c.data);
-const catAge = categories.filter((c) => c.data.group === "age").map((c) => c.data);
-const catReco = categories.filter((c) => c.data.group === "recommend").map((c) => c.data);
+const catLevel = categories
+	.filter((c) => c.data.group === "level")
+	.map((c) => c.data);
+const catAge = categories
+	.filter((c) => c.data.group === "age")
+	.map((c) => c.data);
+const catReco = categories
+	.filter((c) => c.data.group === "recommend")
+	.map((c) => c.data);
 
 const pickupTop = pickups[0]?.data;
-const sidebarBannersTop = banners.filter((b) => ["sidebar", "sidebar_top"].includes(b.data.placement)).map((b) => b.data);
-const sidebarBannersMid = banners.filter((b) => b.data.placement === "sidebar_mid").map((b) => b.data);
-const sidebarBannersBottom = banners.filter((b) => b.data.placement === "sidebar_bottom").map((b) => b.data);
+const sidebarBannersTop = banners
+	.filter((b) => ["sidebar", "sidebar_top"].includes(b.data.placement))
+	.map((b) => b.data);
+const sidebarBannersMid = banners
+	.filter((b) => b.data.placement === "sidebar_mid")
+	.map((b) => b.data);
+const sidebarBannersBottom = banners
+	.filter((b) => b.data.placement === "sidebar_bottom")
+	.map((b) => b.data);
 
 // Start with static reviews
-const staticReviewsBySchoolId = new Map(reviews.map((r) => [r.data.schoolId, r.data.items] as const));
+const staticReviewsBySchoolId = new Map(
+	reviews.map((r) => [r.data.schoolId, r.data.items] as const)
+);
 
 // Fetch approved reviews from database
 type DbReviewRow = DBReviewRow & {
-  school_id: string;
-  body?: string | null;
-  birth_year?: number | null;
-  birth_month?: number | null;
-  age?: string | null; // legacy
-  featured_rank?: number | null;
-  created_at?: string | null;
+	school_id: string;
+	body?: string | null;
+	birth_year?: number | null;
+	birth_month?: number | null;
+	age?: string | null; // legacy
+	featured_rank?: number | null;
+	created_at?: string | null;
+	nickname?: string | null;
 };
 let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
-  const dbReviewsWithSchoolId = await query<DbReviewRow>(
-    "select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age from reviews where status = 'approved' and featured_rank is not null",
-  );
-  for (const r of dbReviewsWithSchoolId.rows ?? []) {
-    const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
-    existing.push({
-      school_id: r.school_id,
-      created_at: r.created_at ?? null,
-      featured_rank: (r as any).featured_rank ?? null,
-      overall_rating: r.overall_rating,
-      teacher_quality: r.teacher_quality,
-      material_quality: r.material_quality,
-      connection_quality: r.connection_quality,
-      price_rating: (r as any).price_rating ?? null,
-      satisfaction_rating: (r as any).satisfaction_rating ?? null,
-      body: r.body,
-      birth_year: (r as any).birth_year ?? null,
-      birth_month: (r as any).birth_month ?? null,
-      age: (r as any).age ?? null,
-    });
-    dbReviewsBySchoolId.set(r.school_id, existing);
-  }
+	const dbReviewsWithSchoolId = await query<DbReviewRow>(
+		"select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age, nickname from reviews where status = 'approved' and featured_rank is not null"
+	);
+	for (const r of dbReviewsWithSchoolId.rows ?? []) {
+		const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
+		existing.push({
+			school_id: r.school_id,
+			created_at: r.created_at ?? null,
+			featured_rank: (r as any).featured_rank ?? null,
+			overall_rating: r.overall_rating,
+			teacher_quality: r.teacher_quality,
+			material_quality: r.material_quality,
+			connection_quality: r.connection_quality,
+			price_rating: (r as any).price_rating ?? null,
+			satisfaction_rating: (r as any).satisfaction_rating ?? null,
+			body: r.body,
+			birth_year: (r as any).birth_year ?? null,
+			birth_month: (r as any).birth_month ?? null,
+			age: (r as any).age ?? null,
+			nickname: (r as any).nickname ?? null,
+		});
+		dbReviewsBySchoolId.set(r.school_id, existing);
+	}
 } catch {
-  // If DB query fails (e.g., table doesn't exist yet), continue with static reviews only
+	// If DB query fails (e.g., table doesn't exist yet), continue with static reviews only
 }
 
 // Display reviews for components:
 // - Prefer latest approved user-submitted reviews per school (max 3)
 // - Fall back to static reviews if no approved DB reviews exist
-const reviewsBySchoolId = new Map<string, { age: string; rating: number; body: string }[]>();
+const reviewsBySchoolId = new Map<
+	string,
+	{ age: string; rating: number; body: string }[]
+>();
 for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
-  reviewsBySchoolId.set(schoolId, [...staticItems]);
+	reviewsBySchoolId.set(schoolId, [...staticItems]);
 }
 for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
-  const valid = dbReviews
-    .filter((r) => r.featured_rank !== null && r.overall_rating !== null && Number.isFinite(r.overall_rating) && r.body)
-    .slice()
-    .sort((a, b) => {
-      const at = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return bt - at;
-    });
+	const valid = dbReviews
+		.filter(
+			(r) =>
+				r.featured_rank !== null &&
+				r.overall_rating !== null &&
+				Number.isFinite(r.overall_rating) &&
+				r.body
+		)
+		.slice()
+		.sort((a, b) => {
+			const at = a.created_at ? new Date(a.created_at).getTime() : 0;
+			const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
+			return bt - at;
+		});
 
-  if (!valid.length) continue;
+	if (!valid.length) continue;
 
-  const latest3 = valid.slice(0, 3).map((r) => ({
-    age:
-      typeof r.birth_year === "number" && typeof r.birth_month === "number"
-        ? `${r.birth_year}年${r.birth_month}月`
-        : r.age || "ユーザー",
-    rating: r.overall_rating!,
-    body: r.body!,
-  }));
-  reviewsBySchoolId.set(schoolId, latest3);
+	const latest3 = valid.slice(0, 3).map((r) => ({
+		age: r.nickname || "ユーザー",
+		rating: r.overall_rating!,
+		body: r.body!,
+	}));
+	reviewsBySchoolId.set(schoolId, latest3);
 }
 
 // Calculate review stats from ALL reviews (static + ALL approved DB), for rating display.
-const reviewStatsBySchoolId = new Map<string, { count: number; avg: number | null }>();
+const reviewStatsBySchoolId = new Map<
+	string,
+	{ count: number; avg: number | null }
+>();
 for (const [schoolId] of schoolsById) {
-  const staticItems = staticReviewsBySchoolId.get(schoolId) ?? [];
-  const dbItems = dbReviewsBySchoolId.get(schoolId) ?? [];
-  const dbForStats = dbItems
-    .filter((r) => r.featured_rank !== null && r.overall_rating !== null && Number.isFinite(r.overall_rating))
-    .map((r) => ({ rating: r.overall_rating! }));
-  const stats = getReviewStats([
-    ...staticItems,
-    ...dbForStats,
-  ]);
-  reviewStatsBySchoolId.set(schoolId, stats);
+	const staticItems = staticReviewsBySchoolId.get(schoolId) ?? [];
+	const dbItems = dbReviewsBySchoolId.get(schoolId) ?? [];
+	const dbForStats = dbItems
+		.filter(
+			(r) =>
+				r.featured_rank !== null &&
+				r.overall_rating !== null &&
+				Number.isFinite(r.overall_rating)
+		)
+		.map((r) => ({ rating: r.overall_rating! }));
+	const stats = getReviewStats([...staticItems, ...dbForStats]);
+	reviewStatsBySchoolId.set(schoolId, stats);
 }
 
 // Detailed stats for compare table (teacher, material, connection quality)
-const detailedReviewStatsBySchoolId = new Map<string, ReturnType<typeof getDetailedReviewStatsFromDB>>();
+const detailedReviewStatsBySchoolId = new Map<
+	string,
+	ReturnType<typeof getDetailedReviewStatsFromDB>
+>();
 for (const [schoolId] of schoolsById) {
-  const dbReviews = dbReviewsBySchoolId.get(schoolId) ?? [];
-  const detailedStats = getDetailedReviewStatsFromDB(dbReviews);
-  if (detailedStats.count > 0) {
-    detailedReviewStatsBySchoolId.set(schoolId, detailedStats);
-  }
+	const dbReviews = dbReviewsBySchoolId.get(schoolId) ?? [];
+	const detailedStats = getDetailedReviewStatsFromDB(dbReviews);
+	if (detailedStats.count > 0) {
+		detailedReviewStatsBySchoolId.set(schoolId, detailedStats);
+	}
 }
 
-const applyReviewRating = <T extends { id: string; data: Record<string, unknown> }>(xs: T[]) =>
+const applyReviewRating = <
+	T extends { id: string; data: Record<string, unknown> }
+>(
+	xs: T[]
+) =>
 	xs.map((x) => {
 		const stats = reviewStatsBySchoolId.get(x.id);
 		// Only show a rating when it's backed by reviews.
 		const rating = stats?.count ? stats.avg : null;
 		// Merge DB review stats for detailed ratings (teacher, material, connection)
 		const detailedStats = detailedReviewStatsBySchoolId.get(x.id);
-		const teacherQuality = detailedStats?.teacherQualityAvg ?? x.data.teacherQuality ?? null;
-		const materialQuality = detailedStats?.materialQualityAvg ?? x.data.materialQuality ?? null;
-		const connectionQuality = detailedStats?.connectionQualityAvg ?? x.data.connectionQuality ?? null;
-		const priceRating = detailedStats?.priceRatingAvg ?? (x.data as any).priceRating ?? null;
-		const satisfactionRating = detailedStats?.satisfactionRatingAvg ?? (x.data as any).satisfactionRating ?? null;
-		return { ...x, data: { ...x.data, rating, teacherQuality, materialQuality, connectionQuality, priceRating, satisfactionRating } };
+		const teacherQuality =
+			detailedStats?.teacherQualityAvg ?? x.data.teacherQuality ?? null;
+		const materialQuality =
+			detailedStats?.materialQualityAvg ?? x.data.materialQuality ?? null;
+		const connectionQuality =
+			detailedStats?.connectionQualityAvg ??
+			x.data.connectionQuality ??
+			null;
+		const priceRating =
+			detailedStats?.priceRatingAvg ??
+			(x.data as any).priceRating ??
+			null;
+		const satisfactionRating =
+			detailedStats?.satisfactionRatingAvg ??
+			(x.data as any).satisfactionRating ??
+			null;
+		return {
+			...x,
+			data: {
+				...x.data,
+				rating,
+				teacherQuality,
+				materialQuality,
+				connectionQuality,
+				priceRating,
+				satisfactionRating,
+			},
+		};
 	});
 
 const overallItemsRated = applyReviewRating(overallItems);
@@ -181,73 +247,77 @@ const itemListJsonLd = {
 // Generate structured data for reviews (Schema.org Review and AggregateRating)
 const reviewsJsonLd: any[] = [];
 for (const [schoolId, schoolData] of schoolsById) {
-  const staticReviews = reviewsBySchoolId.get(schoolId) ?? [];
-  const dbReviews = dbReviewsBySchoolId.get(schoolId) ?? [];
-  const stats = reviewStatsBySchoolId.get(schoolId);
-  
-  if (stats && stats.count > 0 && stats.avg !== null) {
-    // Create AggregateRating
-    const aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: stats.avg,
-      bestRating: 5,
-      worstRating: 1,
-      ratingCount: stats.count,
-    };
+	const staticReviews = reviewsBySchoolId.get(schoolId) ?? [];
+	const dbReviews = dbReviewsBySchoolId.get(schoolId) ?? [];
+	const stats = reviewStatsBySchoolId.get(schoolId);
 
-    // Create individual Review objects
-    const reviewObjects: any[] = [];
-    
-    // Add static reviews
-    for (const review of staticReviews) {
-      reviewObjects.push({
-        "@type": "Review",
-        author: {
-          "@type": "Person",
-          name: review.age || "匿名",
-        },
-        reviewRating: {
-          "@type": "Rating",
-          ratingValue: review.rating,
-          bestRating: 5,
-          worstRating: 1,
-        },
-        reviewBody: review.body,
-      });
-    }
-    
-    // Add DB reviews
-    for (const review of dbReviews) {
-      if (review.overall_rating !== null && Number.isFinite(review.overall_rating) && review.body) {
-        reviewObjects.push({
-          "@type": "Review",
-          author: {
-            "@type": "Person",
-            name: "ユーザー",
-          },
-          reviewRating: {
-            "@type": "Rating",
-            ratingValue: review.overall_rating,
-            bestRating: 5,
-            worstRating: 1,
-          },
-          reviewBody: review.body,
-        });
-      }
-    }
+	if (stats && stats.count > 0 && stats.avg !== null) {
+		// Create AggregateRating
+		const aggregateRating = {
+			"@type": "AggregateRating",
+			ratingValue: stats.avg,
+			bestRating: 5,
+			worstRating: 1,
+			ratingCount: stats.count,
+		};
 
-    // Create Service with reviews
-    const serviceUrl = new URL(`#school-${schoolId}`, pageUrl).toString();
-    reviewsJsonLd.push({
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "@id": serviceUrl,
-      name: schoolData.name,
-      url: schoolData.officialUrl || serviceUrl,
-      aggregateRating,
-      review: reviewObjects.slice(0, 10), // Limit to 10 reviews for structured data
-    });
-  }
+		// Create individual Review objects
+		const reviewObjects: any[] = [];
+
+		// Add static reviews
+		for (const review of staticReviews) {
+			reviewObjects.push({
+				"@type": "Review",
+				author: {
+					"@type": "Person",
+					name: review.age || "匿名",
+				},
+				reviewRating: {
+					"@type": "Rating",
+					ratingValue: review.rating,
+					bestRating: 5,
+					worstRating: 1,
+				},
+				reviewBody: review.body,
+			});
+		}
+
+		// Add DB reviews
+		for (const review of dbReviews) {
+			if (
+				review.overall_rating !== null &&
+				Number.isFinite(review.overall_rating) &&
+				review.body
+			) {
+				reviewObjects.push({
+					"@type": "Review",
+					author: {
+						"@type": "Person",
+						name: "ユーザー",
+					},
+					reviewRating: {
+						"@type": "Rating",
+						ratingValue: review.overall_rating,
+						bestRating: 5,
+						worstRating: 1,
+					},
+					reviewBody: review.body,
+				});
+			}
+		}
+
+		// Create Service with reviews
+		const serviceUrl = new URL(`#school-${schoolId}`, pageUrl).toString();
+		reviewsJsonLd.push({
+			"@context": "https://schema.org",
+			"@type": "Service",
+			"@id": serviceUrl,
+			name: schoolData.name,
+			url: schoolData.officialUrl || serviceUrl,
+			aggregateRating,
+			review: reviewObjects.slice(0, 10), // Limit to 10 reviews for structured data
+		});
+	}
 }
 
 const faqJsonLd = {
@@ -259,8 +329,7 @@ const faqJsonLd = {
 			name: "オンライン英会話のおすすめはどう選べばいい？",
 			acceptedAnswer: {
 				"@type": "Answer",
-				text:
-					"目的（総合/試験対策/日曜英会話/ビジネス英会話）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
+				text: "目的（総合/試験対策/日曜英会話/ビジネス英会話）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
 			},
 		},
 		{
@@ -282,6 +351,7 @@ const faqJsonLd = {
 	],
 };
 ---
+
 <Layout
 	title="オンライン英会話 おすすめ比較・ランキング（総合・試験対策・日曜・ビジネス）"
 	description="オンライン英会話のおすすめを「総合 / 試験対策 / 日曜英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
@@ -291,18 +361,30 @@ const faqJsonLd = {
 	<Fragment slot="head">
 		<link rel="preload" as="image" href="/fv_1.webp" fetchpriority="high" />
 	</Fragment>
-	<script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)}></script>
-	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}></script>
-	{reviewsJsonLd.map((review) => (
-		<script type="application/ld+json" set:html={JSON.stringify(review)}></script>
-	))}
+	<script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)}
+	></script>
+	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)}
+	></script>
+	{
+		reviewsJsonLd.map((review) => (
+			<script
+				type="application/ld+json"
+				set:html={JSON.stringify(review)}
+			/>
+		))
+	}
 
-	<main id="top" class="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 sm:pb-10 sm:pt-6">
+	<main
+		id="top"
+		class="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 sm:pb-10 sm:pt-6"
+	>
 		<section class="pt-10 sm:pt-12">
 			<div class="mt-3 grid gap-6 sm:mt-4 lg:grid-cols-3 lg:items-start">
 				<div class="min-w-0 space-y-6 lg:col-span-2">
 					<!-- Hero image -->
-					<div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+					<div
+						class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
+					>
 						<picture>
 							<source srcset="/fv_1.webp" type="image/webp" />
 							<img
@@ -316,510 +398,1130 @@ const faqJsonLd = {
 								class="block h-auto w-full object-cover"
 							/>
 						</picture>
-
 					</div>
 
-				<section id="ranking" class="w-full min-w-0">
-					<div class="mb-4">
-						<h2 class="text-xl font-extrabold text-zinc-900">目的別ランキング</h2>
-						<p class="mt-1 text-sm text-zinc-600">タブを切り替えて、目的に合うスクールを比較できます。</p>
-					</div>
-
-					<div class="rounded-2xl border-2 border-[#F49BB5] bg-white p-0 shadow-sm overflow-hidden">
-						<input class="peer/overall sr-only" type="radio" name="ranktab" id="tab-overall" checked />
-						<input class="peer/exam sr-only" type="radio" name="ranktab" id="tab-exam" />
-						<input class="peer/daily sr-only" type="radio" name="ranktab" id="tab-daily" />
-						<input class="peer/business sr-only" type="radio" name="ranktab" id="tab-business" />
-
-						<div class="rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4
-							peer-checked/overall:[&_.tab-overall]:relative peer-checked/overall:[&_.tab-overall]:z-10 peer-checked/overall:[&_.tab-overall]:h-full peer-checked/overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/overall:[&_.tab-overall]:text-white peer-checked/overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-							peer-checked/exam:[&_.tab-exam]:relative peer-checked/exam:[&_.tab-exam]:z-10 peer-checked/exam:[&_.tab-exam]:h-full peer-checked/exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/exam:[&_.tab-exam]:text-white peer-checked/exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-							peer-checked/daily:[&_.tab-daily]:relative peer-checked/daily:[&_.tab-daily]:z-10 peer-checked/daily:[&_.tab-daily]:h-full peer-checked/daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/daily:[&_.tab-daily]:text-white peer-checked/daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-							peer-checked/business:[&_.tab-business]:relative peer-checked/business:[&_.tab-business]:z-10 peer-checked/business:[&_.tab-business]:h-full peer-checked/business:[&_.tab-business]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/business:[&_.tab-business]:text-white peer-checked/business:[&_.tab-business]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-						">
-							<div class="grid h-[50px] w-full grid-cols-4 items-end gap-0.5 text-[#595959] sm:gap-[10px]">
-							<label
-								for="tab-overall"
-								class="tab tab-overall w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
-							>
-								<div class="grid h-[80%] place-items-center">
-									<span class="grid grid-rows-2 leading-tight">
-										<span class="block">{overall?.title ?? "総合"}</span>
-										<span class="block select-none text-transparent" aria-hidden="true">英会話</span>
-									</span>
-								</div>
-							</label>
-							<label
-								for="tab-exam"
-								class="tab tab-exam w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
-							>
-								<div class="grid h-[80%] place-items-center">
-									<span class="grid grid-rows-2 leading-tight">
-										<span class="block">試験</span>
-										<span class="block">対策</span>
-									</span>
-								</div>
-							</label>
-							<label
-								for="tab-daily"
-								class="tab tab-daily w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
-							>
-								<div class="grid h-[80%] place-items-center">
-									<span class="grid grid-rows-2 leading-tight">
-										<span class="block">日曜</span>
-										<span class="block">英会話</span>
-									</span>
-								</div>
-							</label>
-							<label
-								for="tab-business"
-								class="tab tab-business w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
-							>
-								<div class="grid h-[80%] place-items-center">
-									<span class="grid grid-rows-2 leading-tight">
-										<span class="block">ビジネス</span>
-										<span class="block">英会話</span>
-									</span>
-								</div>
-							</label>
-							</div>
+					<section id="ranking" class="w-full min-w-0">
+						<div class="mb-4">
+							<h2 class="text-xl font-extrabold text-zinc-900">
+								目的別ランキング
+							</h2>
+							<p class="mt-1 text-sm text-zinc-600">
+								タブを切り替えて、目的に合うスクールを比較できます。
+							</p>
 						</div>
 
-						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/overall:block">
-							<p class="mb-3 text-sm text-zinc-600">{overall?.description}</p>
-							<div class="grid gap-4">
-								{overallItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem
-											item={x.data}
-											offerId={x.id}
-											rank={idx + 1}
-											reviews={reviewsBySchoolId.get(x.id) ?? []}
-											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
-										/>
-								))}
-							</div>
-						</section>
-
-						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/exam:block">
-							<p class="mb-3 text-sm text-zinc-600">{exam?.description}</p>
-							<div class="grid gap-4">
-								{examItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem
-											item={x.data}
-											offerId={x.id}
-											rank={idx + 1}
-											reviews={reviewsBySchoolId.get(x.id) ?? []}
-											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
-										/>
-								))}
-							</div>
-						</section>
-
-						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/daily:block">
-							<p class="mb-3 text-sm text-zinc-600">{daily?.description}</p>
-							<div class="grid gap-4">
-								{dailyItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem
-											item={x.data}
-											offerId={x.id}
-											rank={idx + 1}
-											reviews={reviewsBySchoolId.get(x.id) ?? []}
-											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
-										/>
-								))}
-							</div>
-						</section>
-
-						<section class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/business:block">
-							<p class="mb-3 text-sm text-zinc-600">{business?.description}</p>
-							<div class="grid gap-4">
-								{businessItemsRated.slice(0, 3).map((x, idx) => (
-										<RankingListItem
-											item={x.data}
-											offerId={x.id}
-											rank={idx + 1}
-											reviews={reviewsBySchoolId.get(x.id) ?? []}
-											reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
-										/>
-								))}
-							</div>
-						</section>
-					</div>
-				</section>
-
-				<ReviewSubmitCard className="lg:hidden" />
-
-				<section id="compare">
-					<div class="mb-4">
-						<h2 class="text-xl font-extrabold text-zinc-900">比較表</h2>
-						<p class="mt-1 text-sm text-zinc-600">上位スクールを項目ごとに横並びで比較できます（横スクロール可）。</p>
-					</div>
-
-					{overall && exam && daily && business ? (
-						<CompareTableTabs
-							overall={{ title: overall.title, items: overallItemsRated }}
-							exam={{ title: exam.title, items: examItemsRated }}
-							daily={{ title: daily.title, items: dailyItemsRated }}
-							business={{ title: business.title, items: businessItemsRated }}
-							columns={4}
-						/>
-					) : null}
-				</section>
-
-				<section id="pickup">
-					{pickupTop?.schoolId ? (
-						<PickupCard
-              title={pickupTop.title}
-              label={pickupTop.label}
-              body={pickupTop.body}
-              offerId={pickupTop.schoolId}
-              ctaHref={pickupTop.ctaHref}
-              ctaLabel={pickupTop.ctaLabel}
-            />
-					) : null}
-				</section>
-
-				<section id="details" class="space-y-6">
-					<div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-						<h2 class="text-xl font-extrabold text-zinc-900">ランキング詳細</h2>
-						<p class="mt-1 text-sm text-zinc-600">PICKUPの下に、各社の詳細を順に掲載しています。</p>
-					</div>
-
-					{overallItemsRated.map((x, idx) => (
-						<div id={`school-${x.id}`} class="scroll-mt-24">
-							<SchoolDetailSection
-								offerId={x.id}
-								rank={idx + 1}
-								item={x.data}
-								reviews={reviewsBySchoolId.get(x.id) ?? []}
-								reviewStats={reviewStatsBySchoolId.get(x.id) ?? null}
+						<div
+							class="rounded-2xl border-2 border-[#F49BB5] bg-white p-0 shadow-sm overflow-hidden"
+						>
+							<input
+								class="peer/overall sr-only"
+								type="radio"
+								name="ranktab"
+								id="tab-overall"
+								checked
 							/>
-						</div>
-					))}
-				</section>
-
-				<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
-					<!-- Eyecatch -->
-					<div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
-						<picture>
-							<source srcset="/fv_1.webp" type="image/webp" />
-							<img
-								src="/fv_1.jpg"
-								alt="オンライン英会話の始め方・選び方（初心者向け）"
-								loading="lazy"
-								decoding="async"
-								width="1024"
-								height="565"
-								class="block h-40 w-full object-cover sm:h-48"
+							<input
+								class="peer/exam sr-only"
+								type="radio"
+								name="ranktab"
+								id="tab-exam"
 							/>
-						</picture>
-					</div>
+							<input
+								class="peer/daily sr-only"
+								type="radio"
+								name="ranktab"
+								id="tab-daily"
+							/>
+							<input
+								class="peer/business sr-only"
+								type="radio"
+								name="ranktab"
+								id="tab-business"
+							/>
 
-					<!-- Decorated title -->
-					<div class="mt-5">
-						<div class="flex flex-wrap items-center gap-2">
-							<span class="inline-flex items-center rounded-lg bg-pink-100 px-2 py-1 text-xs font-extrabold text-pink-700 ring-1 ring-pink-200">
-								初心者ガイド
-							</span>
-							<span class="text-xs font-extrabold text-zinc-500">2026年最新</span>
+							<div
+								class="rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4 peer-checked/overall:[&_.tab-overall]:relative peer-checked/overall:[&_.tab-overall]:z-10 peer-checked/overall:[&_.tab-overall]:h-full peer-checked/overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/overall:[&_.tab-overall]:text-white peer-checked/overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/exam:[&_.tab-exam]:relative peer-checked/exam:[&_.tab-exam]:z-10 peer-checked/exam:[&_.tab-exam]:h-full peer-checked/exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/exam:[&_.tab-exam]:text-white peer-checked/exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/daily:[&_.tab-daily]:relative peer-checked/daily:[&_.tab-daily]:z-10 peer-checked/daily:[&_.tab-daily]:h-full peer-checked/daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/daily:[&_.tab-daily]:text-white peer-checked/daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/business:[&_.tab-business]:relative peer-checked/business:[&_.tab-business]:z-10 peer-checked/business:[&_.tab-business]:h-full peer-checked/business:[&_.tab-business]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/business:[&_.tab-business]:text-white peer-checked/business:[&_.tab-business]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
+							>
+								<div
+									class="grid h-[50px] w-full grid-cols-4 items-end gap-0.5 text-[#595959] sm:gap-[10px]"
+								>
+									<label
+										for="tab-overall"
+										class="tab tab-overall w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
+									>
+										<div
+											class="grid h-[80%] place-items-center"
+										>
+											<span
+												class="grid grid-rows-2 leading-tight"
+											>
+												<span class="block"
+													>{
+														overall?.title ?? "総合"
+													}</span
+												>
+												<span
+													class="block select-none text-transparent"
+													aria-hidden="true"
+													>英会話</span
+												>
+											</span>
+										</div>
+									</label>
+									<label
+										for="tab-exam"
+										class="tab tab-exam w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
+									>
+										<div
+											class="grid h-[80%] place-items-center"
+										>
+											<span
+												class="grid grid-rows-2 leading-tight"
+											>
+												<span class="block">試験</span>
+												<span class="block">対策</span>
+											</span>
+										</div>
+									</label>
+									<label
+										for="tab-daily"
+										class="tab tab-daily w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
+									>
+										<div
+											class="grid h-[80%] place-items-center"
+										>
+											<span
+												class="grid grid-rows-2 leading-tight"
+											>
+												<span class="block">日曜</span>
+												<span class="block">英会話</span
+												>
+											</span>
+										</div>
+									</label>
+									<label
+										for="tab-business"
+										class="tab tab-business w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
+									>
+										<div
+											class="grid h-[80%] place-items-center"
+										>
+											<span
+												class="grid grid-rows-2 leading-tight"
+											>
+												<span class="block"
+													>ビジネス</span
+												>
+												<span class="block">英会話</span
+												>
+											</span>
+										</div>
+									</label>
+								</div>
+							</div>
+
+							<section
+								class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/overall:block"
+							>
+								<p class="mb-3 text-sm text-zinc-600">
+									{overall?.description}
+								</p>
+								<div class="grid gap-4">
+									{
+										overallItemsRated
+											.slice(0, 3)
+											.map((x, idx) => (
+												<RankingListItem
+													item={x.data}
+													offerId={x.id}
+													rank={idx + 1}
+													reviews={
+														reviewsBySchoolId.get(
+															x.id
+														) ?? []
+													}
+													reviewStats={
+														reviewStatsBySchoolId.get(
+															x.id
+														) ?? null
+													}
+												/>
+											))
+									}
+								</div>
+							</section>
+
+							<section
+								class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/exam:block"
+							>
+								<p class="mb-3 text-sm text-zinc-600">
+									{exam?.description}
+								</p>
+								<div class="grid gap-4">
+									{
+										examItemsRated
+											.slice(0, 3)
+											.map((x, idx) => (
+												<RankingListItem
+													item={x.data}
+													offerId={x.id}
+													rank={idx + 1}
+													reviews={
+														reviewsBySchoolId.get(
+															x.id
+														) ?? []
+													}
+													reviewStats={
+														reviewStatsBySchoolId.get(
+															x.id
+														) ?? null
+													}
+												/>
+											))
+									}
+								</div>
+							</section>
+
+							<section
+								class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/daily:block"
+							>
+								<p class="mb-3 text-sm text-zinc-600">
+									{daily?.description}
+								</p>
+								<div class="grid gap-4">
+									{
+										dailyItemsRated
+											.slice(0, 3)
+											.map((x, idx) => (
+												<RankingListItem
+													item={x.data}
+													offerId={x.id}
+													rank={idx + 1}
+													reviews={
+														reviewsBySchoolId.get(
+															x.id
+														) ?? []
+													}
+													reviewStats={
+														reviewStatsBySchoolId.get(
+															x.id
+														) ?? null
+													}
+												/>
+											))
+									}
+								</div>
+							</section>
+
+							<section
+								class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/business:block"
+							>
+								<p class="mb-3 text-sm text-zinc-600">
+									{business?.description}
+								</p>
+								<div class="grid gap-4">
+									{
+										businessItemsRated
+											.slice(0, 3)
+											.map((x, idx) => (
+												<RankingListItem
+													item={x.data}
+													offerId={x.id}
+													rank={idx + 1}
+													reviews={
+														reviewsBySchoolId.get(
+															x.id
+														) ?? []
+													}
+													reviewStats={
+														reviewStatsBySchoolId.get(
+															x.id
+														) ?? null
+													}
+												/>
+											))
+									}
+								</div>
+							</section>
 						</div>
-						<h2 class="mt-2 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">
-							オンライン英会話とは？初心者向けの始め方・選び方
-						</h2>
-						<div class="mt-2 h-[3px] w-32 rounded-full bg-[linear-gradient(to_right,#ec4899,#f59e0b,transparent)]"></div>
-					</div>
+					</section>
 
-					<p class="mt-2 text-sm font-semibold leading-7 text-zinc-700">
-						「オンライン英会話って何？」「全く話せなくても大丈夫？」という不安を、初心者向けにわかりやすく整理しました。迷ったら、まずは無料体験で“続けられるか”を確認するのが近道です。
-					</p>
+					<ReviewSubmitCard className="lg:hidden" />
 
-					<!-- Table of contents -->
-					<nav aria-label="目次" class="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
-						<div class="text-sm font-extrabold text-zinc-900">目次</div>
-						<ul class="mt-3 grid gap-2 text-sm text-[color:var(--brand-link)] sm:grid-cols-2">
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-1">1. 定義とメリット</a></li>
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-2">2. 仕組みと通学型の違い</a></li>
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-3">3. 怖い・話せない不安の解消</a></li>
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-4">4. 選び方（3つの基準）</a></li>
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-5">5. 初心者におすすめ3選</a></li>
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-6">6. 英語力ゼロからの準備</a></li>
-							<li><a class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]" href="#guide-7">7. FAQ</a></li>
-						</ul>
-					</nav>
+					<section id="compare">
+						<div class="mb-4">
+							<h2 class="text-xl font-extrabold text-zinc-900">
+								比較表
+							</h2>
+							<p class="mt-1 text-sm text-zinc-600">
+								上位スクールを項目ごとに横並びで比較できます（横スクロール可）。
+							</p>
+						</div>
 
-					<div class="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-						<p class="text-xs font-extrabold text-zinc-900">この記事の結論（300字以内）</p>
-						<p class="mt-2 text-sm leading-7 text-zinc-700">
-							オンライン英会話は、スマホやPCで講師と1対1（または少人数）で話す英語レッスンです。初心者でも大丈夫な理由は「日本語サポート」「初心者教材」「チャット等で“詰まっても続く”仕組み」が揃っているから。まずは無料体験で、①予約のしやすさ②教材のわかりやすさ③講師との相性を確認し、続けられるサービスを選びましょう。
+						{
+							overall && exam && daily && business ? (
+								<CompareTableTabs
+									overall={{
+										title: overall.title,
+										items: overallItemsRated,
+									}}
+									exam={{
+										title: exam.title,
+										items: examItemsRated,
+									}}
+									daily={{
+										title: daily.title,
+										items: dailyItemsRated,
+									}}
+									business={{
+										title: business.title,
+										items: businessItemsRated,
+									}}
+									columns={4}
+								/>
+							) : null
+						}
+					</section>
+
+					<section id="pickup">
+						{
+							pickupTop?.schoolId ? (
+								<PickupCard
+									title={pickupTop.title}
+									label={pickupTop.label}
+									body={pickupTop.body}
+									offerId={pickupTop.schoolId}
+									ctaHref={pickupTop.ctaHref}
+									ctaLabel={pickupTop.ctaLabel}
+								/>
+							) : null
+						}
+					</section>
+
+					<section id="details" class="space-y-6">
+						<div
+							class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"
+						>
+							<h2 class="text-xl font-extrabold text-zinc-900">
+								ランキング詳細
+							</h2>
+							<p class="mt-1 text-sm text-zinc-600">
+								PICKUPの下に、各社の詳細を順に掲載しています。
+							</p>
+						</div>
+
+						{
+							overallItemsRated.map((x, idx) => (
+								<div id={`school-${x.id}`} class="scroll-mt-24">
+									<SchoolDetailSection
+										offerId={x.id}
+										rank={idx + 1}
+										item={x.data}
+										reviews={
+											reviewsBySchoolId.get(x.id) ?? []
+										}
+										reviewStats={
+											reviewStatsBySchoolId.get(x.id) ??
+											null
+										}
+									/>
+								</div>
+							))
+						}
+					</section>
+
+					<section
+						class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6"
+					>
+						<!-- Eyecatch -->
+						<div
+							class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50"
+						>
+							<picture>
+								<source srcset="/fv_1.webp" type="image/webp" />
+								<img
+									src="/fv_1.jpg"
+									alt="オンライン英会話の始め方・選び方（初心者向け）"
+									loading="lazy"
+									decoding="async"
+									width="1024"
+									height="565"
+									class="block h-40 w-full object-cover sm:h-48"
+								/>
+							</picture>
+						</div>
+
+						<!-- Decorated title -->
+						<div class="mt-5">
+							<div class="flex flex-wrap items-center gap-2">
+								<span
+									class="inline-flex items-center rounded-lg bg-pink-100 px-2 py-1 text-xs font-extrabold text-pink-700 ring-1 ring-pink-200"
+								>
+									初心者ガイド
+								</span>
+								<span
+									class="text-xs font-extrabold text-zinc-500"
+									>2026年最新</span
+								>
+							</div>
+							<h2
+								class="mt-2 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl"
+							>
+								オンライン英会話とは？初心者向けの始め方・選び方
+							</h2>
+							<div
+								class="mt-2 h-[3px] w-32 rounded-full bg-[linear-gradient(to_right,#ec4899,#f59e0b,transparent)]"
+							>
+							</div>
+						</div>
+
+						<p
+							class="mt-2 text-sm font-semibold leading-7 text-zinc-700"
+						>
+							「オンライン英会話って何？」「全く話せなくても大丈夫？」という不安を、初心者向けにわかりやすく整理しました。迷ったら、まずは無料体験で“続けられるか”を確認するのが近道です。
 						</p>
-					</div>
 
-					<div class="mt-6 space-y-6">
-						<section>
-							<div>
-								<h3 id="guide-1" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										1
-									</span>
-									<span>オンライン英会話の定義とメリット</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
+						<!-- Table of contents -->
+						<nav
+							aria-label="目次"
+							class="mt-4 rounded-xl border border-zinc-200 bg-white p-4"
+						>
+							<div class="text-sm font-extrabold text-zinc-900">
+								目次
 							</div>
-							<ul class="mt-3 space-y-2 text-sm leading-7 text-zinc-700">
-								<li><span class="font-extrabold text-zinc-900">定義</span>：オンライン英会話＝インターネットで、講師と英会話レッスンを受ける学習サービス</li>
-								<li><span class="font-extrabold text-zinc-900">メリット1</span>：通学なしで、場所を選ばず受講できる</li>
-								<li><span class="font-extrabold text-zinc-900">メリット2</span>：予約が柔軟で、忙しくても続けやすい</li>
-								<li><span class="font-extrabold text-zinc-900">メリット3</span>：料金が比較的抑えやすい（教材・AI学習を含むプランも増加）</li>
+							<ul
+								class="mt-3 grid gap-2 text-sm text-[color:var(--brand-link)] sm:grid-cols-2"
+							>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-1">1. 定義とメリット</a>
+								</li>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-2"
+										>2. 仕組みと通学型の違い</a>
+								</li>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-3"
+										>3. 怖い・話せない不安の解消</a>
+								</li>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-4"
+										>4. 選び方（3つの基準）</a>
+								</li>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-5"
+										>5. 初心者におすすめ3選</a>
+								</li>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-6"
+										>6. 英語力ゼロからの準備</a>
+								</li>
+								<li>
+									<a
+										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
+										href="#guide-7">7. FAQ</a>
+								</li>
 							</ul>
-							<p class="mt-3 text-xs leading-6 text-zinc-600">
-								<span class="font-extrabold text-zinc-900">注釈</span>：<span class="font-extrabold text-zinc-900">AI講師</span>＝AIが会話相手になったり、発音・文章を添削したりする機能（人間講師の代わりではなく“補助輪”として使うのが主流です）。
-							</p>
-						</section>
+						</nav>
 
-						<section>
-							<div>
-								<h3 id="guide-2" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										2
-									</span>
-									<span>仕組みと通学型との違い（比較表）</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
-							</div>
+						<div
+							class="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4"
+						>
+							<p class="text-xs font-extrabold text-zinc-900">
+								この記事の結論（300字以内）
+							</p>
 							<p class="mt-2 text-sm leading-7 text-zinc-700">
-								オンライン英会話の基本は「予約 → レッスン → 復習」。レッスン中は音声・ビデオ・チャットを使い、教材は画面共有やシステム上で進みます。
+								オンライン英会話は、スマホやPCで講師と1対1（または少人数）で話す英語レッスンです。初心者でも大丈夫な理由は「日本語サポート」「初心者教材」「チャット等で“詰まっても続く”仕組み」が揃っているから。まずは無料体験で、①予約のしやすさ②教材のわかりやすさ③講師との相性を確認し、続けられるサービスを選びましょう。
 							</p>
-							<div class="mt-3 overflow-x-auto">
-								<table class="min-w-[680px] w-full border-separate border-spacing-0 text-sm">
-									<thead>
-										<tr>
-											<th class="whitespace-nowrap rounded-tl-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">比較項目</th>
-											<th class="whitespace-nowrap border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">オンライン英会話</th>
-											<th class="whitespace-nowrap rounded-tr-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">通学型（英会話スクール）</th>
-										</tr>
-									</thead>
-									<tbody class="text-zinc-700">
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">料金感</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">月数千円〜</span>が中心（プラン差あり）</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">月1〜数万円</span>になりやすい</td>
-										</tr>
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">場所</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">自宅・外出先でもOK</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">教室に行く必要あり</td>
-										</tr>
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">時間</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">早朝〜深夜・24時間など幅広い</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">校舎・講師スケジュールに依存</td>
-										</tr>
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">続けやすさ</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">予約・キャンセルが柔軟なサービスが多い</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">移動・固定時間が負担になりやすい</td>
-										</tr>
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">学習サポート</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">AI/アプリ/教材がセットのことも</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">対面指導・カウンセリングが強い場合も</td>
-										</tr>
-										<tr>
-											<td class="rounded-bl-xl border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">向いている人</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">最初の一歩、習慣化、コスパ重視</span></td>
-											<td class="rounded-br-xl border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">対面が合う、強制力が欲しい</span></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</section>
+						</div>
 
-						<section>
-							<div>
-								<h3 id="guide-3" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										3
-									</span>
-									<span>「怖い・話せない」は過去の話？初心者が安心できる3つの理由</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
-							</div>
-							<ul class="mt-3 space-y-2 text-sm leading-7 text-zinc-700">
-								<li><span class="font-extrabold text-zinc-900">日本人講師・日本語サポート</span>：最初の不安を日本語で潰せる</li>
-								<li><span class="font-extrabold text-zinc-900">初心者向け教材</span>：自己紹介・あいさつなど“台本付き”で進められる</li>
-								<li><span class="font-extrabold text-zinc-900">チャット活用</span>：聞き取れない/言えないを“止めない”仕組みがある</li>
-							</ul>
-							<p class="mt-2 text-sm leading-7 text-zinc-700">
-								検索で多い「オンライン英会話 怖い」「全く話せない」は、今は<span class="font-extrabold text-zinc-900">“詰まる前提”の機能</span>でかなり解消できます。
-							</p>
-						</section>
-
-						<section>
-							<div>
-								<h3 id="guide-4" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										4
-									</span>
-									<span>【失敗しない】初心者のための選び方（3つの基準）</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
-							</div>
-							<div class="mt-3 space-y-4 text-sm leading-7 text-zinc-700">
+						<div class="mt-6 space-y-6">
+							<section>
 								<div>
-									<p class="font-extrabold text-zinc-900">基準1：講師の国籍（日本人/フィリピン人/ネイティブ）</p>
-									<ul class="mt-2 list-disc pl-5">
-										<li>日本人講師：不安を潰しやすい（日本語で質問できる）</li>
-										<li>フィリピン人講師：明るくフレンドリー、価格帯も続けやすい傾向</li>
-										<li>ネイティブ講師：自然な言い回しに触れられる（費用は上がりやすい）</li>
-									</ul>
+									<h3
+										id="guide-1"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											1
+										</span>
+										<span
+											>オンライン英会話の定義とメリット</span
+										>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
 								</div>
-								<div>
-									<p class="font-extrabold text-zinc-900">基準2：教材の充実度（初心者導線）</p>
-									<p class="mt-1">教材数より、初心者コースや予習・復習のしやすさを見ましょう。</p>
-								</div>
-								<div>
-									<p class="font-extrabold text-zinc-900">基準3：継続のしやすさ（予約ルール/アプリ/受講時間）</p>
-									<p class="mt-1">予約が面倒だと続かないので、“今すぐ受講”型やスマホ完結かも重要です。</p>
-								</div>
-							</div>
-						</section>
+								<ul
+									class="mt-3 space-y-2 text-sm leading-7 text-zinc-700"
+								>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>定義</span
+										>：オンライン英会話＝インターネットで、講師と英会話レッスンを受ける学習サービス
+									</li>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>メリット1</span
+										>：通学なしで、場所を選ばず受講できる
+									</li>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>メリット2</span
+										>：予約が柔軟で、忙しくても続けやすい
+									</li>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>メリット3</span
+										>：料金が比較的抑えやすい（教材・AI学習を含むプランも増加）
+									</li>
+								</ul>
+								<p class="mt-3 text-xs leading-6 text-zinc-600">
+									<span class="font-extrabold text-zinc-900"
+										>注釈</span
+									>：<span
+										class="font-extrabold text-zinc-900"
+										>AI講師</span
+									>＝AIが会話相手になったり、発音・文章を添削したりする機能（人間講師の代わりではなく“補助輪”として使うのが主流です）。
+								</p>
+							</section>
 
-						<section>
-							<div>
-								<h3 id="guide-5" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										5
-									</span>
-									<span>初心者におすすめのオンライン英会話 3選</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
-							</div>
-							<p class="mt-2 text-xs leading-6 text-zinc-600">
-								料金・無料体験は時期やプランで変動します。申し込み前に公式で最新条件をご確認ください。
-							</p>
-							<div class="mt-3 overflow-x-auto">
-								<table class="min-w-[760px] w-full border-separate border-spacing-0 text-sm">
-									<thead>
-										<tr>
-											<th class="whitespace-nowrap rounded-tl-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">サービス</th>
-											<th class="border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">特徴（初心者目線）</th>
-											<th class="whitespace-nowrap border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">料金目安</th>
-											<th class="whitespace-nowrap rounded-tr-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900">無料体験</th>
-										</tr>
-									</thead>
-									<tbody class="text-zinc-700">
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">Kimini英会話</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">教材・コースが体系的で「次に何をやるか」迷いにくい</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">月額1,210円〜</span>（回数/プランによる）</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">あり</span>（例：10日間）</td>
-										</tr>
-										<tr>
-											<td class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">DMM英会話</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">24時間受講しやすく、講師の選択肢が広い</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">月額4,800円〜</span>（プランによる）</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">あり</span>（例：7日間）</td>
-										</tr>
-										<tr>
-											<td class="rounded-bl-xl border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900">ネイティブキャンプ</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2">予約不要の受講導線があり、続けやすさが強い</td>
-											<td class="border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">月額6,480円〜</span>（プランによる）</td>
-											<td class="rounded-br-xl border border-zinc-200 bg-white px-3 py-2"><span class="font-extrabold text-zinc-900">あり</span>（例：7日間）</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div class="mt-4 flex flex-wrap items-center gap-2">
-								<a href="#compare" class="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-extrabold text-white hover:bg-zinc-800">比較表で確認する</a>
-								<a href="#details" class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50">ランキング詳細を見る</a>
-							</div>
-						</section>
-
-						<section>
-							<div>
-								<h3 id="guide-6" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										6
-									</span>
-									<span>英語力ゼロからの「3つの準備」</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
-							</div>
-							<div class="mt-3 space-y-3 text-sm leading-7 text-zinc-700">
-								<p><span class="font-extrabold text-zinc-900">準備1</span>：PC/スマホ（迷ったらスマホで開始→必要ならPC）</p>
-								<p><span class="font-extrabold text-zinc-900">準備2</span>：通信環境（Wi‑Fi推奨。重いときは音声＋チャットでもOK）</p>
+							<section>
 								<div>
-									<p class="font-extrabold text-zinc-900">準備3：「これだけは覚える」基本フレーズ5選</p>
-									<ul class="mt-2 list-disc pl-5">
-										<li><span class="font-extrabold text-zinc-900">I’m new to English.</span>（英語は初心者です）</li>
-										<li><span class="font-extrabold text-zinc-900">Could you speak more slowly?</span>（もう少しゆっくり話してもらえますか）</li>
-										<li><span class="font-extrabold text-zinc-900">Could you type it in the chat?</span>（チャットに書いてもらえますか）</li>
-										<li><span class="font-extrabold text-zinc-900">I don’t understand.</span>（わかりません）</li>
-										<li><span class="font-extrabold text-zinc-900">Could you say that again?</span>（もう一度言ってもらえますか）</li>
-									</ul>
-									<p class="mt-2 text-xs leading-6 text-zinc-600">
-										<span class="font-extrabold text-zinc-900">注釈</span>：<span class="font-extrabold text-zinc-900">フレーズ</span>＝会話でそのまま使える定型表現。単語より“丸ごと”覚えると、初心者ほど効果が出やすいです。
+									<h3
+										id="guide-2"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											2
+										</span>
+										<span
+											>仕組みと通学型との違い（比較表）</span
+										>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
+								</div>
+								<p class="mt-2 text-sm leading-7 text-zinc-700">
+									オンライン英会話の基本は「予約 → レッスン →
+									復習」。レッスン中は音声・ビデオ・チャットを使い、教材は画面共有やシステム上で進みます。
+								</p>
+								<div class="mt-3 overflow-x-auto">
+									<table
+										class="min-w-[680px] w-full border-separate border-spacing-0 text-sm"
+									>
+										<thead>
+											<tr>
+												<th
+													class="whitespace-nowrap rounded-tl-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>比較項目</th
+												>
+												<th
+													class="whitespace-nowrap border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>オンライン英会話</th
+												>
+												<th
+													class="whitespace-nowrap rounded-tr-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>通学型（英会話スクール）</th
+												>
+											</tr>
+										</thead>
+										<tbody class="text-zinc-700">
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>料金感</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>月数千円〜</span
+													>が中心（プラン差あり）</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>月1〜数万円</span
+													>になりやすい</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>場所</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>自宅・外出先でもOK</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>教室に行く必要あり</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>時間</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>早朝〜深夜・24時間など幅広い</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>校舎・講師スケジュールに依存</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>続けやすさ</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>予約・キャンセルが柔軟なサービスが多い</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>移動・固定時間が負担になりやすい</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>学習サポート</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>AI/アプリ/教材がセットのことも</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>対面指導・カウンセリングが強い場合も</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="rounded-bl-xl border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>向いている人</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>最初の一歩、習慣化、コスパ重視</span
+													>
+												</td>
+												<td
+													class="rounded-br-xl border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>対面が合う、強制力が欲しい</span
+													>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</section>
+
+							<section>
+								<div>
+									<h3
+										id="guide-3"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											3
+										</span>
+										<span
+											>「怖い・話せない」は過去の話？初心者が安心できる3つの理由</span
+										>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
+								</div>
+								<ul
+									class="mt-3 space-y-2 text-sm leading-7 text-zinc-700"
+								>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>日本人講師・日本語サポート</span
+										>：最初の不安を日本語で潰せる
+									</li>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>初心者向け教材</span
+										>：自己紹介・あいさつなど“台本付き”で進められる
+									</li>
+									<li>
+										<span
+											class="font-extrabold text-zinc-900"
+											>チャット活用</span
+										>：聞き取れない/言えないを“止めない”仕組みがある
+									</li>
+								</ul>
+								<p class="mt-2 text-sm leading-7 text-zinc-700">
+									検索で多い「オンライン英会話
+									怖い」「全く話せない」は、今は<span
+										class="font-extrabold text-zinc-900"
+										>“詰まる前提”の機能</span
+									>でかなり解消できます。
+								</p>
+							</section>
+
+							<section>
+								<div>
+									<h3
+										id="guide-4"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											4
+										</span>
+										<span
+											>【失敗しない】初心者のための選び方（3つの基準）</span
+										>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
+								</div>
+								<div
+									class="mt-3 space-y-4 text-sm leading-7 text-zinc-700"
+								>
+									<div>
+										<p class="font-extrabold text-zinc-900">
+											基準1：講師の国籍（日本人/フィリピン人/ネイティブ）
+										</p>
+										<ul class="mt-2 list-disc pl-5">
+											<li>
+												日本人講師：不安を潰しやすい（日本語で質問できる）
+											</li>
+											<li>
+												フィリピン人講師：明るくフレンドリー、価格帯も続けやすい傾向
+											</li>
+											<li>
+												ネイティブ講師：自然な言い回しに触れられる（費用は上がりやすい）
+											</li>
+										</ul>
+									</div>
+									<div>
+										<p class="font-extrabold text-zinc-900">
+											基準2：教材の充実度（初心者導線）
+										</p>
+										<p class="mt-1">
+											教材数より、初心者コースや予習・復習のしやすさを見ましょう。
+										</p>
+									</div>
+									<div>
+										<p class="font-extrabold text-zinc-900">
+											基準3：継続のしやすさ（予約ルール/アプリ/受講時間）
+										</p>
+										<p class="mt-1">
+											予約が面倒だと続かないので、“今すぐ受講”型やスマホ完結かも重要です。
+										</p>
+									</div>
+								</div>
+							</section>
+
+							<section>
+								<div>
+									<h3
+										id="guide-5"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											5
+										</span>
+										<span
+											>初心者におすすめのオンライン英会話
+											3選</span
+										>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
+								</div>
+								<p class="mt-2 text-xs leading-6 text-zinc-600">
+									料金・無料体験は時期やプランで変動します。申し込み前に公式で最新条件をご確認ください。
+								</p>
+								<div class="mt-3 overflow-x-auto">
+									<table
+										class="min-w-[760px] w-full border-separate border-spacing-0 text-sm"
+									>
+										<thead>
+											<tr>
+												<th
+													class="whitespace-nowrap rounded-tl-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>サービス</th
+												>
+												<th
+													class="border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>特徴（初心者目線）</th
+												>
+												<th
+													class="whitespace-nowrap border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>料金目安</th
+												>
+												<th
+													class="whitespace-nowrap rounded-tr-xl border border-zinc-200 bg-white px-3 py-2 text-left font-extrabold text-zinc-900"
+													>無料体験</th
+												>
+											</tr>
+										</thead>
+										<tbody class="text-zinc-700">
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>Kimini英会話</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>教材・コースが体系的で「次に何をやるか」迷いにくい</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>月額1,210円〜</span
+													>（回数/プランによる）</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>あり</span
+													>（例：10日間）</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>DMM英会話</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>24時間受講しやすく、講師の選択肢が広い</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>月額4,800円〜</span
+													>（プランによる）</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>あり</span
+													>（例：7日間）</td
+												>
+											</tr>
+											<tr>
+												<td
+													class="rounded-bl-xl border border-zinc-200 bg-white px-3 py-2 font-extrabold text-zinc-900"
+													>ネイティブキャンプ</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													>予約不要の受講導線があり、続けやすさが強い</td
+												>
+												<td
+													class="border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>月額6,480円〜</span
+													>（プランによる）</td
+												>
+												<td
+													class="rounded-br-xl border border-zinc-200 bg-white px-3 py-2"
+													><span
+														class="font-extrabold text-zinc-900"
+														>あり</span
+													>（例：7日間）</td
+												>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div
+									class="mt-4 flex flex-wrap items-center gap-2"
+								>
+									<a
+										href="#compare"
+										class="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-extrabold text-white hover:bg-zinc-800"
+										>比較表で確認する</a
+									>
+									<a
+										href="#details"
+										class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+										>ランキング詳細を見る</a
+									>
+								</div>
+							</section>
+
+							<section>
+								<div>
+									<h3
+										id="guide-6"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											6
+										</span>
+										<span
+											>英語力ゼロからの「3つの準備」</span
+										>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
+								</div>
+								<div
+									class="mt-3 space-y-3 text-sm leading-7 text-zinc-700"
+								>
+									<p>
+										<span
+											class="font-extrabold text-zinc-900"
+											>準備1</span
+										>：PC/スマホ（迷ったらスマホで開始→必要ならPC）
 									</p>
+									<p>
+										<span
+											class="font-extrabold text-zinc-900"
+											>準備2</span
+										>：通信環境（Wi‑Fi推奨。重いときは音声＋チャットでもOK）
+									</p>
+									<div>
+										<p class="font-extrabold text-zinc-900">
+											準備3：「これだけは覚える」基本フレーズ5選
+										</p>
+										<ul class="mt-2 list-disc pl-5">
+											<li>
+												<span
+													class="font-extrabold text-zinc-900"
+													>I’m new to English.</span
+												>（英語は初心者です）
+											</li>
+											<li>
+												<span
+													class="font-extrabold text-zinc-900"
+													>Could you speak more
+													slowly?</span
+												>（もう少しゆっくり話してもらえますか）
+											</li>
+											<li>
+												<span
+													class="font-extrabold text-zinc-900"
+													>Could you type it in the
+													chat?</span
+												>（チャットに書いてもらえますか）
+											</li>
+											<li>
+												<span
+													class="font-extrabold text-zinc-900"
+													>I don’t understand.</span
+												>（わかりません）
+											</li>
+											<li>
+												<span
+													class="font-extrabold text-zinc-900"
+													>Could you say that again?</span
+												>（もう一度言ってもらえますか）
+											</li>
+										</ul>
+										<p
+											class="mt-2 text-xs leading-6 text-zinc-600"
+										>
+											<span
+												class="font-extrabold text-zinc-900"
+												>注釈</span
+											>：<span
+												class="font-extrabold text-zinc-900"
+												>フレーズ</span
+											>＝会話でそのまま使える定型表現。単語より“丸ごと”覚えると、初心者ほど効果が出やすいです。
+										</p>
+									</div>
 								</div>
-							</div>
-						</section>
+							</section>
 
-						<section>
-							<div>
-								<h3 id="guide-7" class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900">
-									<span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white">
-										7
-									</span>
-									<span>FAQ（よくある質問）</span>
-								</h3>
-								<div class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"></div>
-							</div>
-							<div class="mt-3 space-y-3">
-								<div class="rounded-xl border border-zinc-200 bg-white p-4">
-									<p class="text-sm font-extrabold text-zinc-900">Q：週に何回やればいい？</p>
-									<p class="mt-2 text-sm leading-7 text-zinc-700"><span class="font-extrabold text-zinc-900">A：まずは週2回</span>が現実的な合格ラインです。慣れてきたら週3回、余裕があれば“短時間でも毎日”が最も伸びます。</p>
+							<section>
+								<div>
+									<h3
+										id="guide-7"
+										class="scroll-mt-28 flex flex-wrap items-center gap-3 text-lg font-extrabold text-zinc-900"
+									>
+										<span
+											class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-extrabold text-white"
+										>
+											7
+										</span>
+										<span>FAQ（よくある質問）</span>
+									</h3>
+									<div
+										class="mt-2 h-[2px] w-28 rounded-full bg-[linear-gradient(to_right,#a78bfa,#ec4899,transparent)]"
+									>
+									</div>
 								</div>
-								<div class="rounded-xl border border-zinc-200 bg-white p-4">
-									<p class="text-sm font-extrabold text-zinc-900">Q：スマホだけでも受けられる？</p>
-									<p class="mt-2 text-sm leading-7 text-zinc-700"><span class="font-extrabold text-zinc-900">A：受けられます。</span>まずは始めて習慣化することが最優先。スマホで開始→必要ならPCに移行でOKです。</p>
+								<div class="mt-3 space-y-3">
+									<div
+										class="rounded-xl border border-zinc-200 bg-white p-4"
+									>
+										<p
+											class="text-sm font-extrabold text-zinc-900"
+										>
+											Q：週に何回やればいい？
+										</p>
+										<p
+											class="mt-2 text-sm leading-7 text-zinc-700"
+										>
+											<span
+												class="font-extrabold text-zinc-900"
+												>A：まずは週2回</span
+											>が現実的な合格ラインです。慣れてきたら週3回、余裕があれば“短時間でも毎日”が最も伸びます。
+										</p>
+									</div>
+									<div
+										class="rounded-xl border border-zinc-200 bg-white p-4"
+									>
+										<p
+											class="text-sm font-extrabold text-zinc-900"
+										>
+											Q：スマホだけでも受けられる？
+										</p>
+										<p
+											class="mt-2 text-sm leading-7 text-zinc-700"
+										>
+											<span
+												class="font-extrabold text-zinc-900"
+												>A：受けられます。</span
+											>まずは始めて習慣化することが最優先。スマホで開始→必要ならPCに移行でOKです。
+										</p>
+									</div>
+									<div
+										class="rounded-xl border border-zinc-200 bg-white p-4"
+									>
+										<p
+											class="text-sm font-extrabold text-zinc-900"
+										>
+											Q：全く話せないけど、レッスンが止まらない？
+										</p>
+										<p
+											class="mt-2 text-sm leading-7 text-zinc-700"
+										>
+											<span
+												class="font-extrabold text-zinc-900"
+												>A：止まりません。</span
+											>初心者教材＋チャット機能で進行できます。「ゆっくり話して」「チャットに書いて」を最初に伝えれば安心です。
+										</p>
+									</div>
+									<div
+										class="rounded-xl border border-zinc-200 bg-white p-4"
+									>
+										<p
+											class="text-sm font-extrabold text-zinc-900"
+										>
+											Q：何を話せばいいかわからない…
+										</p>
+										<p
+											class="mt-2 text-sm leading-7 text-zinc-700"
+										>
+											<span
+												class="font-extrabold text-zinc-900"
+												>A：教材を選べばOK。</span
+											>自由会話ではなく、自己紹介・あいさつ・買い物など“台本付き”の教材から始めるのが近道です。
+										</p>
+									</div>
 								</div>
-								<div class="rounded-xl border border-zinc-200 bg-white p-4">
-									<p class="text-sm font-extrabold text-zinc-900">Q：全く話せないけど、レッスンが止まらない？</p>
-									<p class="mt-2 text-sm leading-7 text-zinc-700"><span class="font-extrabold text-zinc-900">A：止まりません。</span>初心者教材＋チャット機能で進行できます。「ゆっくり話して」「チャットに書いて」を最初に伝えれば安心です。</p>
-								</div>
-								<div class="rounded-xl border border-zinc-200 bg-white p-4">
-									<p class="text-sm font-extrabold text-zinc-900">Q：何を話せばいいかわからない…</p>
-									<p class="mt-2 text-sm leading-7 text-zinc-700"><span class="font-extrabold text-zinc-900">A：教材を選べばOK。</span>自由会話ではなく、自己紹介・あいさつ・買い物など“台本付き”の教材から始めるのが近道です。</p>
-								</div>
-							</div>
-						</section>
-					</div>
-				</section>
+							</section>
+						</div>
+					</section>
 
-				<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
-					<h2 class="text-xl font-extrabold text-zinc-900">よくある質問（オンライン英会話 おすすめ）</h2>
-					<div class="mt-4 space-y-3">
-						<details class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-							<summary class="cursor-pointer text-sm font-extrabold text-zinc-900">オンライン英会話のおすすめはどう選べばいい？</summary>
-							<p class="mt-2 text-sm text-zinc-700">
-								目的（総合/日常/ビジネス）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。
-							</p>
-						</details>
-						<details class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-							<summary class="cursor-pointer text-sm font-extrabold text-zinc-900">無料体験は受けた方がいい？</summary>
-							<p class="mt-2 text-sm text-zinc-700">
-								おすすめです。講師との相性や教材の使いやすさ、予約の取りやすさを実際に確認できます。
-							</p>
-						</details>
-						<details class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-							<summary class="cursor-pointer text-sm font-extrabold text-zinc-900">初心者でも続けやすいオンライン英会話の特徴は？</summary>
-							<p class="mt-2 text-sm text-zinc-700">
-								日本語サポート・初心者向け教材・短時間レッスン・受講できる時間帯が広いサービスは継続しやすい傾向があります。
-							</p>
-						</details>
-					</div>
-				</section>
-
+					<section
+						class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6"
+					>
+						<h2 class="text-xl font-extrabold text-zinc-900">
+							よくある質問（オンライン英会話 おすすめ）
+						</h2>
+						<div class="mt-4 space-y-3">
+							<details
+								class="rounded-xl border border-zinc-200 bg-zinc-50 p-4"
+							>
+								<summary
+									class="cursor-pointer text-sm font-extrabold text-zinc-900"
+									>オンライン英会話のおすすめはどう選べばいい？</summary
+								>
+								<p class="mt-2 text-sm text-zinc-700">
+									目的（総合/日常/ビジネス）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。
+								</p>
+							</details>
+							<details
+								class="rounded-xl border border-zinc-200 bg-zinc-50 p-4"
+							>
+								<summary
+									class="cursor-pointer text-sm font-extrabold text-zinc-900"
+									>無料体験は受けた方がいい？</summary
+								>
+								<p class="mt-2 text-sm text-zinc-700">
+									おすすめです。講師との相性や教材の使いやすさ、予約の取りやすさを実際に確認できます。
+								</p>
+							</details>
+							<details
+								class="rounded-xl border border-zinc-200 bg-zinc-50 p-4"
+							>
+								<summary
+									class="cursor-pointer text-sm font-extrabold text-zinc-900"
+									>初心者でも続けやすいオンライン英会話の特徴は？</summary
+								>
+								<p class="mt-2 text-sm text-zinc-700">
+									日本語サポート・初心者向け教材・短時間レッスン・受講できる時間帯が広いサービスは継続しやすい傾向があります。
+								</p>
+							</details>
+						</div>
+					</section>
 				</div>
 
 				<!-- Desktop sidebar -->
@@ -829,15 +1531,24 @@ const faqJsonLd = {
 						bannersMid={sidebarBannersMid}
 						bannersBottom={sidebarBannersBottom}
 						popular={overallItems.slice(0, 8).map((x) => ({
-              offerId: x.id,
+							offerId: x.id,
 							name: x.data.name,
 							officialUrl: x.data.officialUrl,
 							logoUrl: x.data.logoUrl,
 						}))}
 						categories={[
-							...catReco.map((c) => ({ title: c.title, href: c.href })),
-							...catAge.map((c) => ({ title: c.title, href: c.href })),
-							...catLevel.map((c) => ({ title: c.title, href: c.href })),
+							...catReco.map((c) => ({
+								title: c.title,
+								href: c.href,
+							})),
+							...catAge.map((c) => ({
+								title: c.title,
+								href: c.href,
+							})),
+							...catLevel.map((c) => ({
+								title: c.title,
+								href: c.href,
+							})),
 						]}
 					/>
 				</div>
@@ -851,7 +1562,7 @@ const faqJsonLd = {
 				bannersMid={sidebarBannersMid}
 				bannersBottom={sidebarBannersBottom}
 				popular={overallItems.slice(0, 8).map((x) => ({
-          offerId: x.id,
+					offerId: x.id,
 					name: x.data.name,
 					officialUrl: x.data.officialUrl,
 					logoUrl: x.data.logoUrl,
@@ -863,6 +1574,5 @@ const faqJsonLd = {
 				]}
 			/>
 		</section>
-
 	</main>
 </Layout>
