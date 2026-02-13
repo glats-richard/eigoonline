@@ -24,7 +24,9 @@ const isAccesstrade = (() => {
 // 例: /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
 const trackedHref =
   isExternal && offerId
-    ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
+    ? offerId === "kimini"
+      ? href // Kiminiだけは自社リダイレクトを通さず、直接CVページへ
+      : `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
     : href;
 ---
 

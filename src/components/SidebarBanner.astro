@@ -4,19 +4,21 @@ type Props = { heading?: string; items: Banner[] };
 
 const { heading = "バナー", items } = Astro.props satisfies Props;
 
-// Wrap all external CTA links so that redirects always go through
+// Wrap all external CTA links (except Kimini) so that redirects go through
 // our tracking endpoint, e.g.
-// /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
+// /api/track/click?offer_id=xxx&to=...
 const withTracking = (href: string) => {
   // Already a tracking URL → そのまま使う
   if (href.startsWith("/api/track/click")) return href;
 
-  // 外部リンクはすべて tracking 経由にする
+  // 外部リンクは原則 tracking 経由にする（Kiminiだけは除外して直接遷移）
   if (/^https?:\/\//.test(href)) {
-    // 必要に応じてここで offer_id を振り分けられる
-    const offerId =
-      href.includes("kimini.online") || href.includes("h.accesstrade.net") ? "kimini" : "external";
-
+    // Kiminiドメインはリダイレクトを通さずにそのまま遷移
+    if (href.includes("kimini.online")) {
+      return href;
+    }
+    // Kimini以外は外部トラッキング経由
+    const offerId = "external";
     return `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`;
   }
 

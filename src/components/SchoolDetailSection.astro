@@ -47,11 +47,14 @@ const stripLeadingBullet = (v: unknown): string =>
     .replace(/^(?:[・•\-–—*]\s*)+/, "")
     .trim();
 
-// すべての外部CTAリンクは自社のトラッキング経由に統一する
+// 外部CTAリンクは原則として自社のトラッキング経由に統一する
 // 例: /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
+// ※ Kiminiだけはリダイレクトを通さず、直接CVページへ遷移させる
 const trackHref = (href: string) =>
   href.startsWith("http://") || href.startsWith("https://")
-    ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
+    ? offerId === "kimini"
+      ? href
+      : `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
     : href;
 ---
 
