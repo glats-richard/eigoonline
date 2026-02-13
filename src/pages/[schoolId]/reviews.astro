@@ -96,11 +96,7 @@ const dbDisplayReviews = dbApprovedReviews.map((r) => ({
 
 const combinedForStats = [
   ...staticReviews,
-  ...dbDisplayReviews.map((r) => ({
-    age: r.age,
-    rating: r.rating,
-    body: r.body,
-  })),
+  // DB由来の口コミは1件ずつだけ集計対象にする（重複カウントを防ぐ）
   ...dbDisplayReviews.map((r) => ({
     age: r.age,
     rating: r.rating,
