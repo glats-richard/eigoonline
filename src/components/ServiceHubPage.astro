@@ -1219,9 +1219,7 @@ if (faqItems.length) {
           {dbEnvError ? (
             <div class="mt-2 text-xs font-semibold text-rose-700">DB未設定のため、口コミ（ユーザー投稿）の集計が一部表示できません。</div>
           ) : null}
-          {dbErr ? (
-            <div class="mt-2 text-xs text-zinc-500">（参考: DB取得に失敗した場合は静的口コミのみ表示します）</div>
-          ) : null}
+
         </div>
 
         {displayLatest.length ? (
@@ -1244,7 +1242,7 @@ if (faqItems.length) {
       <!-- Voices -->
       <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 class="text-lg font-extrabold text-zinc-900">利用者の声（最新口コミ）</h2>
-        <p class="mt-1 text-sm text-zinc-600">当サイトで収集した口コミ（静的/ユーザー投稿）から、最新の内容を掲載します。</p>
+        <p class="mt-1 text-sm text-zinc-600">当サイトで収集した口コミから、最新の内容を掲載します。</p>
         {displayLatest.length ? (
           <ul class="mt-4 space-y-3">
             {displayLatest.map((r) => (
