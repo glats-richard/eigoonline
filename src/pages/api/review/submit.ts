@@ -68,7 +68,12 @@ function isAllowedRecaptchaHost(hostname: string | undefined | null): boolean {
   return h === "eigoonline.com" || h.endsWith(".eigoonline.com");
 }
 
-async function verifyRecaptchaV3(opts: { token: string; action: string; ip: string | null }) {
+type RecaptchaResult =
+  | { ok: true; score: number }
+  | { ok: false; status: number; error: string }
+  | { skipped: true };
+
+async function verifyRecaptchaV3(opts: { token: string; action: string; ip: string | null }): Promise<RecaptchaResult> {
   const secret = readRecaptchaSecret();
   const siteKey = readRecaptchaSiteKey();
   // Require both site+secret keys to be configured.
@@ -78,8 +83,10 @@ async function verifyRecaptchaV3(opts: { token: string; action: string; ip: stri
   // }
 
   // Create override to disable reCAPTCHA
+  // Create override to disable reCAPTCHA
   return { skipped: true as const };
 
+  /*
   const minScore = readRecaptchaMinScore();
   if (!opts.token) {
     return { ok: false as const, status: 400, error: "Missing reCAPTCHA token" };
@@ -128,6 +135,7 @@ async function verifyRecaptchaV3(opts: { token: string; action: string; ip: stri
   }
 
   return { ok: true as const, score };
+  */
 }
 
 export const POST: APIRoute = async ({ request, redirect }) => {
