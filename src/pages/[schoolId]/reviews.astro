@@ -53,7 +53,6 @@ let dbApprovedReviews: DbApprovedReviewRow[] = [];
 try {
   const res = await query<DbApprovedReviewRow>(
     `
-    select
       id,
       created_at,
       featured_rank,
@@ -61,9 +60,8 @@ try {
       teacher_quality,
       material_quality,
       connection_quality,
-      body,
-      birth_year,
-      birth_month,
+      price_rating,
+      satisfaction_rating,
       body,
       birth_year,
       birth_month,
@@ -71,7 +69,7 @@ try {
       nickname,
       duration_months
     from reviews
-    where status = 'approved' and featured_rank is not null and school_id = $1
+    where status = 'approved' and school_id = $1
     order by created_at desc
     limit 200
     `,

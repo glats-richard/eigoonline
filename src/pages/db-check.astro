@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+import { query } from "../../lib/db";
+
+let data = {};
+try {
+    const countRes = await query(
+        "select count(*) as total, count(*) filter (where status='approved') as approved_count from reviews"
+    );
+    const kiminiRes = await query(
+        "select count(*) as count, avg(overall_rating) as avg from reviews where status='approved' and school_id='kimini'"
+    );
+    const reviewsRes = await query(
+        "select id, school_id, status, nickname, overall_rating, price_rating, satisfaction_rating from reviews order by created_at desc limit 20"
+    );
+
+    data = {
+        counts: countRes.rows[0],
+        kimini: kiminiRes.rows[0],
+        reviews: reviewsRes.rows,
+    };
+} catch (e) {
+    data = { error: e.message };
+}
+---
+
+<pre>{JSON.stringify(data, null, 2)}</pre>
