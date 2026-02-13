@@ -123,9 +123,11 @@ type DbReview = {
   birth_year: number | null;
   birth_month: number | null;
   age: string | null; // legacy
+  nickname: string | null;
+  duration_months: number | null;
 };
 
-type DisplayReview = { label: string; rating: number; body: string; createdAt: string | null };
+type DisplayReview = { label: string; rating: number; body: string; createdAt: string | null; studyPeriod: string | null };
 
 let dbLatest: DisplayReview[] = [];
 let dbCount = 0;
@@ -150,22 +152,7 @@ try {
     pr: number | null;
     sr: number | null;
   }>(
-    `
-    select
-      school_id,
-      count(*)::bigint as count,
-      avg(teacher_quality)::numeric as tq,
-      avg(material_quality)::numeric as mq,
-      avg(connection_quality)::numeric as cq,
-      avg(price_rating)::numeric as pr,
-      avg(satisfaction_rating)::numeric as sr
-    from reviews
-    where status = 'approved'
-      and featured_rank is not null
-      and school_id = any($1::text[])
-    group by school_id
-    `,
-    [schools.map((s) => s.id)],
+    "select school_id, count(*)::int as count, avg(teacher_quality)::numeric as tq, avg(material_quality)::numeric as mq, avg(connection_quality)::numeric as cq, avg(price_rating)::numeric as pr, avg(satisfaction_rating)::numeric as sr from reviews where status = 'approved' and overall_rating is not null group by school_id",
   );
 
   for (const row of qRes.rows ?? []) {
@@ -183,9 +170,9 @@ try {
 
   const latestRes = await query<DbReview>(
     `
-    select created_at, overall_rating, body, birth_year, birth_month, age
+    select *
     from reviews
-    where status = 'approved' and featured_rank is not null and school_id = $1 and overall_rating is not null and body is not null
+    where status = 'approved' and school_id = $1
     order by created_at desc
     limit ${LATEST_REVIEW_LIMIT}
     `,
@@ -194,12 +181,14 @@ try {
 
   dbLatest = (latestRes.rows ?? []).map((r: DbReview) => ({
     label:
-      typeof r.birth_year === "number" && typeof r.birth_month === "number"
+      r.nickname ||
+      (typeof r.birth_year === "number" && typeof r.birth_month === "number"
         ? `${r.birth_year}年${r.birth_month}月`
-        : r.age ?? "ユーザー",
+        : r.age ?? "ユーザー"),
     rating: r.overall_rating ?? 0,
     body: r.body ?? "",
     createdAt: r.created_at ?? null,
+    studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
   }));
 } catch (e: any) {
   // If DB isn't ready, continue with static reviews only
@@ -245,10 +234,11 @@ const compareOptions = schools
   .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
 const staticLatest: DisplayReview[] = staticReviews.map((r) => ({
-  label: r.age ?? "ユーザー",
+  label: r.nickname || r.age || "ユーザー",
   rating: r.rating ?? 0,
   body: r.body ?? "",
   createdAt: null,
+  studyPeriod: r.studyPeriod ?? null,
 }));
 
 // Prefer DB latest; if less than limit, fill with static reviews
@@ -1088,7 +1078,7 @@ if (faqItems.length) {
       <!-- How it works -->
       <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 class="text-lg font-extrabold text-zinc-900">{school.methodologySectionTitle ?? "学習が続く理由（学習設計）"}</h2>
-        <p class="mt-1 text-sm text-zinc-600">{school.methodologySectionSubtitle ?? "ポイントを結論→根拠の順に整理して、初めてでも判断しやすくしています。"}</p>
+        <p class="mt-1 text-sm text-zinc-600">{school.methodologySectionSubtitle ?? "ポイントを「結論→根拠」の順に整理して、初めてでもわかりやすくしています。"}</p>
         <ul class="mt-3 list-disc space-y-2 pl-5 text-sm font-semibold text-zinc-700">
           {methodology.map((t) => (
             <li>{stripLeadingBullet(t)}</li>
@@ -1254,7 +1244,10 @@ if (faqItems.length) {
             {displayLatest.map((r) => (
               <article class="rounded-xl border border-zinc-200 bg-white p-4">
                 <div class="flex items-center justify-between gap-3">
-                  <div class="text-xs font-extrabold text-zinc-700">{r.label}</div>
+                  <div>
+                    <div class="text-xs font-extrabold text-zinc-700">{r.label}</div>
+                    {r.studyPeriod && <div class="mt-0.5 text-[10px] font-semibold text-zinc-500">{r.studyPeriod}</div>}
+                  </div>
                   <StarRating value={r.rating} showValue={false} size={16} />
                 </div>
                 <p class="mt-2 text-sm leading-relaxed text-zinc-700">{r.body}</p>
@@ -1275,7 +1268,10 @@ if (faqItems.length) {
             {displayLatest.map((r) => (
               <li class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div class="text-xs font-extrabold text-zinc-800">{r.label}</div>
+                  <div>
+                    <div class="text-xs font-extrabold text-zinc-800">{r.label}</div>
+                    {r.studyPeriod && <div class="mt-0.5 text-[10px] font-semibold text-zinc-500">{r.studyPeriod}</div>}
+                  </div>
                   <div class="flex items-center gap-2">
                     <StarRating value={r.rating} showValue={false} size={16} />
                     <span class="text-xs font-extrabold text-zinc-700">{r.rating.toFixed(1)} / 5</span>

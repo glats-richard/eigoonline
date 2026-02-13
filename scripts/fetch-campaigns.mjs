@@ -23,6 +23,7 @@ async function main() {
   });
 
   try {
+
     const changes = [];
 
     // Read all school JSON files

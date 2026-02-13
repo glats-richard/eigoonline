@@ -161,6 +161,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const durationMonths = toInt(formData.get("duration_months"));
   const recaptchaToken = String(formData.get("recaptcha_token") ?? "").trim();
   const recaptchaAction = String(formData.get("recaptcha_action") ?? "").trim() || "review_submit";
+  const nickname = String(formData.get("nickname") ?? "").trim().slice(0, 50) || null;
 
   // Validate school_id exists
   if (!schoolId) {
@@ -227,6 +228,14 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Validate body
   if (body.length < 10 || body.length > 300) {
     return new Response(JSON.stringify({ ok: false, error: "Body must be between 10 and 300 characters" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  // Validate nickname
+  if (!nickname) {
+    return new Response(JSON.stringify({ ok: false, error: "nickname is required" }), {
       status: 400,
       headers: { "content-type": "application/json" },
     });
@@ -315,8 +324,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Insert review
   try {
     await query(
-      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)",
-      [schoolId, "pending", durationMonths, overallRating, teacherQuality, materialQuality, connectionQuality, priceRating, satisfactionRating, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer],
+      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer, nickname) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)",
+      [schoolId, "pending", durationMonths, overallRating, teacherQuality, materialQuality, connectionQuality, priceRating, satisfactionRating, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer, nickname],
     );
   } catch (e: any) {
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? String(e) }), {

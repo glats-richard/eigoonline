@@ -250,6 +250,8 @@ const reviews = defineCollection({
 			.array(
 				z.object({
 					age: z.string(),
+					nickname: z.string().optional(),
+					studyPeriod: z.string().optional(),
 					rating: z.number().min(0).max(5),
 					body: z.string(),
 				}),
