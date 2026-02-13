@@ -181,10 +181,7 @@ try {
 
   dbLatest = (latestRes.rows ?? []).map((r: DbReview) => ({
     label:
-      r.nickname ||
-      (typeof r.birth_year === "number" && typeof r.birth_month === "number"
-        ? `${r.birth_year}年${r.birth_month}月`
-        : r.age ?? "ユーザー"),
+      r.nickname || "ユーザー",
     rating: r.overall_rating ?? 0,
     body: r.body ?? "",
     createdAt: r.created_at ?? null,
