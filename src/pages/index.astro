@@ -82,11 +82,12 @@ type DbReviewRow = DBReviewRow & {
 	featured_rank?: number | null;
 	created_at?: string | null;
 	nickname?: string | null;
+	duration_months?: number | null;
 };
 let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
 	const dbReviewsWithSchoolId = await query<DbReviewRow>(
-		"select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age, nickname from reviews where status = 'approved' and featured_rank is not null"
+		"select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age, nickname, duration_months from reviews where status = 'approved' and featured_rank is not null"
 	);
 	for (const r of dbReviewsWithSchoolId.rows ?? []) {
 		const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
@@ -105,6 +106,7 @@ try {
 			birth_month: (r as any).birth_month ?? null,
 			age: (r as any).age ?? null,
 			nickname: (r as any).nickname ?? null,
+			duration_months: (r as any).duration_months ?? null,
 		});
 		dbReviewsBySchoolId.set(r.school_id, existing);
 	}
@@ -144,6 +146,7 @@ for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
 		age: r.nickname || "ユーザー",
 		rating: r.overall_rating!,
 		body: r.body!,
+		studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
 	}));
 	reviewsBySchoolId.set(schoolId, latest3);
 }
@@ -795,42 +798,49 @@ const faqJsonLd = {
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
-										href="#guide-1">1. 定義とメリット</a>
+										href="#guide-1">1. 定義とメリット</a
+									>
 								</li>
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
 										href="#guide-2"
-										>2. 仕組みと通学型の違い</a>
+										>2. 仕組みと通学型の違い</a
+									>
 								</li>
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
 										href="#guide-3"
-										>3. 怖い・話せない不安の解消</a>
+										>3. 怖い・話せない不安の解消</a
+									>
 								</li>
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
 										href="#guide-4"
-										>4. 選び方（3つの基準）</a>
+										>4. 選び方（3つの基準）</a
+									>
 								</li>
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
 										href="#guide-5"
-										>5. 初心者におすすめ3選</a>
+										>5. 初心者におすすめ3選</a
+									>
 								</li>
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
 										href="#guide-6"
-										>6. 英語力ゼロからの準備</a>
+										>6. 英語力ゼロからの準備</a
+									>
 								</li>
 								<li>
 									<a
 										class="underline decoration-[#aebcff] underline-offset-2 hover:text-[color:var(--brand-link-hover)]"
-										href="#guide-7">7. FAQ</a>
+										href="#guide-7">7. FAQ</a
+									>
 								</li>
 							</ul>
 						</nav>

@@ -1241,9 +1241,9 @@ if (faqItems.length) {
             {displayLatest.map((r) => (
               <article class="rounded-xl border border-zinc-200 bg-white p-4">
                 <div class="flex items-center justify-between gap-3">
-                  <div>
-                    <div class="text-xs font-extrabold text-zinc-700">{r.label}</div>
-                    {r.studyPeriod && <div class="mt-0.5 text-[10px] font-semibold text-zinc-500">{r.studyPeriod}</div>}
+                  <div class="text-xs font-extrabold text-zinc-700">
+                    {r.label}
+                    {r.studyPeriod && <span class="ml-1 text-[10px] font-normal text-zinc-500">(学習期間 {r.studyPeriod})</span>}
                   </div>
                   <StarRating value={r.rating} showValue={false} size={16} />
                 </div>
@@ -1265,9 +1265,9 @@ if (faqItems.length) {
             {displayLatest.map((r) => (
               <li class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div class="text-xs font-extrabold text-zinc-800">{r.label}</div>
-                    {r.studyPeriod && <div class="mt-0.5 text-[10px] font-semibold text-zinc-500">{r.studyPeriod}</div>}
+                  <div class="text-xs font-extrabold text-zinc-800">
+                    {r.label}
+                    {r.studyPeriod && <span class="ml-1 text-[10px] font-normal text-zinc-500">(学習期間 {r.studyPeriod})</span>}
                   </div>
                   <div class="flex items-center gap-2">
                     <StarRating value={r.rating} showValue={false} size={16} />

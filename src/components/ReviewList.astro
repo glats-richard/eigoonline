@@ -5,6 +5,7 @@ type Review = {
   age: string;
   rating: number;
   body: string;
+  studyPeriod?: string | null;
 };
 
 type Props = {
@@ -21,7 +22,14 @@ const { title, items } = Astro.props satisfies Props;
     {items.slice(0, 3).map((r) => (
       <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
         <div class="flex items-center justify-between gap-3">
-          <div class="text-sm font-extrabold text-zinc-800">{r.age}</div>
+          <div class="text-sm font-extrabold text-zinc-800">
+            {r.age}
+            {r.studyPeriod && (
+              <span class="ml-2 text-xs font-normal text-zinc-500">
+                (学習期間 {r.studyPeriod})
+              </span>
+            )}
+          </div>
           <div class="flex items-center gap-2">
             <StarRating value={r.rating} />
           </div>
