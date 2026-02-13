@@ -19,11 +19,12 @@ const isAccesstrade = (() => {
     return false;
   }
 })();
+
+// すべての外部CTAリンクは、自社のトラッキング経由に統一する
+// 例: /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
 const trackedHref =
   isExternal && offerId
-    ? isAccesstrade
-      ? href
-      : `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
+    ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
     : href;
 ---
 

@@ -41,24 +41,16 @@ const planHref = item.planUrl || item.officialUrl;
 const bannerHref = item.bannerHref || planHref;
 const stats = reviewStats ?? getReviewStats(reviews);
 
-const isAccesstrade = (href: string) => {
-  if (!(href.startsWith("http://") || href.startsWith("https://"))) return false;
-  try {
-    const u = new URL(href);
-    return u.hostname.endsWith("accesstrade.net");
-  } catch {
-    return false;
-  }
-};
-
 const stripLeadingBullet = (v: unknown): string =>
   String(v ?? "")
     .replace(/^[\s\u3000]+/, "")
     .replace(/^(?:[・•\-–—*]\s*)+/, "")
     .trim();
 
+// すべての外部CTAリンクは自社のトラッキング経由に統一する
+// 例: /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
 const trackHref = (href: string) =>
-  (href.startsWith("http://") || href.startsWith("https://")) && !isAccesstrade(href)
+  href.startsWith("http://") || href.startsWith("https://")
     ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
     : href;
 ---
