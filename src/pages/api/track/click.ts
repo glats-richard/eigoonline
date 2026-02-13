@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import crypto from "node:crypto";
 import { dbEnvError, query } from "../../../lib/db";
+import { getSchoolMergedById } from "../../../lib/schools";
 
 const TRACKING_ENABLED = process.env.EIGOONLINE_TRACKING_ENABLED === "1";
 
@@ -32,9 +33,8 @@ function firstForwardedIp(v: string | null): string | null {
 function randomId(): string {
   // Node 18+ supports randomUUID(); fall back for older runtimes.
   try {
-    // @ts-expect-error runtime check
     if (crypto.randomUUID) return crypto.randomUUID();
-  } catch {}
+  } catch { }
   return crypto.randomBytes(16).toString("hex");
 }
 
@@ -99,7 +99,26 @@ export const GET: APIRoute = async ({ request, url }) => {
   if (toUrl.protocol !== "https:") return badRequest("to must be https");
 
   const allowed = HOSTS_BY_OFFER.get(offerId);
-  if (!allowed || !allowed.has(toUrl.hostname)) return badRequest("to host is not allowed for this offer_id");
+  const isAllowedStatic = allowed && allowed.has(toUrl.hostname);
+  let isAllowedDynamic = false;
+
+  if (!isAllowedStatic) {
+    // Check if the URL matches an override in DB (or current FS content not picked up by glob).
+    // This is slower but necessary for runtime edits via Tracker.
+    const school = await getSchoolMergedById(offerId);
+    if (school) {
+      const candidates = [school.data.officialUrl, school.data.planUrl, school.data.bannerHref].filter(Boolean) as string[];
+      for (const u of candidates) {
+        const parsed = safeParseUrl(u);
+        if (parsed && parsed.hostname === toUrl.hostname) {
+          isAllowedDynamic = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!isAllowedStatic && !isAllowedDynamic) return badRequest("to host is not allowed for this offer_id");
 
   // Tracking disabled: keep navigation working, but don't issue click_id or persist anything.
   if (!TRACKING_ENABLED) {
@@ -160,7 +179,7 @@ export const GET: APIRoute = async ({ request, url }) => {
         return serverError(e2?.message ?? String(e2));
       }
     } else {
-    return serverError(e?.message ?? String(e));
+      return serverError(e?.message ?? String(e));
     }
   }
 

@@ -661,7 +661,7 @@ if (faqItems.length) {
             <div class="mt-6 flex flex-wrap gap-3">
               <a
                 class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                href={school.officialUrl}
+                href={`/api/track/click?offer_id=${schoolId}&to=${encodeURIComponent(school.officialUrl ?? "")}`}
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
                 referrerpolicy="no-referrer"
