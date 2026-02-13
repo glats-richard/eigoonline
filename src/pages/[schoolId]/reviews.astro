@@ -53,6 +53,7 @@ let dbApprovedReviews: DbApprovedReviewRow[] = [];
 try {
   const res = await query<DbApprovedReviewRow>(
     `
+    select
       id,
       created_at,
       featured_rank,
