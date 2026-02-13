@@ -11,20 +11,29 @@ const schoolsList = schools
 
 const submitted = Astro.url.searchParams.get("submitted") === "true";
 const error = Astro.url.searchParams.get("error")?.trim() || "";
-const preselectedSchoolId = Astro.url.searchParams.get("school_id")?.trim() || "";
+const preselectedSchoolId =
+  Astro.url.searchParams.get("school_id")?.trim() || "";
 const RATING_VALUES = [1, 2, 3, 4, 5];
 const currentYear = new Date().getFullYear();
-const BIRTH_YEARS = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => currentYear - i);
+const BIRTH_YEARS = Array.from(
+  { length: currentYear - 1900 + 1 },
+  (_, i) => currentYear - i
+);
 
 const recaptchaSiteKey =
-  (typeof process !== "undefined" && process.env && process.env.RECAPTCHA_SITE_KEY) ||
+  (typeof process !== "undefined" &&
+    process.env &&
+    process.env.RECAPTCHA_SITE_KEY) ||
   ((import.meta as any).env?.RECAPTCHA_SITE_KEY as string | undefined) ||
   "";
-const enableRecaptcha = Boolean(recaptchaSiteKey);
+const enableRecaptcha = false; // Boolean(recaptchaSiteKey);
 const recaptchaAction = "review_submit";
 ---
 
-<Layout title="体験談を投稿" description="オンライン英会話サービスの体験談を投稿できます">
+<Layout
+  title="体験談を投稿"
+  description="オンライン英会話サービスの体験談を投稿できます"
+>
   <main class="mx-auto w-full max-w-3xl px-4 pb-14 pt-8">
     <div class="mb-8">
       <div class="flex flex-wrap items-end justify-between gap-4">
@@ -43,306 +52,370 @@ const recaptchaAction = "review_submit";
       </div>
     </div>
 
-    {submitted ? (
-      <div class="rounded-2xl border border-green-200 bg-green-50 p-6 text-center">
-        <div class="text-lg font-extrabold text-green-900">投稿ありがとうございます</div>
-        <p class="mt-2 text-sm text-green-700">
-          体験談を送信しました。管理者が確認後、承認されるとサイトに反映されます。
-        </p>
-        <a
-          href="/review/submit"
-          class="mt-4 inline-block rounded-xl bg-green-600 px-6 py-2 text-sm font-extrabold text-white hover:bg-green-700"
-        >
-          もう1件投稿する
-        </a>
-      </div>
-    ) : (
-      <>
-        {error ? (
-          <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5">
-            <div class="text-sm font-extrabold text-rose-900">送信に失敗しました</div>
-            <p class="mt-2 text-sm font-semibold text-rose-800">
-              {error === "recaptcha"
-                ? "スパム対策の確認に失敗しました。しばらく待って再度お試しください（広告ブロッカー等の影響で失敗する場合があります）。"
-                : "入力内容を確認して、もう一度お試しください。"}
-            </p>
+    {
+      submitted ? (
+        <div class="rounded-2xl border border-green-200 bg-green-50 p-6 text-center">
+          <div class="text-lg font-extrabold text-green-900">
+            投稿ありがとうございます
           </div>
-        ) : null}
-
-        {enableRecaptcha ? (
-          <script src={`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(recaptchaSiteKey)}`} async defer></script>
-        ) : null}
-
-        <form id="review-submit-form" method="post" action="/api/review/submit" class="space-y-6">
-          <input type="hidden" name="recaptcha_token" value="" />
-          <input type="hidden" name="recaptcha_action" value={recaptchaAction} />
-
-        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <label class="block">
-            <div class="text-sm font-extrabold text-zinc-700">サービス <span class="text-rose-600">*</span></div>
-            <select
-              name="school_id"
-              required
-              class="mt-2 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-            >
-              <option value="">選択してください</option>
-              {schoolsList.map((s) => (
-                <option value={s.id} selected={preselectedSchoolId === s.id}>{s.name}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div class="text-sm font-extrabold text-zinc-700 mb-4">評価 <span class="text-rose-600">*</span></div>
-          <div class="space-y-5">
-            <fieldset class="block">
-              <legend class="text-xs font-semibold text-zinc-600 mb-2">総合評価</legend>
-              <div class="grid grid-cols-5 gap-2">
-                {RATING_VALUES.map((n) => (
-                  <label class="block">
-                    <input
-                      type="radio"
-                      name="overall_rating"
-                      value={String(n)}
-                      required={n === 1}
-                      class="peer sr-only"
-                    />
-                    <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
-                      {n}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <div class="mt-2 flex justify-between text-[11px] font-semibold text-zinc-500">
-                <span>低い</span>
-                <span>高い</span>
-              </div>
-            </fieldset>
-
-            <fieldset class="block">
-              <legend class="text-xs font-semibold text-zinc-600 mb-2">講師の質</legend>
-              <div class="grid grid-cols-5 gap-2">
-                {RATING_VALUES.map((n) => (
-                  <label class="block">
-                    <input
-                      type="radio"
-                      name="teacher_quality"
-                      value={String(n)}
-                      required={n === 1}
-                      class="peer sr-only"
-                    />
-                    <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
-                      {n}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset class="block">
-              <legend class="text-xs font-semibold text-zinc-600 mb-2">教材の質</legend>
-              <div class="grid grid-cols-5 gap-2">
-                {RATING_VALUES.map((n) => (
-                  <label class="block">
-                    <input
-                      type="radio"
-                      name="material_quality"
-                      value={String(n)}
-                      required={n === 1}
-                      class="peer sr-only"
-                    />
-                    <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
-                      {n}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset class="block">
-              <legend class="text-xs font-semibold text-zinc-600 mb-2">通信の質</legend>
-              <div class="grid grid-cols-5 gap-2">
-                {RATING_VALUES.map((n) => (
-                  <label class="block">
-                    <input
-                      type="radio"
-                      name="connection_quality"
-                      value={String(n)}
-                      required={n === 1}
-                      class="peer sr-only"
-                    />
-                    <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
-                      {n}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset class="block">
-              <legend class="text-xs font-semibold text-zinc-600 mb-2">安さ</legend>
-              <div class="grid grid-cols-5 gap-2">
-                {RATING_VALUES.map((n) => (
-                  <label class="block">
-                    <input
-                      type="radio"
-                      name="price_rating"
-                      value={String(n)}
-                      required={n === 1}
-                      class="peer sr-only"
-                    />
-                    <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
-                      {n}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset class="block">
-              <legend class="text-xs font-semibold text-zinc-600 mb-2">満足度</legend>
-              <div class="grid grid-cols-5 gap-2">
-                {RATING_VALUES.map((n) => (
-                  <label class="block">
-                    <input
-                      type="radio"
-                      name="satisfaction_rating"
-                      value={String(n)}
-                      required={n === 1}
-                      class="peer sr-only"
-                    />
-                    <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
-                      {n}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <label class="block">
-            <div class="text-sm font-extrabold text-zinc-700 mb-2">
-              体験談・口コミ <span class="text-rose-600">*</span>
-            </div>
-            <textarea
-              name="body"
-              required
-              minlength="10"
-              maxlength="300"
-              rows="6"
-              placeholder="サービスの体験談や口コミを記入してください（10文字以上300文字以内）"
-              class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-            ></textarea>
-            <div class="mt-1 text-xs text-zinc-500">10文字以上300文字以内で入力してください</div>
-          </label>
-          
-          <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <div class="text-xs font-extrabold text-blue-900 mb-2">より良いレビューを書くコツ</div>
-            <ul class="space-y-2 text-xs text-blue-800">
-              <li class="flex items-start gap-2">
-                <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
-                <span><strong>具体的なキーワード</strong>を含める（例: 初心者、ビジネス、TOEIC、発音、文法など）</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
-                <span><strong>原因と結果</strong>をセットで書く（例: 「言葉に詰まった時、講師が待ってくれたので、焦らず話せた」）</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
-                <span><strong>評価と本文の整合性</strong>を保つ（★5なら本文もポジティブに、★1なら改善点を具体的に）</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <label class="block">
-            <div class="text-sm font-extrabold text-zinc-700 mb-2">メールアドレス <span class="text-rose-600">*</span></div>
-            <input
-              type="email"
-              name="email"
-              required
-              maxlength="255"
-              placeholder="example@email.com"
-              class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-            />
-            <div class="mt-1 text-xs text-zinc-500">確認のためメールアドレスを入力してください</div>
-          </label>
-        </div>
-
-        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <label class="block">
-            <div class="text-sm font-extrabold text-zinc-700 mb-2">
-              継続月数（目安） <span class="text-rose-600">*</span>
-            </div>
-            <select
-              name="duration_months"
-              required
-              class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-            >
-              <option value="">選択してください</option>
-              <option value="1">1ヶ月</option>
-              <option value="3">3ヶ月</option>
-              <option value="6">6ヶ月</option>
-              <option value="12">12ヶ月</option>
-              <option value="24">24ヶ月</option>
-              <option value="36">36ヶ月以上</option>
-            </select>
-            <div class="mt-1 text-xs text-zinc-500">だいたいの継続期間でOKです</div>
-          </label>
-        </div>
-
-        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div class="text-sm font-extrabold text-zinc-700 mb-2">
-            誕生年月 <span class="text-rose-600">*</span>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="block">
-              <div class="text-xs font-semibold text-zinc-600 mb-1">誕生年</div>
-              <select
-                name="birth_year"
-                required
-                class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-              >
-                <option value="">年</option>
-                {BIRTH_YEARS.map((y) => (
-                  <option value={String(y)}>{y}年</option>
-                ))}
-              </select>
-            </label>
-            <label class="block">
-              <div class="text-xs font-semibold text-zinc-600 mb-1">誕生月</div>
-              <select
-                name="birth_month"
-                required
-                class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
-              >
-                <option value="">月</option>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option value={String(m)}>{m}月</option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-3">
-          <button
-            type="submit"
-            id="review-submit-button"
-            class="btn-brand inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          <p class="mt-2 text-sm text-green-700">
+            体験談を送信しました。管理者が確認後、承認されるとサイトに反映されます。
+          </p>
+          <a
+            href="/review/submit"
+            class="mt-4 inline-block rounded-xl bg-green-600 px-6 py-2 text-sm font-extrabold text-white hover:bg-green-700"
           >
-            投稿する
-          </button>
+            もう1件投稿する
+          </a>
         </div>
-        </form>
+      ) : (
+        <>
+          {error ? (
+            <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5">
+              <div class="text-sm font-extrabold text-rose-900">
+                送信に失敗しました
+              </div>
+              <p class="mt-2 text-sm font-semibold text-rose-800">
+                {error === "recaptcha"
+                  ? "スパム対策の確認に失敗しました。しばらく待って再度お試しください（広告ブロッカー等の影響で失敗する場合があります）。"
+                  : "入力内容を確認して、もう一度お試しください。"}
+              </p>
+            </div>
+          ) : null}
 
-        {enableRecaptcha ? (
-          <script is:inline>
-            {String.raw`(function () {
+          {enableRecaptcha ? (
+            <script
+              src={`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(
+                recaptchaSiteKey
+              )}`}
+              async
+              defer
+            />
+          ) : null}
+
+          <form
+            id="review-submit-form"
+            method="post"
+            action="/api/review/submit"
+            class="space-y-6"
+          >
+            <input type="hidden" name="recaptcha_token" value="" />
+            <input
+              type="hidden"
+              name="recaptcha_action"
+              value={recaptchaAction}
+            />
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <label class="block">
+                <div class="text-sm font-extrabold text-zinc-700">
+                  サービス <span class="text-rose-600">*</span>
+                </div>
+                <select
+                  name="school_id"
+                  required
+                  class="mt-2 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                >
+                  <option value="">選択してください</option>
+                  {schoolsList.map((s) => (
+                    <option
+                      value={s.id}
+                      selected={preselectedSchoolId === s.id}
+                    >
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div class="text-sm font-extrabold text-zinc-700 mb-4">
+                評価 <span class="text-rose-600">*</span>
+              </div>
+              <div class="space-y-5">
+                <fieldset class="block">
+                  <legend class="text-xs font-semibold text-zinc-600 mb-2">
+                    総合評価
+                  </legend>
+                  <div class="grid grid-cols-5 gap-2">
+                    {RATING_VALUES.map((n) => (
+                      <label class="block">
+                        <input
+                          type="radio"
+                          name="overall_rating"
+                          value={String(n)}
+                          required={n === 1}
+                          class="peer sr-only"
+                        />
+                        <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
+                          {n}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <div class="mt-2 flex justify-between text-[11px] font-semibold text-zinc-500">
+                    <span>低い</span>
+                    <span>高い</span>
+                  </div>
+                </fieldset>
+
+                <fieldset class="block">
+                  <legend class="text-xs font-semibold text-zinc-600 mb-2">
+                    講師の質
+                  </legend>
+                  <div class="grid grid-cols-5 gap-2">
+                    {RATING_VALUES.map((n) => (
+                      <label class="block">
+                        <input
+                          type="radio"
+                          name="teacher_quality"
+                          value={String(n)}
+                          required={n === 1}
+                          class="peer sr-only"
+                        />
+                        <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
+                          {n}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="block">
+                  <legend class="text-xs font-semibold text-zinc-600 mb-2">
+                    教材の質
+                  </legend>
+                  <div class="grid grid-cols-5 gap-2">
+                    {RATING_VALUES.map((n) => (
+                      <label class="block">
+                        <input
+                          type="radio"
+                          name="material_quality"
+                          value={String(n)}
+                          required={n === 1}
+                          class="peer sr-only"
+                        />
+                        <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
+                          {n}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="block">
+                  <legend class="text-xs font-semibold text-zinc-600 mb-2">
+                    通信の質
+                  </legend>
+                  <div class="grid grid-cols-5 gap-2">
+                    {RATING_VALUES.map((n) => (
+                      <label class="block">
+                        <input
+                          type="radio"
+                          name="connection_quality"
+                          value={String(n)}
+                          required={n === 1}
+                          class="peer sr-only"
+                        />
+                        <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
+                          {n}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="block">
+                  <legend class="text-xs font-semibold text-zinc-600 mb-2">
+                    安さ
+                  </legend>
+                  <div class="grid grid-cols-5 gap-2">
+                    {RATING_VALUES.map((n) => (
+                      <label class="block">
+                        <input
+                          type="radio"
+                          name="price_rating"
+                          value={String(n)}
+                          required={n === 1}
+                          class="peer sr-only"
+                        />
+                        <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
+                          {n}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="block">
+                  <legend class="text-xs font-semibold text-zinc-600 mb-2">
+                    満足度
+                  </legend>
+                  <div class="grid grid-cols-5 gap-2">
+                    {RATING_VALUES.map((n) => (
+                      <label class="block">
+                        <input
+                          type="radio"
+                          name="satisfaction_rating"
+                          value={String(n)}
+                          required={n === 1}
+                          class="peer sr-only"
+                        />
+                        <span class="flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-base font-extrabold text-zinc-900 shadow-sm transition peer-checked:border-[color:var(--brand-link)] peer-checked:bg-[color:var(--brand-link)] peer-checked:text-white">
+                          {n}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <label class="block">
+                <div class="text-sm font-extrabold text-zinc-700 mb-2">
+                  体験談・口コミ <span class="text-rose-600">*</span>
+                </div>
+                <textarea
+                  name="body"
+                  required
+                  minlength="10"
+                  maxlength="300"
+                  rows="6"
+                  placeholder="サービスの体験談や口コミを記入してください（10文字以上300文字以内）"
+                  class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                />
+                <div class="mt-1 text-xs text-zinc-500">
+                  10文字以上300文字以内で入力してください
+                </div>
+              </label>
+
+              <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <div class="text-xs font-extrabold text-blue-900 mb-2">
+                  より良いレビューを書くコツ
+                </div>
+                <ul class="space-y-2 text-xs text-blue-800">
+                  <li class="flex items-start gap-2">
+                    <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
+                    <span>
+                      <strong>具体的なキーワード</strong>を含める（例:
+                      初心者、ビジネス、TOEIC、発音、文法など）
+                    </span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
+                    <span>
+                      <strong>原因と結果</strong>をセットで書く（例:
+                      「言葉に詰まった時、講師が待ってくれたので、焦らず話せた」）
+                    </span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="mt-0.5 shrink-0 font-extrabold">✓</span>
+                    <span>
+                      <strong>評価と本文の整合性</strong>
+                      を保つ（★5なら本文もポジティブに、★1なら改善点を具体的に）
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <label class="block">
+                <div class="text-sm font-extrabold text-zinc-700 mb-2">
+                  メールアドレス <span class="text-rose-600">*</span>
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  maxlength="255"
+                  placeholder="example@email.com"
+                  class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                />
+                <div class="mt-1 text-xs text-zinc-500">
+                  確認のためメールアドレスを入力してください
+                </div>
+              </label>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <label class="block">
+                <div class="text-sm font-extrabold text-zinc-700 mb-2">
+                  継続月数（目安） <span class="text-rose-600">*</span>
+                </div>
+                <select
+                  name="duration_months"
+                  required
+                  class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                >
+                  <option value="">選択してください</option>
+                  <option value="1">1ヶ月</option>
+                  <option value="3">3ヶ月</option>
+                  <option value="6">6ヶ月</option>
+                  <option value="12">12ヶ月</option>
+                  <option value="24">24ヶ月</option>
+                  <option value="36">36ヶ月以上</option>
+                </select>
+                <div class="mt-1 text-xs text-zinc-500">
+                  だいたいの継続期間でOKです
+                </div>
+              </label>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div class="text-sm font-extrabold text-zinc-700 mb-2">
+                誕生年月 <span class="text-rose-600">*</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="block">
+                  <div class="text-xs font-semibold text-zinc-600 mb-1">
+                    誕生年
+                  </div>
+                  <select
+                    name="birth_year"
+                    required
+                    class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                  >
+                    <option value="">年</option>
+                    {BIRTH_YEARS.map((y) => (
+                      <option value={String(y)}>{y}年</option>
+                    ))}
+                  </select>
+                </label>
+                <label class="block">
+                  <div class="text-xs font-semibold text-zinc-600 mb-1">
+                    誕生月
+                  </div>
+                  <select
+                    name="birth_month"
+                    required
+                    class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                  >
+                    <option value="">月</option>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                      <option value={String(m)}>{m}月</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button
+                type="submit"
+                id="review-submit-button"
+                class="btn-brand inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                投稿する
+              </button>
+            </div>
+          </form>
+
+          {enableRecaptcha ? (
+            <script is:inline>
+              {String.raw`(function () {
   var siteKey = ${JSON.stringify(recaptchaSiteKey)};
   var action = ${JSON.stringify(recaptchaAction)};
   var form = document.getElementById("review-submit-form");
@@ -396,9 +469,10 @@ const recaptchaAction = "review_submit";
     }
   });
 })();`}
-          </script>
-        ) : null}
-      </>
-    )}
+            </script>
+          ) : null}
+        </>
+      )
+    }
   </main>
 </Layout>

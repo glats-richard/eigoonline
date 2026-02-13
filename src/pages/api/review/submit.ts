@@ -73,9 +73,12 @@ async function verifyRecaptchaV3(opts: { token: string; action: string; ip: stri
   const siteKey = readRecaptchaSiteKey();
   // Require both site+secret keys to be configured.
   // If only one side is set, skip verification to avoid blocking submissions.
-  if (!secret || !siteKey) {
-    return { skipped: true as const };
-  }
+  // if (!secret || !siteKey) {
+  //   return { skipped: true as const };
+  // }
+
+  // Create override to disable reCAPTCHA
+  return { skipped: true as const };
 
   const minScore = readRecaptchaMinScore();
   if (!opts.token) {
