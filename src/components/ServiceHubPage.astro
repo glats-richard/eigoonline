@@ -240,7 +240,7 @@ const staticLatest: DisplayReview[] = staticReviews.map((r) => ({
 
 // Prefer DB latest; if less than limit, fill with static reviews
 const displayLatest: DisplayReview[] = dbLatest.length
-  ? [...dbLatest, ...staticLatest].slice(0, LATEST_REVIEW_LIMIT)
+  ? dbLatest.slice(0, LATEST_REVIEW_LIMIT)
   : staticLatest.slice(0, LATEST_REVIEW_LIMIT);
 
 // Aggregate rating variables (designed to be dynamically fed)
