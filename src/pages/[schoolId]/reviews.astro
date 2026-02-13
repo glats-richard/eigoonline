@@ -350,10 +350,9 @@ const formatJpDate = (isoLike: string) => {
             <div class="mt-5 overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
               <table
                 class="w-full table-fixed border-separate border-spacing-0"
-                style="min-width:560px"
+                style="min-width:420px"
               >
                 <colgroup>
-                  <col style="width:140px" />
                   <col style="width:140px" />
                   <col style="width:140px" />
                   <col style="width:140px" />
@@ -365,9 +364,6 @@ const formatJpDate = (isoLike: string) => {
                     </th>
                     <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
                       評価
-                    </th>
-                    <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
-                      口コミ数
                     </th>
                     <th class="bg-zinc-100 px-4 py-3 text-sm font-extrabold text-zinc-700">
                       対象
@@ -384,9 +380,6 @@ const formatJpDate = (isoLike: string) => {
                         ? `${detailed.teacherQualityAvg} / 5`
                         : "—"}
                     </td>
-                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                      {detailed.count ? `${detailed.count}件` : "—"}
-                    </td>
                     <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
                       ユーザー投稿
                     </td>
@@ -399,9 +392,6 @@ const formatJpDate = (isoLike: string) => {
                       {detailed.materialQualityAvg
                         ? `${detailed.materialQualityAvg} / 5`
                         : "—"}
-                    </td>
-                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                      {detailed.count ? `${detailed.count}件` : "—"}
                     </td>
                     <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
                       ユーザー投稿
@@ -416,9 +406,6 @@ const formatJpDate = (isoLike: string) => {
                         ? `${detailed.connectionQualityAvg} / 5`
                         : "—"}
                     </td>
-                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                      {detailed.count ? `${detailed.count}件` : "—"}
-                    </td>
                     <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
                       ユーザー投稿
                     </td>
@@ -432,9 +419,6 @@ const formatJpDate = (isoLike: string) => {
                         ? `${detailed.priceRatingAvg} / 5`
                         : "—"}
                     </td>
-                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                      {detailed.count ? `${detailed.count}件` : "—"}
-                    </td>
                     <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
                       ユーザー投稿
                     </td>
@@ -447,9 +431,6 @@ const formatJpDate = (isoLike: string) => {
                       {detailed.satisfactionRatingAvg
                         ? `${detailed.satisfactionRatingAvg} / 5`
                         : "—"}
-                    </td>
-                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
-                      {detailed.count ? `${detailed.count}件` : "—"}
                     </td>
                     <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
                       ユーザー投稿
