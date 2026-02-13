@@ -3,7 +3,29 @@ type Banner = { href: string; image: string; alt: string; label?: string };
 type Props = { heading?: string; items: Banner[] };
 
 const { heading = "バナー", items } = Astro.props satisfies Props;
-const isExternal = (href: string) => /^https?:\/\//.test(href);
+
+// Wrap all external CTA links so that redirects always go through
+// our tracking endpoint, e.g.
+// /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
+const withTracking = (href: string) => {
+  // Already a tracking URL → そのまま使う
+  if (href.startsWith("/api/track/click")) return href;
+
+  // 外部リンクはすべて tracking 経由にする
+  if (/^https?:\/\//.test(href)) {
+    // 必要に応じてここで offer_id を振り分けられる
+    const offerId =
+      href.includes("kimini.online") || href.includes("h.accesstrade.net") ? "kimini" : "external";
+
+    return `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`;
+  }
+
+  // 相対パスなどはそのまま
+  return href;
+};
+
+const isExternal = (href: string) =>
+  /^https?:\/\//.test(href) || href.startsWith("/api/track/click");
 ---
 
 <section class="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
@@ -12,7 +34,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
     <div class="grid gap-3">
       {items.map((b) => (
         <a
-          href={b.href}
+          href={withTracking(b.href)}
           target={isExternal(b.href) ? "_blank" : undefined}
           rel={isExternal(b.href) ? "nofollow sponsored noopener noreferrer" : undefined}
           referrerpolicy={isExternal(b.href) ? "no-referrer" : undefined}
