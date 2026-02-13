@@ -136,7 +136,7 @@ let dbErr: string | null = null;
 
 try {
   const statsRes = await query<{ count: number; avg: number | null }>(
-    "select count(*)::bigint as count, avg(overall_rating)::numeric as avg from reviews where status = 'approved' and featured_rank is not null and school_id = $1 and overall_rating is not null",
+    "select count(*)::bigint as count, avg(overall_rating)::numeric as avg from reviews where status = 'approved' and school_id = $1 and overall_rating is not null",
     [schoolId],
   );
   dbCount = statsRes.rows?.[0]?.count ?? 0;
