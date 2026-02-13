@@ -123,6 +123,7 @@ export const POST: APIRoute = async ({ request }) => {
   const points = toArrayFromTextarea(patch.points);
   const recommendedFor = toArrayFromTextarea(patch.recommendedFor);
   const uniquenessBullets = toArrayFromTextarea(patch.uniquenessBullets);
+  const methodology = toArrayFromTextarea(patch.methodology);
   let introSections: any[] | undefined = undefined;
   let prSections: any[] | undefined = undefined;
   let introPlacement: "section" | "hero" | null | undefined = undefined;
@@ -164,6 +165,7 @@ export const POST: APIRoute = async ({ request }) => {
     features,
     points,
     recommendedFor,
+    methodology,
     uniquenessTitle: toStringOrNull(patch.uniquenessTitle),
     uniquenessBullets,
     tagsSectionTitle: toStringOrNull(patch.tagsSectionTitle),
