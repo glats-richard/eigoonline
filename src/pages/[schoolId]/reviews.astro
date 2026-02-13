@@ -422,6 +422,38 @@ const formatJpDate = (isoLike: string) => {
                       ユーザー投稿
                     </td>
                   </tr>
+                  <tr>
+                    <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      料金の安さ
+                    </th>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.priceRatingAvg
+                        ? `${detailed.priceRatingAvg} / 5`
+                        : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.count ? `${detailed.count}件` : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
+                      ユーザー投稿
+                    </td>
+                  </tr>
+                  <tr>
+                    <th class="border-t border-zinc-200 bg-white px-4 py-3 text-sm font-extrabold text-zinc-700">
+                      満足度
+                    </th>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.satisfactionRatingAvg
+                        ? `${detailed.satisfactionRatingAvg} / 5`
+                        : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-900">
+                      {detailed.count ? `${detailed.count}件` : "—"}
+                    </td>
+                    <td class="border-t border-zinc-200 px-4 py-3 text-sm text-zinc-700">
+                      ユーザー投稿
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -544,28 +576,7 @@ const formatJpDate = (isoLike: string) => {
             </div>
           </div>
 
-          <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h3 class="text-sm font-extrabold text-zinc-900 mb-4">評価詳細（平均）</h3>
-            <div class="space-y-3">
-              {[
-                { label: "講師の質", value: detailed.teacherQualityAvg, count: detailed.count },
-                { label: "教材の質", value: detailed.materialQualityAvg, count: detailed.count },
-                { label: "通信の質", value: detailed.connectionQualityAvg, count: detailed.count },
-                { label: "料金の安さ", value: detailed.priceRatingAvg, count: detailed.count },
-                { label: "満足度", value: detailed.satisfactionRatingAvg, count: detailed.count },
-              ].map((item) => (
-                <div class="flex items-center justify-between text-sm">
-                  <div class="font-bold text-zinc-600">{item.label}</div>
-                  <div class="flex items-center gap-2">
-                    <StarRating value={item.value} size={14} />
-                    <span class="font-bold text-zinc-900 w-12 text-right">
-                      {item.value ? item.value.toFixed(1) : "-"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+
         </section>
 
         {/* Comparison Script */}
