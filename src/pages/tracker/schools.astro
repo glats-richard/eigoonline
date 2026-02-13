@@ -127,6 +127,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
             <col style="width:320px" />
             <col style="width:320px" />
             <col style="width:360px" />
+            <col style="width:360px" />
             <col style="width:520px" />
             <col style="width:520px" />
             <col style="width:520px" />
@@ -153,6 +154,7 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <th class="border-b border-zinc-200 px-3 py-2">ポイント（points, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">おすすめ（recommendedFor, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">編集コメント（editorialComments, 改行）</th>
+              <th class="border-b border-zinc-200 px-3 py-2">学習が続く理由（methodology, 改行）</th>
               <th class="border-b border-zinc-200 px-3 py-2">独自性（title / bullets）</th>
               <th class="border-b border-zinc-200 px-3 py-2">セクション見出し（任意）</th>
               <th class="border-b border-zinc-200 px-3 py-2">紹介（introSections, JSON）</th>
@@ -312,6 +314,9 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">
                     <textarea data-field="editorialComments" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1" placeholder="編集コメント（editorialComments, 改行）">{joinLines(d.editorialComments)}</textarea>
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <textarea data-field="methodology" data-school-id={id} class="h-24 w-full rounded border border-zinc-200 px-2 py-1">{joinLines(d.methodology)}</textarea>
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">
                     <div class="grid gap-2">

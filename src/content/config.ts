@@ -146,6 +146,7 @@ const schools = defineCollection({
 		basicDataSectionTitle: z.string().nullable().optional(),
 		methodologySectionTitle: z.string().nullable().optional(),
 		methodologySectionSubtitle: z.string().nullable().optional(),
+		methodology: z.array(z.string()).default([]),
 		featureSectionTitle: z.string().nullable().optional(),
 		reviewsSectionTitle: z.string().nullable().optional(),
 		reviewsSectionSubtitle: z.string().nullable().optional(),

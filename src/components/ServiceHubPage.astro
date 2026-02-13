@@ -370,6 +370,20 @@ function minYenFromPriceText(v: unknown): number | null {
 
 const minPriceYen = minYenFromPriceText(school?.priceText);
 
+function getYoutubeId(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname === "youtu.be") return u.pathname.slice(1);
+    if (u.hostname.includes("youtube.com")) {
+      return u.searchParams.get("v") || u.pathname.split("/").pop() || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 type PrMedia = { src: string; alt?: string | null; width?: number | null; height?: number | null };
 type PrYoutube = { youtube: string; title?: string | null };
 type PrSection = {
@@ -417,8 +431,10 @@ const heroDescription =
   (introHeroText || null) ??
   school?.summary ??
   "オンライン英会話の料金・特徴・口コミをまとめています。";
+const methodologyRaw = school?.methodology?.length ? school.methodology : null;
 const methodology =
-  schoolId === "kimini"
+  methodologyRaw ??
+  (schoolId === "kimini"
     ? [
         "Kimini英会話は教材と学習ステップがコース化されているため、学習者が「次に何をやるか」で迷いにくいです。",
         "Kimini英会話は予習→レッスン→復習の学習サイクルを回しやすく、復習量を確保しやすいです。",
@@ -427,7 +443,7 @@ const methodology =
     : [
         `${school?.name ?? "本サービス"}は教材・講師・料金のバランスを見ながら学習を継続しやすいです。`,
         `${school?.name ?? "本サービス"}は無料体験と口コミを先に確認できるため、ミスマッチを減らしやすいです。`,
-      ];
+      ]);
 
 const faqItems: { q: string; a: string }[] =
   schoolId === "kimini"
@@ -845,11 +861,12 @@ if (faqItems.length) {
                     {isYoutube ? (
                       <div class="w-full md:w-[280px] md:shrink-0">
                         <iframe
-                          src={`https://www.youtube.com/embed/${(img as PrYoutube).youtube.split("/").pop()}`}
+                          src={`https://www.youtube.com/embed/${getYoutubeId((img as PrYoutube).youtube)}?rel=0&playsinline=1`}
                           title={(img as PrYoutube).title ?? "YouTube video"}
                           class="aspect-video w-full rounded-lg shadow-sm"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowfullscreen
+                          loading="lazy"
                         ></iframe>
                       </div>
                     ) : hasImg ? (
