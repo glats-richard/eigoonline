@@ -461,21 +461,13 @@ if (school) {
   const offerUrl = school.planUrl || school.officialUrl || pageUrl;
 
   const service: any = {
-    "@type": "Service",
-    "@id": `${pageUrl}#service`,
+    // Review Snippet 対象の type に合わせる（Service は対象外になりやすい）
+    "@type": "Product",
+    "@id": `${pageUrl}#product`,
     name: school.name,
     url: pageUrl,
     description,
-    serviceType: "オンライン英会話",
     category: "Education",
-    areaServed: { "@type": "Country", name: "Japan" },
-    inLanguage: "ja-JP",
-    provider: {
-      "@type": "Organization",
-      name: school.name,
-      url: school.officialUrl || pageUrl,
-    },
-    isPartOf: { "@id": `${orgUrl}#website` },
     mainEntityOfPage: { "@id": webpageId },
   };
 

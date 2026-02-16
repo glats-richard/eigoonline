@@ -316,11 +316,11 @@ for (const [schoolId, schoolData] of schoolsById) {
 			}
 		}
 
-		// Create Service with reviews
+		// Create Product with reviews (Review Snippet 対象の type に合わせる)
 		const serviceUrl = new URL(`#school-${schoolId}`, pageUrl).toString();
 		reviewsJsonLd.push({
 			"@context": "https://schema.org",
-			"@type": "Service",
+			"@type": "Product",
 			"@id": serviceUrl,
 			name: schoolData.name,
 			url: schoolData.officialUrl || serviceUrl,
