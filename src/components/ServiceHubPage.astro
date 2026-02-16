@@ -29,8 +29,8 @@ const mainCtaHref =
   !school
     ? ""
     : schoolId === "kimini"
-      ? (school.planUrl || school.officialUrl ?? "")
-      : `/api/track/click?offer_id=${encodeURIComponent(schoolId)}&to=${encodeURIComponent(school.planUrl || school.officialUrl ?? "")}`;
+      ? ((school.planUrl || school.officialUrl) ?? "")
+      : `/api/track/click?offer_id=${encodeURIComponent(schoolId)}&to=${encodeURIComponent((school.planUrl || school.officialUrl) ?? "")}`;
 
 // Overall rank (if present in rankings/overall.json)
 const rankings = await getCollection("rankings");
