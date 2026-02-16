@@ -16,12 +16,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 
+# Install production deps only (keep image smaller)
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+
 # Copy only what we need to run
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/src/content ./src/content
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 4321
 CMD ["node", "./dist/server/entry.mjs"]
