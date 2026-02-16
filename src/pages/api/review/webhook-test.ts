@@ -20,23 +20,22 @@ export const GET: APIRoute = async ({ url }) => {
     });
   }
 
-  const body = new URLSearchParams({
+  const qs = new URLSearchParams({
     source: "eigoonline",
     submitted_at: new Date().toISOString(),
     school_id: "test",
     body: "webhook-test",
   }).toString();
+  const targetUrl = `${WEBHOOK_URL}${WEBHOOK_URL.includes("?") ? "&" : "?"}${qs}`;
 
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), 10000);
   try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: "POST",
+    const res = await fetch(targetUrl, {
+      method: "GET",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "Eigoonline-Review-Webhook/1.0-test",
       },
-      body,
       signal: ac.signal,
     });
     return new Response(
@@ -44,7 +43,7 @@ export const GET: APIRoute = async ({ url }) => {
         ok: res.ok,
         status: res.status,
         statusText: res.statusText,
-        webhookUrl: WEBHOOK_URL,
+        webhookUrl: targetUrl,
       }),
       {
         status: 200,
@@ -56,7 +55,7 @@ export const GET: APIRoute = async ({ url }) => {
       JSON.stringify({
         ok: false,
         error: e?.message ?? String(e),
-        webhookUrl: WEBHOOK_URL,
+        webhookUrl: targetUrl,
       }),
       {
         status: 200,

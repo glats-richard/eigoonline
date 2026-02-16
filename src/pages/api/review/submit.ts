@@ -362,22 +362,21 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const webhookBody = new URLSearchParams(
     Object.entries(webhookPayload).filter(([, v]) => v != null && v !== ""),
   ).toString();
+  const webhookGetUrl = `${webhookUrl}${webhookUrl.includes("?") ? "&" : "?"}${webhookBody}`;
 
   // webhook: 1回目 await、2回目 fire-and-forget で二重送信（届く確率を上げる）
   const webhookOpts = {
-    method: "POST" as const,
+    method: "GET" as const,
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent": "Eigoonline-Review-Webhook/1.0",
     },
-    body: webhookBody,
   };
-  console.log("[review/submit] insert ok, calling webhook", webhookUrl);
+  console.log("[review/submit] insert ok, calling webhook", webhookGetUrl);
   try {
     const ac = new AbortController();
     const t = setTimeout(() => ac.abort(), 10000);
     try {
-      const webhookRes = await fetch(webhookUrl, { ...webhookOpts, signal: ac.signal });
+      const webhookRes = await fetch(webhookGetUrl, { ...webhookOpts, signal: ac.signal });
       if (!webhookRes.ok) {
         console.warn("[review/submit] webhook non-2xx", webhookRes.status, await webhookRes.text().catch(() => ""));
       } else {
@@ -390,7 +389,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     console.warn("[review/submit] webhook failed:", e?.message ?? String(e));
   }
   // 2回目: レスポンス返却後も試行（プラットフォームによってはこちらだけ届く場合あり）
-  fetch(webhookUrl, webhookOpts).catch((e: any) => console.warn("[review/submit] webhook retry failed:", e?.message ?? String(e)));
+  fetch(webhookGetUrl, webhookOpts).catch((e: any) =>
+    console.warn("[review/submit] webhook retry failed:", e?.message ?? String(e)),
+  );
 
   return redirect("/review/submit?submitted=true", 303);
 };
