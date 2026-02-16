@@ -20,10 +20,12 @@ const allBanners = [...bannersTop, ...bannersMid, ...bannersBottom];
 const topBanner = allBanners[0] ? [allBanners[0]] : [];
 const bottomBanners = allBanners.length > 1 ? allBanners.slice(1) : [];
 
-const trackHref = (offerId: string, href: string) =>
-  href.startsWith("http://") || href.startsWith("https://")
-    ? `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`
-    : href;
+// 他サービスは必ずAPI経由。Kiminiだけ直リンク
+const ctaHref = (offerId: string, href: string) => {
+  if (!href.startsWith("http://") && !href.startsWith("https://")) return href;
+  if (offerId === "kimini") return href;
+  return `/api/track/click?offer_id=${encodeURIComponent(offerId)}&to=${encodeURIComponent(href)}`;
+};
 ---
 
 <aside class="space-y-4">
@@ -56,7 +58,7 @@ const trackHref = (offerId: string, href: string) =>
       <div class="mt-4 grid gap-2">
         {popular.map((s) => (
           <a
-            href={trackHref(s.offerId, s.officialUrl)}
+            href={ctaHref(s.offerId, s.officialUrl)}
             target="_blank"
             rel="nofollow sponsored noopener noreferrer"
             referrerpolicy="no-referrer"

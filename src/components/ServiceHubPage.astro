@@ -24,6 +24,14 @@ if (!school) {
   Astro.response.status = 404;
 }
 
+// Kimini はリダイレクトAPIを通さず直接CVへ。それ以外は /api/track/click 経由
+const mainCtaHref =
+  !school
+    ? ""
+    : schoolId === "kimini"
+      ? (school.planUrl || school.officialUrl ?? "")
+      : `/api/track/click?offer_id=${encodeURIComponent(schoolId)}&to=${encodeURIComponent(school.planUrl || school.officialUrl ?? "")}`;
+
 // Overall rank (if present in rankings/overall.json)
 const rankings = await getCollection("rankings");
 const overallRanking = rankings.find((r) => r.data.category === "overall")?.data ?? null;
@@ -664,7 +672,7 @@ if (faqItems.length) {
             <div class="mt-6 flex flex-wrap gap-3">
               <a
                 class="btn-brand inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                href={`/api/track/click?offer_id=${schoolId}&to=${encodeURIComponent(school.officialUrl ?? "")}`}
+                href={mainCtaHref}
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
                 referrerpolicy="no-referrer"
