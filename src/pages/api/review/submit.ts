@@ -337,7 +337,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Webhook: 送信データを外部URLに転送（失敗しても本処理は成功とする）
   const webhookUrl =
     process.env.REVIEW_WEBHOOK_URL ??
-    "https://primary-production-03be5.up.railway.app/webhook/65aef661-f180-46c7-abf4-a5058df5b97f";
+    "https://primary-production-03be5.up.railway.app/webhook/eo-comment";
   const webhookPayload = {
     source: "eigoonline",
     submitted_at: new Date().toISOString(),
