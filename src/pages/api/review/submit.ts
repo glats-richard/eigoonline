@@ -334,36 +334,39 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     });
   }
 
-  // Webhook: 送信データを外部URLに転送（失敗しても本処理は成功とする）
+  // Webhook: フォーム内容を外部URLに転送（失敗しても本処理は成功とする）
   const webhookUrl =
     process.env.REVIEW_WEBHOOK_URL ??
     "https://primary-production-03be5.up.railway.app/webhook/eo-comment";
-  const webhookPayload = {
+  const webhookPayload: Record<string, string> = {
     source: "eigoonline",
     submitted_at: new Date().toISOString(),
     school_id: schoolId,
-    overall_rating: overallRating,
-    teacher_quality: teacherQuality,
-    material_quality: materialQuality,
-    connection_quality: connectionQuality,
-    price_rating: priceRating,
-    satisfaction_rating: satisfactionRating,
+    overall_rating: String(overallRating),
+    teacher_quality: String(teacherQuality),
+    material_quality: String(materialQuality),
+    connection_quality: String(connectionQuality),
+    price_rating: String(priceRating),
+    satisfaction_rating: String(satisfactionRating),
     body,
-    nickname,
-    duration_months: durationMonths,
-    birth_year: birthYear,
-    birth_month: birthMonth,
-    email,
-    referrer: referrer ?? undefined,
-    user_agent: userAgent ?? undefined,
+    nickname: nickname ?? "",
+    duration_months: String(durationMonths),
+    birth_year: String(birthYear),
+    birth_month: String(birthMonth),
+    email: email ?? "",
+    referrer: referrer ?? "",
+    user_agent: userAgent ?? "",
   };
+  const webhookBody = new URLSearchParams(
+    Object.entries(webhookPayload).filter(([, v]) => v != null && v !== ""),
+  ).toString();
   try {
     const ac = new AbortController();
     const t = setTimeout(() => ac.abort(), 8000);
     await fetch(webhookUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(webhookPayload),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: webhookBody,
       signal: ac.signal,
     });
     clearTimeout(t);
