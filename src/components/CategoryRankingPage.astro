@@ -5,6 +5,7 @@ import CompareTable from "./CompareTable.astro";
 import SchoolDetailSection from "./SchoolDetailSection.astro";
 import Sidebar from "./Sidebar.astro";
 import { getReviewStats } from "../utils/reviewStats";
+import { dbEnvError, query } from "../lib/db";
 import { getSchoolsMerged } from "../lib/schools";
 import { getCollection } from "astro:content";
 
@@ -51,8 +52,39 @@ const resolveItems = (items: string[] | undefined) =>
     .filter((x): x is { id: string; data: NonNullable<typeof x.data> } => Boolean(x.data));
 
 const items = resolveItems(ranking?.items);
+
+// DBの承認済み口コミ（全件）も含めた平均・件数を作る（静的 + DB）
+type DbAggRow = { school_id: string; count: number; avg: number | null };
+const dbAggBySchoolId = new Map<string, { count: number; avg: number | null }>();
+if (!dbEnvError && items.length) {
+  try {
+    const ids = items.map((x) => x.id);
+    const res = await query<DbAggRow>(
+      "select school_id, count(*)::int as count, avg(overall_rating)::float as avg from reviews where status = 'approved' and overall_rating is not null and school_id = any($1::text[]) group by school_id",
+      [ids],
+    );
+    for (const r of res.rows ?? []) {
+      const avg = typeof r.avg === "number" && Number.isFinite(r.avg) ? r.avg : null;
+      dbAggBySchoolId.set(r.school_id, { count: Number(r.count) || 0, avg });
+    }
+  } catch {
+    // best-effort: fall back to static only
+  }
+}
+
+const combinedReviewStatsBySchoolId = new Map<string, { count: number; avg: number | null }>();
+for (const { id } of items) {
+  const staticStats = reviewStatsBySchoolId.get(id) ?? { count: 0, avg: null };
+  const dbStats = dbAggBySchoolId.get(id) ?? { count: 0, avg: null };
+  const staticSum = (staticStats.avg ?? 0) * (staticStats.count ?? 0);
+  const dbSum = (dbStats.avg ?? 0) * (dbStats.count ?? 0);
+  const totalCount = (staticStats.count ?? 0) + (dbStats.count ?? 0);
+  const totalAvg = totalCount ? Math.round(((staticSum + dbSum) / totalCount) * 10) / 10 : null;
+  combinedReviewStatsBySchoolId.set(id, { count: totalCount, avg: totalAvg });
+}
+
 const itemsRated = items.map((x) => {
-  const stats = reviewStatsBySchoolId.get(x.id);
+  const stats = combinedReviewStatsBySchoolId.get(x.id);
   const rating = stats?.count ? stats.avg : null;
   return { ...x, data: { ...x.data, rating } };
 });
@@ -120,7 +152,13 @@ const pageDesc =
 
             <div class="mt-4 grid gap-4">
               {itemsRated.slice(0, 8).map((x, idx) => (
-                <RankingListItem item={x.data} offerId={x.id} rank={idx + 1} reviews={reviewsBySchoolId.get(x.id) ?? []} />
+                <RankingListItem
+                  item={x.data}
+                  offerId={x.id}
+                  rank={idx + 1}
+                  reviews={reviewsBySchoolId.get(x.id) ?? []}
+                  reviewStats={combinedReviewStatsBySchoolId.get(x.id) ?? null}
+                />
               ))}
             </div>
           </section>

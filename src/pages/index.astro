@@ -87,7 +87,7 @@ type DbReviewRow = DBReviewRow & {
 let dbReviewsBySchoolId = new Map<string, DbReviewRow[]>();
 try {
 	const dbReviewsWithSchoolId = await query<DbReviewRow>(
-		"select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age, nickname, duration_months from reviews where status = 'approved' and featured_rank is not null"
+		"select school_id, created_at, featured_rank, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, age, nickname, duration_months from reviews where status = 'approved'"
 	);
 	for (const r of dbReviewsWithSchoolId.rows ?? []) {
 		const existing = dbReviewsBySchoolId.get(r.school_id) ?? [];
@@ -125,30 +125,36 @@ for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
 	reviewsBySchoolId.set(schoolId, [...staticItems]);
 }
 for (const [schoolId, dbReviews] of dbReviewsBySchoolId) {
-	const valid = dbReviews
+	const baseValid = dbReviews
 		.filter(
 			(r) =>
-				r.featured_rank !== null &&
 				r.overall_rating !== null &&
 				Number.isFinite(r.overall_rating) &&
 				r.body
 		)
-		.slice()
-		.sort((a, b) => {
-			const at = a.created_at ? new Date(a.created_at).getTime() : 0;
-			const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
-			return bt - at;
-		});
+		.slice();
 
-	if (!valid.length) continue;
+	// Prefer featured reviews when present; otherwise show latest reviews.
+	const featured = baseValid
+		.filter((r) => r.featured_rank !== null)
+		.sort((a, b) => (a.featured_rank ?? 9999) - (b.featured_rank ?? 9999));
 
-	const latest3 = valid.slice(0, 3).map((r) => ({
+	const latest = baseValid.sort((a, b) => {
+		const at = a.created_at ? new Date(a.created_at).getTime() : 0;
+		const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
+		return bt - at;
+	});
+
+	const display = (featured.length ? featured : latest).slice(0, 3).map((r) => ({
 		age: r.nickname || "ユーザー",
 		rating: r.overall_rating!,
 		body: r.body!,
 		studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
 	}));
-	reviewsBySchoolId.set(schoolId, latest3);
+
+	if (display.length) {
+		reviewsBySchoolId.set(schoolId, display);
+	}
 }
 
 // Calculate review stats from ALL reviews (static + ALL approved DB), for rating display.
@@ -162,7 +168,6 @@ for (const [schoolId] of schoolsById) {
 	const dbForStats = dbItems
 		.filter(
 			(r) =>
-				r.featured_rank !== null &&
 				r.overall_rating !== null &&
 				Number.isFinite(r.overall_rating)
 		)
@@ -269,6 +274,7 @@ for (const [schoolId, schoolData] of schoolsById) {
 
 		// Add static reviews
 		for (const review of staticReviews) {
+			if (reviewObjects.length >= 10) break;
 			reviewObjects.push({
 				"@type": "Review",
 				author: {
@@ -287,6 +293,7 @@ for (const [schoolId, schoolData] of schoolsById) {
 
 		// Add DB reviews
 		for (const review of dbReviews) {
+			if (reviewObjects.length >= 10) break;
 			if (
 				review.overall_rating !== null &&
 				Number.isFinite(review.overall_rating) &&
