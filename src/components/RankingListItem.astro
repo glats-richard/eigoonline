@@ -28,6 +28,12 @@ type Props = {
 const { item, offerId, rank, reviews = [], reviewStats = null } = Astro.props satisfies Props;
 const stats = reviewStats ?? getReviewStats(reviews);
 
+const preferWebpForKnownPng = (url: string) => {
+  if (url.endsWith("/kimini_detail_banner.png")) return url.replace(/\.png$/, ".webp");
+  if (url.endsWith("/heroes/kimini_detail_banner.png")) return url.replace(/\.png$/, ".webp");
+  return url;
+};
+
 const stripLeadingBullet = (v: unknown): string =>
   String(v ?? "")
     .replace(/^[\s\u3000]+/, "")
@@ -52,8 +58,10 @@ const highlightText =
       aria-label={`${item.name}の詳細ページへ`}
     >
       <img
-        src={item.heroImageUrl}
+        src={preferWebpForKnownPng(item.heroImageUrl)}
         alt={item.heroImageAlt ?? `${item.name} アイキャッチ`}
+        width="1024"
+        height="565"
         loading="lazy"
         decoding="async"
         class="h-auto w-full object-contain"
@@ -67,6 +75,8 @@ const highlightText =
         <img
           src={item.logoUrl}
           alt={`${item.name} ロゴ`}
+          width="160"
+          height="64"
           loading="lazy"
           decoding="async"
           class="h-12 w-auto max-w-full object-contain"

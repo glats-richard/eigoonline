@@ -426,6 +426,13 @@ const heroDescription =
   (introHeroText || null) ??
   school?.summary ??
   "オンライン英会話の料金・特徴・口コミをまとめています。";
+
+function preferWebpForKnownPng(url: string): string {
+  // LCP対策: 大きいPNGはWebPを優先（同名の .webp を public/ に用意している）
+  if (url.endsWith("/kimini_detail_banner.png")) return url.replace(/\.png$/, ".webp");
+  if (url.endsWith("/heroes/kimini_detail_banner.png")) return url.replace(/\.png$/, ".webp");
+  return url;
+}
 const methodologyRaw = school?.methodology?.length ? school.methodology : null;
 const methodology: string[] =
   (methodologyRaw as string[] | null | undefined) ??
@@ -648,7 +655,7 @@ if (faqItems.length) {
             {school.heroImageUrl ? (
               <div class="h-full overflow-hidden rounded-2xl border border-zinc-200 bg-white">
                 <img
-                  src={school.heroImageUrl}
+                  src={preferWebpForKnownPng(school.heroImageUrl)}
                   alt={school.heroImageAlt ?? ""}
                   loading="eager"
                   decoding="async"
