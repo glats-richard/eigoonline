@@ -56,6 +56,10 @@ const items = resolveItems(ranking?.items);
 // DBの承認済み口コミ（全件）も含めた平均・件数を作る（静的 + DB）
 type DbAggRow = { school_id: string; count: number; avg: number | null };
 const dbAggBySchoolId = new Map<string, { count: number; avg: number | null }>();
+
+// Featured(1-5)のみ、表示用レビューとして取得
+type DbFeaturedRow = { school_id: string; nickname: string | null; overall_rating: number | null; body: string | null };
+const dbFeaturedBySchoolId = new Map<string, { age: string; rating: number; body: string }[]>();
 if (!dbEnvError && items.length) {
   try {
     const ids = items.map((x) => x.id);
@@ -66,6 +70,17 @@ if (!dbEnvError && items.length) {
     for (const r of res.rows ?? []) {
       const avg = typeof r.avg === "number" && Number.isFinite(r.avg) ? r.avg : null;
       dbAggBySchoolId.set(r.school_id, { count: Number(r.count) || 0, avg });
+    }
+
+    const feat = await query<DbFeaturedRow>(
+      "select school_id, nickname, overall_rating, body from reviews where status = 'approved' and featured_rank between 1 and 5 and overall_rating is not null and body is not null and school_id = any($1::text[]) order by school_id asc, featured_rank asc",
+      [ids],
+    );
+    for (const r of feat.rows ?? []) {
+      if (typeof r.overall_rating !== "number" || !Number.isFinite(r.overall_rating) || !r.body) continue;
+      const existing = dbFeaturedBySchoolId.get(r.school_id) ?? [];
+      existing.push({ age: r.nickname || "ユーザー", rating: r.overall_rating, body: r.body });
+      dbFeaturedBySchoolId.set(r.school_id, existing);
     }
   } catch {
     // best-effort: fall back to static only
@@ -150,13 +165,13 @@ const pageDesc =
               </a>
             </div>
 
-            <div class="mt-4 grid gap-4">
+              <div class="mt-4 grid gap-4">
               {itemsRated.slice(0, 8).map((x, idx) => (
                 <RankingListItem
                   item={x.data}
                   offerId={x.id}
                   rank={idx + 1}
-                  reviews={reviewsBySchoolId.get(x.id) ?? []}
+                  reviews={dbFeaturedBySchoolId.get(x.id) ?? reviewsBySchoolId.get(x.id) ?? []}
                   reviewStats={combinedReviewStatsBySchoolId.get(x.id) ?? null}
                 />
               ))}
