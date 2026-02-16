@@ -334,6 +334,44 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     });
   }
 
+  // Webhook: 送信データを外部URLに転送（失敗しても本処理は成功とする）
+  const webhookUrl =
+    process.env.REVIEW_WEBHOOK_URL ??
+    "https://primary-production-03be5.up.railway.app/webhook/65aef661-f180-46c7-abf4-a5058df5b97f";
+  const webhookPayload = {
+    source: "eigoonline",
+    submitted_at: new Date().toISOString(),
+    school_id: schoolId,
+    overall_rating: overallRating,
+    teacher_quality: teacherQuality,
+    material_quality: materialQuality,
+    connection_quality: connectionQuality,
+    price_rating: priceRating,
+    satisfaction_rating: satisfactionRating,
+    body,
+    nickname,
+    duration_months: durationMonths,
+    birth_year: birthYear,
+    birth_month: birthMonth,
+    email,
+    referrer: referrer ?? undefined,
+    user_agent: userAgent ?? undefined,
+  };
+  try {
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort(), 8000);
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(webhookPayload),
+      signal: ac.signal,
+    });
+    clearTimeout(t);
+  } catch (e: any) {
+    // ログのみ。webhook 失敗でユーザーを失敗にしない
+    console.warn("[review/submit] webhook failed:", e?.message ?? String(e));
+  }
+
   // Redirect to success page
   return redirect("/review/submit?submitted=true", 303);
 };
