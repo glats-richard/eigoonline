@@ -119,7 +119,14 @@ const pageDesc =
 
 <Layout title={pageTitle} description={pageDesc} ogImage="/eigoonline_logo.png" headerOverlay>
   <Fragment slot="head">
-    <link rel="preload" as="image" href="/fv_1.webp" fetchpriority="high" />
+    <link
+      rel="preload"
+      as="image"
+      href="/fv_1-640.webp"
+      imagesrcset="/fv_1-640.webp 640w, /fv_1-768.webp 768w, /fv_1.webp 1024w"
+      imagesizes="(max-width: 640px) 100vw, 1024px"
+      fetchpriority="high"
+    />
   </Fragment>
 
   <main class="mx-auto w-full max-w-6xl px-4 pb-10 pt-4 sm:pb-12 sm:pt-6">
@@ -129,7 +136,11 @@ const pageDesc =
           <!-- Hero image -->
           <div class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <picture>
-            <source srcset="/fv_1.webp" type="image/webp" />
+            <source
+              srcset="/fv_1-640.webp 640w, /fv_1-768.webp 768w, /fv_1.webp 1024w"
+              sizes="(max-width: 640px) 100vw, 1024px"
+              type="image/webp"
+            />
             <img
               src="/fv_1.jpg"
               alt="オンライン英会話 おすすめランキング"

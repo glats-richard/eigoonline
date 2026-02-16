@@ -4,6 +4,24 @@ type Props = { heading?: string; items: Banner[] };
 
 const { heading = "バナー", items } = Astro.props satisfies Props;
 
+const isLocal = (src: string) => src.startsWith("/");
+
+const bannerImgAttrs = (src: string) => {
+  // Special-case: provide responsive srcset for our sidebar PR banner (329px wide slot).
+  if (src.startsWith("/banners/") && src.endsWith("-329.webp")) {
+    const src2x = src.replace(/-329\.webp$/i, "-658.webp");
+    return {
+      src,
+      srcset: `${src} 329w, ${src2x} 658w`,
+      sizes: "(min-width: 768px) 329px, 100vw",
+      width: 329,
+      height: 165,
+    } as const;
+  }
+
+  return { src } as const;
+};
+
 // Wrap all external CTA links (except Kimini) so that redirects go through
 // our tracking endpoint, e.g.
 // /api/track/click?offer_id=xxx&to=...
@@ -35,6 +53,9 @@ const isExternal = (href: string) =>
   {items.length ? (
     <div class="grid gap-3">
       {items.map((b) => (
+        (() => {
+          const img = bannerImgAttrs(b.image);
+          return (
         <a
           href={withTracking(b.href)}
           target={isExternal(b.href) ? "_blank" : undefined}
@@ -47,8 +68,20 @@ const isExternal = (href: string) =>
               {b.label}
             </span>
           ) : null}
-          <img src={b.image} alt={b.alt} loading="lazy" decoding="async" class="h-auto w-full object-contain transition group-hover:opacity-95" />
+          <img
+            src={img.src}
+            srcset={(img as any).srcset}
+            sizes={(img as any).sizes}
+            width={(img as any).width}
+            height={(img as any).height}
+            alt={b.alt}
+            loading="lazy"
+            decoding="async"
+            class="h-auto w-full object-contain transition group-hover:opacity-95"
+          />
         </a>
+          );
+        })()
       ))}
     </div>
   ) : (
