@@ -139,6 +139,7 @@ async function verifyRecaptchaV3(opts: { token: string; action: string; ip: stri
 }
 
 export const POST: APIRoute = async ({ request, redirect }) => {
+  console.log("[review/submit] POST received");
   if (dbEnvError) {
     return new Response(JSON.stringify({ ok: false, error: dbEnvError }), {
       status: 500,
@@ -362,32 +363,29 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     Object.entries(webhookPayload).filter(([, v]) => v != null && v !== ""),
   ).toString();
 
-  // 先にリダイレクトを返し、webhook はレスポンス送信後に送る（プラットフォームで処理が打ち切られないよう）
-  const redirectResponse = redirect("/review/submit?submitted=true", 303);
-
-  (async () => {
+  // webhook を await してから redirect（確実に送信するため）
+  console.log("[review/submit] insert ok, calling webhook", webhookUrl);
+  try {
     const ac = new AbortController();
     const t = setTimeout(() => ac.abort(), 15000);
-    try {
-      const webhookRes = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "User-Agent": "Eigoonline-Review-Webhook/1.0",
-        },
-        body: webhookBody,
-        signal: ac.signal,
-      });
-      clearTimeout(t);
-      if (!webhookRes.ok) {
-        console.warn("[review/submit] webhook non-2xx", webhookRes.status, await webhookRes.text().catch(() => ""));
-      } else {
-        console.log("[review/submit] webhook ok", webhookRes.status);
-      }
-    } catch (e: any) {
-      console.warn("[review/submit] webhook failed:", e?.message ?? String(e));
+    const webhookRes = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Eigoonline-Review-Webhook/1.0",
+      },
+      body: webhookBody,
+      signal: ac.signal,
+    });
+    clearTimeout(t);
+    if (!webhookRes.ok) {
+      console.warn("[review/submit] webhook non-2xx", webhookRes.status, await webhookRes.text().catch(() => ""));
+    } else {
+      console.log("[review/submit] webhook ok", webhookRes.status);
     }
-  })();
+  } catch (e: any) {
+    console.warn("[review/submit] webhook failed:", e?.message ?? String(e));
+  }
 
-  return redirectResponse;
+  return redirect("/review/submit?submitted=true", 303);
 };
