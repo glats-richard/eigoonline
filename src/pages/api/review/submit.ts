@@ -361,15 +361,21 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     Object.entries(webhookPayload).filter(([, v]) => v != null && v !== ""),
   ).toString();
   try {
+    console.log("[review/submit] calling webhook", webhookUrl);
     const ac = new AbortController();
     const t = setTimeout(() => ac.abort(), 8000);
-    await fetch(webhookUrl, {
+    const webhookRes = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: webhookBody,
       signal: ac.signal,
     });
     clearTimeout(t);
+    if (!webhookRes.ok) {
+      console.warn("[review/submit] webhook non-2xx", webhookRes.status, await webhookRes.text().catch(() => ""));
+    } else {
+      console.log("[review/submit] webhook ok", webhookRes.status);
+    }
   } catch (e: any) {
     // ログのみ。webhook 失敗でユーザーを失敗にしない
     console.warn("[review/submit] webhook failed:", e?.message ?? String(e));
