@@ -304,14 +304,15 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     });
   }
 
-  // Rate limiting: Check if same IP submitted more than 3 reviews in the last hour
+  // Rate limiting: 同一IPで1時間あたり10件まで
+  const RATE_LIMIT_PER_HOUR = 10;
   try {
     const rateLimitResult = await query<{ count: number }>(
       "select count(*)::bigint as count from reviews where ip_hash = $1 and created_at > now() - interval '1 hour'",
       [ipHash],
     );
     const recentCount = rateLimitResult.rows?.[0]?.count ?? 0;
-    if (recentCount >= 3) {
+    if (recentCount >= RATE_LIMIT_PER_HOUR) {
       return new Response(JSON.stringify({ ok: false, error: "Too many submissions. Please try again later." }), {
         status: 429,
         headers: { "content-type": "application/json" },
