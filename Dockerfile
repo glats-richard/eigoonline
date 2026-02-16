@@ -3,7 +3,7 @@ WORKDIR /app
 
 # Install deps first for better caching
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund && npm cache clean --force
 
 FROM node:20-slim AS builder
 WORKDIR /app
