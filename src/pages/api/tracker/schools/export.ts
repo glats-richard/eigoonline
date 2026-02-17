@@ -41,6 +41,10 @@ export const GET: APIRoute = async () => {
 
         priceText: d.priceText ?? "",
         trialText: d.trialText ?? "",
+        trialMaxDays: d.trialMaxDays ?? "",
+        trialMaxLessons: d.trialMaxLessons ?? "",
+        trialPromoMaxDays: d.trialPromoMaxDays ?? "",
+        trialPromoMaxLessons: d.trialPromoMaxLessons ?? "",
         trialDetailText: d.trialDetailText ?? "",
         benefitText: d.benefitText ?? "",
         hoursText: d.hoursText ?? "",

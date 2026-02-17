@@ -15,9 +15,14 @@ type School = {
   priceText?: string | null;
   hoursText?: string | null;
   trialText?: string | null;
+  trialMaxDays?: number | null;
+	trialMaxLessons?: number | null;
+  trialPromoMaxDays?: number | null;
+  trialPromoMaxLessons?: number | null;
   trialDetailText?: string | null;
   benefitText?: string | null;
   campaignText?: string | null;
+  campaignEndsAt?: string | null;
   points?: string[];
   recommendedFor?: string[];
 };
@@ -86,6 +91,46 @@ const parseMaxLessons = (a: string | null | undefined, b: string | null | undefi
   return Number.isFinite(n) ? n : null;
 };
 
+const parseCampaignEndsAt = (v: string | null | undefined): Date | null => {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  // YYYY-MM-DD -> interpret as end of day in JST.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(`${s}T23:59:59+09:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
+const jstYmd = (d: Date): string => {
+  // "2026-02-17"
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+};
+
+const isCampaignActive = (endsAt: string | null | undefined) => {
+  const d = parseCampaignEndsAt(endsAt);
+  if (!d) return false;
+  return Date.now() <= d.getTime();
+};
+
+const isCampaignLastDay = (endsAt: string | null | undefined) => {
+  if (!isCampaignActive(endsAt)) return false;
+  const s = String(endsAt ?? "").trim();
+  const endsYmd = /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : (() => {
+    const d = parseCampaignEndsAt(s);
+    return d ? jstYmd(d) : "";
+  })();
+  if (!endsYmd) return false;
+  return endsYmd === jstYmd(new Date());
+};
+
 const isTrialBoosted = (benefitText: string | null | undefined, campaignText: string | null | undefined) => {
   const s = `${benefitText ?? ""} ${campaignText ?? ""}`;
   // Only flag when the copy explicitly indicates an increase/extension.
@@ -104,8 +149,15 @@ const stripLeadingBullet = (v: unknown): string =>
     {ranking.items.map((x, idx) => {
       const rank = idx + 1;
       const borderColor = colBorder(rank);
+      const lastDay = isCampaignLastDay(x.data.campaignEndsAt);
       return (
-        <section class="rounded-2xl border-2 bg-white p-4 shadow-sm" style={`border-color:${borderColor}`}>
+        <section
+          class:list={[
+            "rounded-2xl border-2 bg-white p-4 shadow-sm",
+            lastDay ? "ring-2 ring-rose-400 ring-offset-2 ring-offset-white bg-rose-50/30" : "",
+          ]}
+          style={`border-color:${borderColor}`}
+        >
           <div class="flex items-start justify-between gap-3">
             <div class="flex min-w-0 items-start gap-3">
               {rank <= 3 ? (
@@ -142,6 +194,13 @@ const stripLeadingBullet = (v: unknown): string =>
                 >
                   {x.data.name}
                 </a>
+                {lastDay ? (
+                  <div class="mt-1">
+                    <span class="inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-extrabold text-white">
+                      キャンペーン最終日
+                    </span>
+                  </div>
+                ) : null}
                 <div class="mt-2">
                   <StarRating value={x.data.rating ?? null} size={16} />
                 </div>
@@ -257,22 +316,59 @@ const stripLeadingBullet = (v: unknown): string =>
               <div class="text-xs font-extrabold text-zinc-700">無料体験</div>
               <div class="text-sm font-extrabold text-zinc-900">
                 {(() => {
-                  const days = parseMaxDays(x.data.trialText, x.data.trialDetailText);
-                  const lessons = parseMaxLessons(x.data.trialText, x.data.trialDetailText);
-                  const boosted = isTrialBoosted(x.data.benefitText, x.data.campaignText);
+                  const active = isCampaignActive(x.data.campaignEndsAt);
+
+                  const baseDays =
+                    typeof x.data.trialMaxDays === "number" && Number.isFinite(x.data.trialMaxDays)
+                      ? x.data.trialMaxDays
+                      : parseMaxDays(x.data.trialText, x.data.trialDetailText);
+                  const promoDays =
+                    active && typeof x.data.trialPromoMaxDays === "number" && Number.isFinite(x.data.trialPromoMaxDays)
+                      ? x.data.trialPromoMaxDays
+                      : null;
+                  const displayDays = promoDays ?? baseDays;
+
+                  const baseLessons =
+                    typeof x.data.trialMaxLessons === "number" && Number.isFinite(x.data.trialMaxLessons)
+                      ? x.data.trialMaxLessons
+                      : parseMaxLessons(x.data.trialText, x.data.trialDetailText);
+                  const promoLessons =
+                    active && typeof x.data.trialPromoMaxLessons === "number" && Number.isFinite(x.data.trialPromoMaxLessons)
+                      ? x.data.trialPromoMaxLessons
+                      : null;
+                  const displayLessons = promoLessons ?? baseLessons;
+
+                  const boostedByNumbers =
+                    active &&
+                    ((promoDays != null && baseDays != null && promoDays > baseDays) ||
+                      (promoLessons != null && baseLessons != null && promoLessons > baseLessons));
+                  const boosted = boostedByNumbers || (active && isTrialBoosted(x.data.benefitText, x.data.campaignText));
                   return (
                     <div class="space-y-1">
                       <div class="flex items-center gap-2">
-                        <div class="text-sm font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
+                        <div class="text-sm font-extrabold text-zinc-900">{displayDays == null ? "最大—日間" : `最大${displayDays}日間`}</div>
                         {boosted ? (
                           <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
                             増量中
                           </span>
                         ) : null}
                       </div>
-                      <div class="text-xs font-extrabold text-zinc-700">
-                        期間中の最大レッスン数 {lessons == null ? "—" : `${lessons}回`}
-                      </div>
+                      {active && promoDays != null && (baseDays == null || promoDays > baseDays) ? (
+                        <div class="text-xs font-extrabold">
+                          {baseDays != null ? <span class="text-zinc-500">（通常{baseDays}日無料） </span> : null}
+                          <span class="text-rose-700">期間限定 {promoDays}日無料</span>
+                        </div>
+                      ) : null}
+                      {active && promoLessons != null && (baseLessons == null || promoLessons > baseLessons) ? (
+                        <div class="text-xs font-extrabold">
+                          {baseLessons != null ? <span class="text-zinc-500">（通常{baseLessons}回） </span> : null}
+                          <span class="text-rose-700">期間限定 {promoLessons}回</span>
+                        </div>
+                      ) : (
+                        <div class="text-xs font-extrabold text-zinc-700">
+                          期間中の最大レッスン数 {displayLessons == null ? "—" : `${displayLessons}回`}
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
@@ -337,8 +433,20 @@ const stripLeadingBullet = (v: unknown): string =>
           {ranking.items.map((x, idx) => {
             const rank = idx + 1;
             const borderColor = colBorder(rank);
+            const lastDay = isCampaignLastDay(x.data.campaignEndsAt);
             return (
-              <th class="px-3 pb-4 pt-3 text-center align-top" style={`border-top:2px solid ${borderColor}; border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor}; border-top-left-radius:12px; border-top-right-radius:12px;`}>
+              <th
+                class="px-3 pb-4 pt-3 text-center align-top"
+                style={[
+                  `border-top:2px solid ${borderColor}`,
+                  `border-left:2px solid ${borderColor}`,
+                  `border-right:2px solid ${borderColor}`,
+                  `border-top-left-radius:12px`,
+                  `border-top-right-radius:12px`,
+                  lastDay ? "background:#fff1f2" : "",
+                  lastDay ? "box-shadow: inset 0 0 0 2px #fb7185" : "",
+                ].filter(Boolean).join(";")}
+              >
                 <div class="flex items-center justify-center">
                   {rank <= 3 ? (
                     <img src={`/rank${rank}.webp`} alt={`${rank}位`} width="40" height="40" loading="eager" decoding="async" class="h-10 w-10 object-contain" />
@@ -362,6 +470,13 @@ const stripLeadingBullet = (v: unknown): string =>
                 <div class="mt-2 flex items-center justify-center">
                   <StarRating value={x.data.rating ?? null} size={18} />
                 </div>
+                {lastDay ? (
+                  <div class="mt-2 flex items-center justify-center">
+                    <span class="inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-extrabold text-white">
+                      キャンペーン最終日
+                    </span>
+                  </div>
+                ) : null}
               </th>
             );
           })}
@@ -520,23 +635,69 @@ const stripLeadingBullet = (v: unknown): string =>
           <th class={`sticky left-0 z-10 border-t border-zinc-200 px-3 py-3 text-left text-sm font-extrabold ${labelBar}`}>無料体験</th>
           {ranking.items.map((x, idx) => {
             const borderColor = colBorder(idx + 1);
-            const days = parseMaxDays(x.data.trialText, x.data.trialDetailText);
-            const lessons = parseMaxLessons(x.data.trialText, x.data.trialDetailText);
-            const boosted = isTrialBoosted(x.data.benefitText, x.data.campaignText);
+            const lastDay = isCampaignLastDay(x.data.campaignEndsAt);
+            const active = isCampaignActive(x.data.campaignEndsAt);
+
+            const baseDays =
+              typeof x.data.trialMaxDays === "number" && Number.isFinite(x.data.trialMaxDays)
+                ? x.data.trialMaxDays
+                : parseMaxDays(x.data.trialText, x.data.trialDetailText);
+            const promoDays =
+              active && typeof x.data.trialPromoMaxDays === "number" && Number.isFinite(x.data.trialPromoMaxDays)
+                ? x.data.trialPromoMaxDays
+                : null;
+            const displayDays = promoDays ?? baseDays;
+
+            const baseLessons =
+              typeof x.data.trialMaxLessons === "number" && Number.isFinite(x.data.trialMaxLessons)
+                ? x.data.trialMaxLessons
+                : parseMaxLessons(x.data.trialText, x.data.trialDetailText);
+            const promoLessons =
+              active && typeof x.data.trialPromoMaxLessons === "number" && Number.isFinite(x.data.trialPromoMaxLessons)
+                ? x.data.trialPromoMaxLessons
+                : null;
+            const displayLessons = promoLessons ?? baseLessons;
+
+            const boostedByNumbers =
+              active &&
+              ((promoDays != null && baseDays != null && promoDays > baseDays) ||
+                (promoLessons != null && baseLessons != null && promoLessons > baseLessons));
+            const boosted = boostedByNumbers || (active && isTrialBoosted(x.data.benefitText, x.data.campaignText));
             return (
-              <td class="border-t border-zinc-200 px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg" style={`border-left:2px solid ${borderColor}; border-right:2px solid ${borderColor};`}>
+              <td
+                class="border-t border-zinc-200 px-3 py-3 text-center text-base font-extrabold text-zinc-900 sm:text-lg"
+                style={[
+                  `border-left:2px solid ${borderColor}`,
+                  `border-right:2px solid ${borderColor}`,
+                  lastDay ? "background:#fff1f2" : "",
+                  lastDay ? "box-shadow: inset 0 0 0 2px #fb7185" : "",
+                ].filter(Boolean).join(";")}
+              >
                 <div class="grid place-items-center gap-1">
                   <div class="flex items-center justify-center gap-2">
-                    <div class="text-base font-extrabold text-zinc-900">{days == null ? "最大—日間" : `最大${days}日間`}</div>
+                    <div class="text-base font-extrabold text-zinc-900">{displayDays == null ? "最大—日間" : `最大${displayDays}日間`}</div>
                     {boosted ? (
                       <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
                         増量中
                       </span>
                     ) : null}
                   </div>
-                  <div class="text-xs font-extrabold text-zinc-700">
-                    期間中の最大レッスン数 {lessons == null ? "—" : `${lessons}回`}
-                  </div>
+                  {active && promoDays != null && (baseDays == null || promoDays > baseDays) ? (
+                    <div class="text-[11px] font-extrabold">
+                      {baseDays != null ? <span class="text-zinc-500">（通常{baseDays}日無料） </span> : null}
+                      <span class="text-rose-700">期間限定 {promoDays}日無料</span>
+                    </div>
+                  ) : null}
+                  {active && promoLessons != null && (baseLessons == null || promoLessons > baseLessons) ? (
+                    <div class="text-[11px] font-extrabold">
+                      {baseLessons != null ? <span class="text-zinc-500">（通常{baseLessons}回） </span> : null}
+                      <span class="text-rose-700">期間限定 {promoLessons}回</span>
+                    </div>
+                  ) : (
+                    <div class="text-xs font-extrabold text-zinc-700">
+                      期間中の最大レッスン数 {displayLessons == null ? "—" : `${displayLessons}回`}
+                    </div>
+                  )}
                 </div>
               </td>
             );

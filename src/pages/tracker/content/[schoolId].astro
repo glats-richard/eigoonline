@@ -150,6 +150,54 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <input data-field="trialText" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.trialText ?? ""} />
             </label>
             <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">体験 最大日数（trialMaxDays）</span>
+              <input
+                data-field="trialMaxDays"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold"
+                value={school.trialMaxDays ?? ""}
+              />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">体験 最大レッスン数（trialMaxLessons）</span>
+              <input
+                data-field="trialMaxLessons"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold"
+                value={school.trialMaxLessons ?? ""}
+              />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">期間限定 最大日数（trialPromoMaxDays）</span>
+              <input
+                data-field="trialPromoMaxDays"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold"
+                value={school.trialPromoMaxDays ?? ""}
+              />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-xs font-extrabold text-zinc-600">期間限定 最大レッスン数（trialPromoMaxLessons）</span>
+              <input
+                data-field="trialPromoMaxLessons"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold"
+                value={school.trialPromoMaxLessons ?? ""}
+              />
+            </label>
+            <label class="grid gap-1">
               <span class="text-xs font-extrabold text-zinc-600">体験詳細（trialDetailText）</span>
               <input data-field="trialDetailText" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.trialDetailText ?? ""} />
             </label>

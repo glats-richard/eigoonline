@@ -118,6 +118,10 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
             <col style="width:120px" />
             <col style="width:120px" />
             <col style="width:120px" />
+            <col style="width:120px" />
+            <col style="width:120px" />
+            <col style="width:120px" />
+            <col style="width:120px" />
             <col style="width:260px" />
             <col style="width:260px" />
             <col style="width:360px" />
@@ -142,6 +146,10 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
               <th class="border-b border-zinc-200 px-3 py-2">バナー（href / img / alt）</th>
               <th class="border-b border-zinc-200 px-3 py-2">月額</th>
               <th class="border-b border-zinc-200 px-3 py-2">無料体験</th>
+              <th class="border-b border-zinc-200 px-3 py-2">体験 最大レッスン数</th>
+              <th class="border-b border-zinc-200 px-3 py-2">体験 最大日数</th>
+              <th class="border-b border-zinc-200 px-3 py-2">期間限定 最大レッスン数</th>
+              <th class="border-b border-zinc-200 px-3 py-2">期間限定 最大日数</th>
               <th class="border-b border-zinc-200 px-3 py-2">体験詳細</th>
               <th class="border-b border-zinc-200 px-3 py-2">特典</th>
               <th class="border-b border-zinc-200 px-3 py-2">受講時間</th>
@@ -231,6 +239,54 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">
                     <input data-field="trialText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.trialText ?? ""} />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input
+                      data-field="trialMaxLessons"
+                      data-school-id={id}
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      step="1"
+                      class="w-full rounded border border-zinc-200 px-2 py-1"
+                      value={d.trialMaxLessons ?? ""}
+                    />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input
+                      data-field="trialMaxDays"
+                      data-school-id={id}
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      step="1"
+                      class="w-full rounded border border-zinc-200 px-2 py-1"
+                      value={d.trialMaxDays ?? ""}
+                    />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input
+                      data-field="trialPromoMaxLessons"
+                      data-school-id={id}
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      step="1"
+                      class="w-full rounded border border-zinc-200 px-2 py-1"
+                      value={d.trialPromoMaxLessons ?? ""}
+                    />
+                  </td>
+                  <td class="border-b border-zinc-200 px-3 py-2">
+                    <input
+                      data-field="trialPromoMaxDays"
+                      data-school-id={id}
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      step="1"
+                      class="w-full rounded border border-zinc-200 px-2 py-1"
+                      value={d.trialPromoMaxDays ?? ""}
+                    />
                   </td>
                   <td class="border-b border-zinc-200 px-3 py-2">
                     <input data-field="trialDetailText" data-school-id={id} class="w-full rounded border border-zinc-200 px-2 py-1" value={d.trialDetailText ?? ""} />

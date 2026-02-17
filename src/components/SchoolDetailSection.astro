@@ -47,6 +47,46 @@ const stripLeadingBullet = (v: unknown): string =>
     .replace(/^(?:[・•\-–—*]\s*)+/, "")
     .trim();
 
+const jstYmd = (d: Date): string => {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+};
+
+const parseCampaignEndsAt = (v: string | null | undefined): Date | null => {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(`${s}T23:59:59+09:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
+const isCampaignActive = (endsAt: string | null | undefined) => {
+  const d = parseCampaignEndsAt(endsAt);
+  if (!d) return false;
+  return Date.now() <= d.getTime();
+};
+
+const isCampaignLastDay = (endsAt: string | null | undefined) => {
+  if (!isCampaignActive(endsAt)) return false;
+  const s = String(endsAt ?? "").trim();
+  const endsYmd = /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : (() => {
+    const d = parseCampaignEndsAt(s);
+    return d ? jstYmd(d) : "";
+  })();
+  if (!endsYmd) return false;
+  return endsYmd === jstYmd(new Date());
+};
+
+const campaignLastDay = isCampaignLastDay(item.campaignEndsAt);
+
 // 外部CTAリンクは原則として自社のトラッキング経由に統一する
 // 例: /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
 // ※ Kiminiだけはリダイレクトを通さず、直接CVページへ遷移させる
@@ -195,16 +235,28 @@ const trackHref = (href: string) =>
   {(item.campaignText || (item.campaignBullets && item.campaignBullets.length) || item.campaignEndsAt) ? (
     <div class="mt-5 grid gap-3">
       <Countdown endsAt={item.campaignEndsAt ?? null} />
-      <div class="rounded-2xl border border-[#c9d4ff] bg-[#eef3ff] p-4">
-        <div class="text-sm font-extrabold text-[#2f46b6]">期間限定キャンペーン</div>
+      <div
+        class:list={[
+          "rounded-2xl border p-4",
+          campaignLastDay ? "border-rose-200 bg-rose-50" : "border-[#c9d4ff] bg-[#eef3ff]",
+        ]}
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class:list={["text-sm font-extrabold", campaignLastDay ? "text-rose-800" : "text-[#2f46b6]"]}>期間限定キャンペーン</div>
+          {campaignLastDay ? (
+            <span class="inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-extrabold text-white">
+              キャンペーン最終日
+            </span>
+          ) : null}
+        </div>
         {item.campaignBullets?.length ? (
-          <ul class="mt-2 list-disc pl-5 text-sm text-[#2f46b6]/90">
+          <ul class:list={["mt-2 list-disc pl-5 text-sm", campaignLastDay ? "text-rose-800/90" : "text-[#2f46b6]/90"]}>
             {item.campaignBullets.slice(0, 6).map((t) => (
               <li>{stripLeadingBullet(t)}</li>
             ))}
           </ul>
         ) : item.campaignText ? (
-          <p class="mt-2 text-sm text-[#2f46b6]/90">{item.campaignText}</p>
+          <p class:list={["mt-2 text-sm", campaignLastDay ? "text-rose-800/90" : "text-[#2f46b6]/90"]}>{item.campaignText}</p>
         ) : null}
         <div class="mt-4">
           <CTAButton href={item.officialUrl} offerId={offerId} label="無料体験レッスンを受ける" />

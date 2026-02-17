@@ -45,6 +45,10 @@ async function main() {
 
       priceText: data.priceText ?? "",
       trialText: data.trialText ?? "",
+      trialMaxDays: data.trialMaxDays ?? "",
+      trialMaxLessons: data.trialMaxLessons ?? "",
+      trialPromoMaxDays: data.trialPromoMaxDays ?? "",
+      trialPromoMaxLessons: data.trialPromoMaxLessons ?? "",
       trialDetailText: data.trialDetailText ?? "",
       benefitText: data.benefitText ?? "",
       hoursText: data.hoursText ?? "",

@@ -36,6 +36,14 @@ const schools = defineCollection({
 		priceText: z.string().nullable().optional(),
 		/** Free trial text (e.g. "7日間", "1回"). */
 		trialText: z.string().nullable().optional(),
+		/** Max days during trial (used for compare table; prefer this over parsing text). */
+		trialMaxDays: z.number().int().positive().nullable().optional(),
+		/** Max lessons during trial (used for compare table; prefer this over parsing text). */
+		trialMaxLessons: z.number().int().positive().nullable().optional(),
+		/** Limited-time boosted max days during trial (only shown while campaign is active). */
+		trialPromoMaxDays: z.number().int().positive().nullable().optional(),
+		/** Limited-time boosted max lessons during trial (only shown while campaign is active). */
+		trialPromoMaxLessons: z.number().int().positive().nullable().optional(),
 		/** Benefit/promo text shown in list (e.g. "初月50%OFF"). */
 		benefitText: z.string().nullable().optional(),
 		/** Lesson hours text (e.g. "24時間", "朝5時〜深夜25時"). */
