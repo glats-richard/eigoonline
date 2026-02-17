@@ -8,6 +8,25 @@ const execAsync = promisify(exec);
 
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
+function getProvidedSecret(request: Request, url: URL): string | null {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+        const m = authHeader.match(/^\s*Bearer\s+(.+?)\s*$/i);
+        if (m?.[1]) return m[1];
+    }
+
+    const headerSecret =
+        request.headers.get('x-webhook-secret') ||
+        request.headers.get('x-webhook-key') ||
+        request.headers.get('x-api-key');
+    if (headerSecret) return headerSecret.trim();
+
+    const qp = url.searchParams.get('key') || url.searchParams.get('secret');
+    if (qp) return qp.trim();
+
+    return null;
+}
+
 function unauthorized() {
     return new Response('Unauthorized', {
         status: 401,
@@ -54,12 +73,10 @@ function jsonResponse(data: any, status = 200) {
  *   "slackMessageTs": "1234567890.123456"
  * }
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, url }) => {
     // Verify webhook secret
-    const authHeader = request.headers.get('authorization');
-    const providedSecret = authHeader?.replace('Bearer ', '');
-
-    if (!WEBHOOK_SECRET || providedSecret !== WEBHOOK_SECRET) {
+    const providedSecret = getProvidedSecret(request, url);
+    if (!WEBHOOK_SECRET || !providedSecret || providedSecret !== WEBHOOK_SECRET) {
         return unauthorized();
     }
 
