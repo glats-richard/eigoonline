@@ -18,6 +18,10 @@ type School = {
   bannerHref?: string | null;
   trialText?: string | null;
   trialDetailText?: string | null;
+  /** Max days during trial (prefer this over parsing text). */
+  trialMaxDays?: number | null;
+  /** Limited-time boosted max days during trial (only shown while campaign is active). */
+  trialPromoMaxDays?: number | null;
   hoursText?: string | null;
   teacherQuality?: number | null;
   recommendedFor?: string[];
@@ -86,6 +90,37 @@ const isCampaignLastDay = (endsAt: string | null | undefined) => {
 };
 
 const campaignLastDay = isCampaignLastDay(item.campaignEndsAt);
+
+const maxDaysFromText = (text: string): number | null => {
+  const s = String(text ?? "");
+  let max: number | null = null;
+  for (const m of s.matchAll(/(\d+)\s*日/g)) {
+    const n = Number(m?.[1]);
+    if (!Number.isFinite(n)) continue;
+    if (max == null || n > max) max = n;
+  }
+  return max;
+};
+
+const trialDays = (() => {
+  const active = isCampaignActive(item.campaignEndsAt);
+  const baseFromField = typeof item.trialMaxDays === "number" && Number.isFinite(item.trialMaxDays) ? item.trialMaxDays : null;
+  const baseFromText = maxDaysFromText(String(item.trialText ?? ""));
+  const maxFromPool = maxDaysFromText(
+    `${item.trialText ?? ""} ${item.trialDetailText ?? ""} ${item.campaignText ?? ""}`,
+  );
+  const base = baseFromField ?? baseFromText ?? maxFromPool;
+  const promoCandidate =
+    (active && typeof item.trialPromoMaxDays === "number" && Number.isFinite(item.trialPromoMaxDays) ? item.trialPromoMaxDays : null) ??
+    (active ? maxFromPool : null);
+  const promo = active && promoCandidate != null && (base == null || promoCandidate > base) ? promoCandidate : null;
+  const display = promo ?? base;
+  const headlineEligible =
+    /(\d+)\s*日/.test(String(item.trialText ?? "")) ||
+    typeof item.trialMaxDays === "number" ||
+    typeof item.trialPromoMaxDays === "number";
+  return { active, base, promo, display, headlineEligible };
+})();
 
 // 外部CTAリンクは原則として自社のトラッキング経由に統一する
 // 例: /api/track/click?offer_id=kimini&to=https%3A%2F%2Fkimini.online%2Flp%2Ftrial
@@ -173,7 +208,24 @@ const trackHref = (href: string) =>
       <tbody class="text-sm text-zinc-800">
         <tr class="[&_td]:border-t [&_td]:border-zinc-200">
           <td class="p-3">
-            <div class="font-extrabold text-zinc-900">{item.trialText ?? "—"}</div>
+            <div class="flex flex-wrap items-center gap-2 font-extrabold text-zinc-900">
+              <div>
+                {trialDays.headlineEligible && trialDays.display != null
+                  ? `${trialDays.display}日間`
+                  : (item.trialText ?? "—")}
+              </div>
+              {trialDays.promo != null ? (
+                <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
+                  増量中
+                </span>
+              ) : null}
+            </div>
+            {trialDays.active && trialDays.promo != null ? (
+              <div class="mt-1 text-xs font-extrabold">
+                {trialDays.base != null ? <span class="text-zinc-500">（通常{trialDays.base}日無料） </span> : null}
+                <span class="text-rose-700">期間限定 {trialDays.promo}日無料</span>
+              </div>
+            ) : null}
             {item.trialDetailText ? <div class="text-sm text-zinc-700">{item.trialDetailText}</div> : null}
           </td>
           <td class="p-3">
