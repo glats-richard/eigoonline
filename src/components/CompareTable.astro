@@ -91,6 +91,41 @@ const parseMaxLessons = (a: string | null | undefined, b: string | null | undefi
   return Number.isFinite(n) ? n : null;
 };
 
+const maxNumberByUnit = (text: string, unit: "日" | "回"): number | null => {
+  const s = String(text ?? "");
+  const re = unit === "日" ? /(\d+)\s*日/g : /(\d+)\s*回/g;
+  let max: number | null = null;
+  for (const m of s.matchAll(re)) {
+    const n = Number(m?.[1]);
+    if (!Number.isFinite(n)) continue;
+    if (max == null || n > max) max = n;
+  }
+  return max;
+};
+
+const deriveTrialBasePromo = (opts: {
+  active: boolean;
+  baseField: number | null | undefined;
+  promoField: number | null | undefined;
+  trialText: string | null | undefined;
+  trialDetailText: string | null | undefined;
+  unit: "日" | "回";
+}) => {
+  const baseFromField = typeof opts.baseField === "number" && Number.isFinite(opts.baseField) ? opts.baseField : null;
+  const promoFromField = typeof opts.promoField === "number" && Number.isFinite(opts.promoField) ? opts.promoField : null;
+
+  const textA = String(opts.trialText ?? "");
+  const textB = String(opts.trialDetailText ?? "");
+  const baseFromText = maxNumberByUnit(textA, opts.unit);
+  const maxFromBoth = maxNumberByUnit(`${textA} ${textB}`, opts.unit);
+
+  const base = baseFromField ?? baseFromText ?? maxFromBoth;
+  const promoCandidate = promoFromField ?? (opts.active ? maxFromBoth : null);
+  const promo = opts.active && promoCandidate != null && (base == null || promoCandidate > base) ? promoCandidate : null;
+
+  return { base, promo, display: promo ?? base };
+};
+
 const parseCampaignEndsAt = (v: string | null | undefined): Date | null => {
   if (!v) return null;
   const s = String(v).trim();
@@ -318,55 +353,52 @@ const stripLeadingBullet = (v: unknown): string =>
                 {(() => {
                   const active = isCampaignActive(x.data.campaignEndsAt);
 
-                  const baseDays =
-                    typeof x.data.trialMaxDays === "number" && Number.isFinite(x.data.trialMaxDays)
-                      ? x.data.trialMaxDays
-                      : parseMaxDays(x.data.trialText, x.data.trialDetailText);
-                  const promoDays =
-                    active && typeof x.data.trialPromoMaxDays === "number" && Number.isFinite(x.data.trialPromoMaxDays)
-                      ? x.data.trialPromoMaxDays
-                      : null;
-                  const displayDays = promoDays ?? baseDays;
-
-                  const baseLessons =
-                    typeof x.data.trialMaxLessons === "number" && Number.isFinite(x.data.trialMaxLessons)
-                      ? x.data.trialMaxLessons
-                      : parseMaxLessons(x.data.trialText, x.data.trialDetailText);
-                  const promoLessons =
-                    active && typeof x.data.trialPromoMaxLessons === "number" && Number.isFinite(x.data.trialPromoMaxLessons)
-                      ? x.data.trialPromoMaxLessons
-                      : null;
-                  const displayLessons = promoLessons ?? baseLessons;
+                  const days = deriveTrialBasePromo({
+                    active,
+                    baseField: x.data.trialMaxDays,
+                    promoField: x.data.trialPromoMaxDays,
+                    trialText: x.data.trialText,
+                    trialDetailText: x.data.trialDetailText,
+                    unit: "日",
+                  });
+                  const lessons = deriveTrialBasePromo({
+                    active,
+                    baseField: x.data.trialMaxLessons,
+                    promoField: x.data.trialPromoMaxLessons,
+                    trialText: x.data.trialText,
+                    trialDetailText: x.data.trialDetailText,
+                    unit: "回",
+                  });
 
                   const boostedByNumbers =
                     active &&
-                    ((promoDays != null && baseDays != null && promoDays > baseDays) ||
-                      (promoLessons != null && baseLessons != null && promoLessons > baseLessons));
+                    ((days.promo != null && days.base != null && days.promo > days.base) ||
+                      (lessons.promo != null && lessons.base != null && lessons.promo > lessons.base));
                   const boosted = boostedByNumbers || (active && isTrialBoosted(x.data.benefitText, x.data.campaignText));
                   return (
                     <div class="space-y-1">
                       <div class="flex items-center gap-2">
-                        <div class="text-sm font-extrabold text-zinc-900">{displayDays == null ? "最大—日間" : `最大${displayDays}日間`}</div>
+                        <div class="text-sm font-extrabold text-zinc-900">{days.display == null ? "最大—日間" : `最大${days.display}日間`}</div>
                         {boosted ? (
                           <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
                             増量中
                           </span>
                         ) : null}
                       </div>
-                      {active && promoDays != null && (baseDays == null || promoDays > baseDays) ? (
+                      {active && days.promo != null ? (
                         <div class="text-xs font-extrabold">
-                          {baseDays != null ? <span class="text-zinc-500">（通常{baseDays}日無料） </span> : null}
-                          <span class="text-rose-700">期間限定 {promoDays}日無料</span>
+                          {days.base != null ? <span class="text-zinc-500">（通常{days.base}日無料） </span> : null}
+                          <span class="text-rose-700">期間限定 {days.promo}日無料</span>
                         </div>
                       ) : null}
-                      {active && promoLessons != null && (baseLessons == null || promoLessons > baseLessons) ? (
+                      {active && lessons.promo != null ? (
                         <div class="text-xs font-extrabold">
-                          {baseLessons != null ? <span class="text-zinc-500">（通常{baseLessons}回） </span> : null}
-                          <span class="text-rose-700">期間限定 {promoLessons}回</span>
+                          {lessons.base != null ? <span class="text-zinc-500">（通常{lessons.base}回） </span> : null}
+                          <span class="text-rose-700">期間限定 {lessons.promo}回</span>
                         </div>
                       ) : (
                         <div class="text-xs font-extrabold text-zinc-700">
-                          期間中の最大レッスン数 {displayLessons == null ? "—" : `${displayLessons}回`}
+                          期間中の最大レッスン数 {lessons.display == null ? "—" : `${lessons.display}回`}
                         </div>
                       )}
                     </div>
@@ -638,30 +670,27 @@ const stripLeadingBullet = (v: unknown): string =>
             const lastDay = isCampaignLastDay(x.data.campaignEndsAt);
             const active = isCampaignActive(x.data.campaignEndsAt);
 
-            const baseDays =
-              typeof x.data.trialMaxDays === "number" && Number.isFinite(x.data.trialMaxDays)
-                ? x.data.trialMaxDays
-                : parseMaxDays(x.data.trialText, x.data.trialDetailText);
-            const promoDays =
-              active && typeof x.data.trialPromoMaxDays === "number" && Number.isFinite(x.data.trialPromoMaxDays)
-                ? x.data.trialPromoMaxDays
-                : null;
-            const displayDays = promoDays ?? baseDays;
-
-            const baseLessons =
-              typeof x.data.trialMaxLessons === "number" && Number.isFinite(x.data.trialMaxLessons)
-                ? x.data.trialMaxLessons
-                : parseMaxLessons(x.data.trialText, x.data.trialDetailText);
-            const promoLessons =
-              active && typeof x.data.trialPromoMaxLessons === "number" && Number.isFinite(x.data.trialPromoMaxLessons)
-                ? x.data.trialPromoMaxLessons
-                : null;
-            const displayLessons = promoLessons ?? baseLessons;
+            const days = deriveTrialBasePromo({
+              active,
+              baseField: x.data.trialMaxDays,
+              promoField: x.data.trialPromoMaxDays,
+              trialText: x.data.trialText,
+              trialDetailText: x.data.trialDetailText,
+              unit: "日",
+            });
+            const lessons = deriveTrialBasePromo({
+              active,
+              baseField: x.data.trialMaxLessons,
+              promoField: x.data.trialPromoMaxLessons,
+              trialText: x.data.trialText,
+              trialDetailText: x.data.trialDetailText,
+              unit: "回",
+            });
 
             const boostedByNumbers =
               active &&
-              ((promoDays != null && baseDays != null && promoDays > baseDays) ||
-                (promoLessons != null && baseLessons != null && promoLessons > baseLessons));
+              ((days.promo != null && days.base != null && days.promo > days.base) ||
+                (lessons.promo != null && lessons.base != null && lessons.promo > lessons.base));
             const boosted = boostedByNumbers || (active && isTrialBoosted(x.data.benefitText, x.data.campaignText));
             return (
               <td
@@ -675,27 +704,27 @@ const stripLeadingBullet = (v: unknown): string =>
               >
                 <div class="grid place-items-center gap-1">
                   <div class="flex items-center justify-center gap-2">
-                    <div class="text-base font-extrabold text-zinc-900">{displayDays == null ? "最大—日間" : `最大${displayDays}日間`}</div>
+                    <div class="text-base font-extrabold text-zinc-900">{days.display == null ? "最大—日間" : `最大${days.display}日間`}</div>
                     {boosted ? (
                       <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
                         増量中
                       </span>
                     ) : null}
                   </div>
-                  {active && promoDays != null && (baseDays == null || promoDays > baseDays) ? (
+                  {active && days.promo != null ? (
                     <div class="text-[11px] font-extrabold">
-                      {baseDays != null ? <span class="text-zinc-500">（通常{baseDays}日無料） </span> : null}
-                      <span class="text-rose-700">期間限定 {promoDays}日無料</span>
+                      {days.base != null ? <span class="text-zinc-500">（通常{days.base}日無料） </span> : null}
+                      <span class="text-rose-700">期間限定 {days.promo}日無料</span>
                     </div>
                   ) : null}
-                  {active && promoLessons != null && (baseLessons == null || promoLessons > baseLessons) ? (
+                  {active && lessons.promo != null ? (
                     <div class="text-[11px] font-extrabold">
-                      {baseLessons != null ? <span class="text-zinc-500">（通常{baseLessons}回） </span> : null}
-                      <span class="text-rose-700">期間限定 {promoLessons}回</span>
+                      {lessons.base != null ? <span class="text-zinc-500">（通常{lessons.base}回） </span> : null}
+                      <span class="text-rose-700">期間限定 {lessons.promo}回</span>
                     </div>
                   ) : (
                     <div class="text-xs font-extrabold text-zinc-700">
-                      期間中の最大レッスン数 {displayLessons == null ? "—" : `${displayLessons}回`}
+                      期間中の最大レッスン数 {lessons.display == null ? "—" : `${lessons.display}回`}
                     </div>
                   )}
                 </div>
