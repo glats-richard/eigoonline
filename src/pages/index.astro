@@ -261,6 +261,22 @@ function minYenFromPriceText(v: unknown): number | null {
 	if (!nums.length) return null;
 	return Math.min(...nums);
 }
+
+function absUrlMaybePublicPath(v: unknown): string | null {
+	const s = String(v ?? "").trim();
+	if (!s) return null;
+	try {
+		// Absolute URL already
+		if (s.startsWith("http://") || s.startsWith("https://")) return s;
+		// Public path like "/logos/company-30.webp"
+		return new URL(s, base).toString();
+	} catch {
+		return null;
+	}
+}
+
+// Optional structured-data hint: keep prices valid far into the future.
+const DEFAULT_PRICE_VALID_UNTIL = `${new Date().getFullYear() + 1}-12-31`;
 const itemListJsonLd = {
 	"@context": "https://schema.org",
 	"@type": "ItemList",
@@ -347,12 +363,19 @@ for (const [schoolId, schoolData] of schoolsById) {
 		const minPrice = minYenFromPriceText(priceText);
 		const offerUrl = (schoolData as any)?.planUrl || (schoolData as any)?.officialUrl || servicePageUrl;
 		const sameAs = [(schoolData as any)?.officialUrl, (schoolData as any)?.planUrl].filter(Boolean);
+		const logoAbs = absUrlMaybePublicPath((schoolData as any)?.logoUrl);
+		const description =
+			typeof (schoolData as any)?.summary === "string" && String((schoolData as any).summary).trim()
+				? String((schoolData as any).summary).trim()
+				: undefined;
 		reviewsJsonLd.push({
 			"@context": "https://schema.org",
 			"@type": "Product",
 			"@id": serviceProductId,
 			name: schoolData.name,
 			url: servicePageUrl,
+			description,
+			image: logoAbs ? [{ "@type": "ImageObject", url: logoAbs }] : undefined,
 			sameAs: sameAs.length ? sameAs : undefined,
 			offers: minPrice != null
 				? {
@@ -360,6 +383,7 @@ for (const [schoolId, schoolData] of schoolsById) {
 						url: offerUrl,
 						price: minPrice,
 						priceCurrency: "JPY",
+						priceValidUntil: DEFAULT_PRICE_VALID_UNTIL,
 						availability: "https://schema.org/InStock",
 					}
 				: undefined,

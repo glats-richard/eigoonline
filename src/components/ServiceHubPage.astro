@@ -437,6 +437,9 @@ function minYenFromPriceText(v: unknown): number | null {
 
 const minPriceYen = minYenFromPriceText(school?.priceText);
 
+// Optional structured-data hint: keep prices valid far into the future.
+const DEFAULT_PRICE_VALID_UNTIL = `${new Date().getFullYear() + 1}-12-31`;
+
 function getYoutubeId(url: string | null | undefined): string | null {
   if (!url) return null;
   try {
@@ -565,6 +568,7 @@ if (school) {
       url: offerUrl,
       priceCurrency: "JPY",
       price: minPriceYen,
+      priceValidUntil: DEFAULT_PRICE_VALID_UNTIL,
       priceSpecification: {
         "@type": "UnitPriceSpecification",
         priceCurrency: "JPY",
@@ -580,6 +584,7 @@ if (school) {
       url: offerUrl,
       priceCurrency: "JPY",
       description: String(school.priceText),
+      priceValidUntil: DEFAULT_PRICE_VALID_UNTIL,
       availability: "https://schema.org/InStock",
     };
   }
