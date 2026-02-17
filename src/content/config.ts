@@ -235,7 +235,14 @@ const articles = defineCollection({
 	schema: z.object({
 		title: z.string(),
 		href: z.string(),
+		/** Eye-catch image (absolute URL or public path like "/fv_1.webp"). */
 		image: z.string().nullable().optional(),
+		/** Published date (YYYY-MM-DD or ISO). */
+		publishedAt: z.string().nullable().optional(),
+		/** Updated date (YYYY-MM-DD or ISO). */
+		updatedAt: z.string().nullable().optional(),
+		/** Author display name (e.g. "eigoonline編集部"). */
+		authorName: z.string().nullable().optional(),
 	}),
 });
 

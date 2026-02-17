@@ -244,6 +244,23 @@ const businessItemsRated = applyReviewRating(businessItems);
 
 const base = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
 const pageUrl = new URL(Astro.url.pathname, base).toString();
+
+function detailUrlForSchoolId(schoolId: string): string {
+	// Canonical service detail page: https://eigoonline.com/<schoolId>/
+	return new URL(`/${encodeURIComponent(schoolId)}/`, base).toString();
+}
+
+function minYenFromPriceText(v: unknown): number | null {
+	const s = String(v ?? "").replace(/\s+/g, " ").trim();
+	if (!s) return null;
+	const matches = Array.from(s.matchAll(/([\d,]{1,})\s*円/g));
+	if (!matches.length) return null;
+	const nums = matches
+		.map((m) => Number(String(m[1]).replace(/,/g, "")))
+		.filter((n) => Number.isFinite(n) && n > 0);
+	if (!nums.length) return null;
+	return Math.min(...nums);
+}
 const itemListJsonLd = {
 	"@context": "https://schema.org",
 	"@type": "ItemList",
@@ -324,13 +341,28 @@ for (const [schoolId, schoolData] of schoolsById) {
 		}
 
 		// Create Product with reviews (Review Snippet 対象の type に合わせる)
-		const serviceUrl = new URL(`#school-${schoolId}`, pageUrl).toString();
+		const servicePageUrl = detailUrlForSchoolId(schoolId);
+		const serviceProductId = `${servicePageUrl}#product`;
+		const priceText = (schoolData as any)?.priceText;
+		const minPrice = minYenFromPriceText(priceText);
+		const offerUrl = (schoolData as any)?.planUrl || (schoolData as any)?.officialUrl || servicePageUrl;
+		const sameAs = [(schoolData as any)?.officialUrl, (schoolData as any)?.planUrl].filter(Boolean);
 		reviewsJsonLd.push({
 			"@context": "https://schema.org",
 			"@type": "Product",
-			"@id": serviceUrl,
+			"@id": serviceProductId,
 			name: schoolData.name,
-			url: schoolData.officialUrl || serviceUrl,
+			url: servicePageUrl,
+			sameAs: sameAs.length ? sameAs : undefined,
+			offers: minPrice != null
+				? {
+						"@type": "Offer",
+						url: offerUrl,
+						price: minPrice,
+						priceCurrency: "JPY",
+						availability: "https://schema.org/InStock",
+					}
+				: undefined,
 			aggregateRating,
 			review: reviewObjects.slice(0, 10), // Limit to 10 reviews for structured data
 		});

@@ -102,17 +102,34 @@ const maxDaysFromText = (text: string): number | null => {
   return max;
 };
 
+const maxFreeTrialDaysFromText = (text: string): number | null => {
+  const s = String(text ?? "");
+  let max: number | null = null;
+  // Only treat numbers as "trial days" when they're in a free-trial context.
+  const patterns = [
+    /(\d+)\s*日(?:間)?\s*(?:無料(?:体験)?|無料トライアル)/g,
+    /(?:無料(?:体験)?|無料トライアル)[^0-9]{0,12}(\d+)\s*日(?:間)?/g,
+  ] as const;
+  for (const re of patterns) {
+    for (const m of s.matchAll(re)) {
+      const n = Number(m?.[1]);
+      if (!Number.isFinite(n)) continue;
+      if (max == null || n > max) max = n;
+    }
+  }
+  return max;
+};
+
 const trialDays = (() => {
   const active = isCampaignActive(item.campaignEndsAt);
   const baseFromField = typeof item.trialMaxDays === "number" && Number.isFinite(item.trialMaxDays) ? item.trialMaxDays : null;
   const baseFromText = maxDaysFromText(String(item.trialText ?? ""));
-  const maxFromPool = maxDaysFromText(
-    `${item.trialText ?? ""} ${item.trialDetailText ?? ""} ${item.campaignText ?? ""}`,
-  );
-  const base = baseFromField ?? baseFromText ?? maxFromPool;
+  const baseFromDetail = maxDaysFromText(String(item.trialDetailText ?? ""));
+  const base = baseFromField ?? baseFromText ?? baseFromDetail;
+  const promoFromPool = maxFreeTrialDaysFromText(`${item.trialDetailText ?? ""} ${item.campaignText ?? ""}`);
   const promoCandidate =
     (active && typeof item.trialPromoMaxDays === "number" && Number.isFinite(item.trialPromoMaxDays) ? item.trialPromoMaxDays : null) ??
-    (active ? maxFromPool : null);
+    (active ? promoFromPool : null);
   const promo = active && promoCandidate != null && (base == null || promoCandidate > base) ? promoCandidate : null;
   const display = promo ?? base;
   const headlineEligible =

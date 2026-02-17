@@ -78,19 +78,38 @@ const maxDaysFromText = (text: string): number | null => {
   return max;
 };
 
+const maxFreeTrialDaysFromText = (text: string): number | null => {
+  const s = String(text ?? "");
+  let max: number | null = null;
+  // Only treat numbers as "trial days" when they're in a free-trial context.
+  const patterns = [
+    /(\d+)\s*日(?:間)?\s*(?:無料(?:体験)?|無料トライアル)/g,
+    /(?:無料(?:体験)?|無料トライアル)[^0-9]{0,12}(\d+)\s*日(?:間)?/g,
+  ] as const;
+  for (const re of patterns) {
+    for (const m of s.matchAll(re)) {
+      const n = Number(m?.[1]);
+      if (!Number.isFinite(n)) continue;
+      if (max == null || n > max) max = n;
+    }
+  }
+  return max;
+};
+
 const trialPill = (() => {
   if (!school) return { displayText: "—", promoDays: null as number | null };
 
   const active = isCampaignActive(school.campaignEndsAt);
   const baseDaysFromField = typeof school.trialMaxDays === "number" && Number.isFinite(school.trialMaxDays) ? school.trialMaxDays : null;
   const baseDaysFromText = maxDaysFromText(String(school.trialText ?? ""));
-  const maxDaysBoth = maxDaysFromText(
-    `${school.trialText ?? ""} ${school.trialDetailText ?? ""} ${school.campaignText ?? ""} ${school.benefitText ?? ""} ${school.heroImageAlt ?? ""}`,
+  const baseDaysFromDetail = maxDaysFromText(String(school.trialDetailText ?? ""));
+  const baseDays = baseDaysFromField ?? baseDaysFromText ?? baseDaysFromDetail;
+  const promoDaysFromPool = maxFreeTrialDaysFromText(
+    `${school.trialDetailText ?? ""} ${school.campaignText ?? ""} ${school.benefitText ?? ""} ${school.heroImageAlt ?? ""}`,
   );
-  const baseDays = baseDaysFromField ?? baseDaysFromText ?? maxDaysBoth;
   const promoDaysCandidate =
     (active && typeof school.trialPromoMaxDays === "number" && Number.isFinite(school.trialPromoMaxDays) ? school.trialPromoMaxDays : null) ??
-    (active ? maxDaysBoth : null);
+    (active ? promoDaysFromPool : null);
   const promoDays =
     active && promoDaysCandidate != null && (baseDays == null || promoDaysCandidate > baseDays) ? promoDaysCandidate : null;
   const displayDays = promoDays ?? baseDays;
@@ -407,7 +426,7 @@ const cheapestPlanYen = fmtYenFromPriceText(school?.priceText);
 function minYenFromPriceText(v: unknown): number | null {
   const s = String(v ?? "").replace(/\s+/g, " ").trim();
   if (!s) return null;
-  const matches = Array.from(s.matchAll(/([\d,]{3,})\s*円/g));
+  const matches = Array.from(s.matchAll(/([\d,]{1,})\s*円/g));
   if (!matches.length) return null;
   const nums = matches
     .map((m) => Number(String(m[1]).replace(/,/g, "")))
@@ -545,6 +564,7 @@ if (school) {
       "@type": "Offer",
       url: offerUrl,
       priceCurrency: "JPY",
+      price: minPriceYen,
       priceSpecification: {
         "@type": "UnitPriceSpecification",
         priceCurrency: "JPY",

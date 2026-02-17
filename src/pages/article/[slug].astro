@@ -1,0 +1,86 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { buildBlogPostingJsonLd } from "../../utils/structuredData";
+
+export const prerender = true;
+
+type ArticleData = {
+  title: string;
+  href: string;
+  image?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  authorName?: string | null;
+};
+
+export async function getStaticPaths() {
+  const articles = await getCollection("articles");
+  const paths = articles
+    .map((a) => {
+      const href = String(a.data.href ?? "").trim();
+      const m = href.match(/^\/article\/([^/?#]+)\/?$/);
+      const slug = m?.[1] ?? null;
+      if (!slug) return null;
+      return { params: { slug }, props: { article: a.data } };
+    })
+    .filter(Boolean) as { params: { slug: string }; props: { article: ArticleData } }[];
+
+  return paths;
+}
+
+const { article } = Astro.props as { article: ArticleData };
+const siteUrl = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+
+const jsonLd = buildBlogPostingJsonLd({
+  canonicalUrl: canonical,
+  siteUrl,
+  title: article.title,
+  publishedAt: article.publishedAt ?? null,
+  updatedAt: article.updatedAt ?? null,
+  imageUrl: article.image ?? null,
+  authorName: article.authorName ?? null,
+  description: `${article.title}｜eigoonline`,
+});
+---
+
+<Layout title={article.title} description={`${article.title}｜eigoonline`}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <main class="mx-auto w-full max-w-3xl px-4 pb-14 pt-10">
+    <header class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h1 class="text-2xl font-extrabold text-zinc-900">{article.title}</h1>
+      <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-zinc-600">
+        <span>著者：{article.authorName ?? "eigoonline編集部"}</span>
+        {article.publishedAt ? <span>公開：{article.publishedAt}</span> : null}
+        {article.updatedAt ? <span>更新：{article.updatedAt}</span> : null}
+      </div>
+      {article.image ? (
+        <div class="mt-4 overflow-hidden rounded-xl ring-1 ring-zinc-200">
+          <img
+            src={article.image}
+            alt={`${article.title} アイキャッチ`}
+            loading="lazy"
+            decoding="async"
+            class="h-auto w-full object-cover"
+          />
+        </div>
+      ) : null}
+    </header>
+
+    <section class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <p class="text-sm font-semibold text-zinc-700">
+        この記事は準備中です。公開までしばらくお待ちください。
+      </p>
+      <div class="mt-5">
+        <a class="btn-brand inline-flex items-center rounded-xl px-4 py-2 text-sm font-extrabold text-white" href="/">
+          TOPへ戻る
+        </a>
+      </div>
+    </section>
+  </main>
+</Layout>
+
