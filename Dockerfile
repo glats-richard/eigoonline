@@ -23,6 +23,9 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 # Copy only what we need to run
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/content ./src/content
+# Webhook campaign endpoints call these scripts at runtime
+COPY --from=builder /app/scripts/fetch-campaigns.mjs ./scripts/fetch-campaigns.mjs
+COPY --from=builder /app/scripts/update-campaign.mjs ./scripts/update-campaign.mjs
 
 EXPOSE 4321
 CMD ["node", "./dist/server/entry.mjs"]
