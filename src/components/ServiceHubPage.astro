@@ -48,6 +48,59 @@ function rankFor(category: string): number | null {
 const businessRank = rankFor("business");
 const kidsRank = rankFor("kids");
 
+const parseCampaignEndsAt = (v: string | null | undefined): Date | null => {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  // YYYY-MM-DD -> interpret as end of day in JST.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(`${s}T23:59:59+09:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
+const isCampaignActive = (endsAt: string | null | undefined) => {
+  const d = parseCampaignEndsAt(endsAt);
+  if (!d) return false;
+  return Date.now() <= d.getTime();
+};
+
+const maxDaysFromText = (text: string): number | null => {
+  const s = String(text ?? "");
+  let max: number | null = null;
+  for (const m of s.matchAll(/(\d+)\s*日/g)) {
+    const n = Number(m?.[1]);
+    if (!Number.isFinite(n)) continue;
+    if (max == null || n > max) max = n;
+  }
+  return max;
+};
+
+const trialPill = (() => {
+  if (!school) return { displayText: "—", promoDays: null as number | null };
+
+  const active = isCampaignActive(school.campaignEndsAt);
+  const baseDaysFromField = typeof school.trialMaxDays === "number" && Number.isFinite(school.trialMaxDays) ? school.trialMaxDays : null;
+  const baseDaysFromText = maxDaysFromText(String(school.trialText ?? ""));
+  const maxDaysBoth = maxDaysFromText(
+    `${school.trialText ?? ""} ${school.trialDetailText ?? ""} ${school.campaignText ?? ""} ${school.benefitText ?? ""} ${school.heroImageAlt ?? ""}`,
+  );
+  const baseDays = baseDaysFromField ?? baseDaysFromText ?? maxDaysBoth;
+  const promoDaysCandidate =
+    (active && typeof school.trialPromoMaxDays === "number" && Number.isFinite(school.trialPromoMaxDays) ? school.trialPromoMaxDays : null) ??
+    (active ? maxDaysBoth : null);
+  const promoDays =
+    active && promoDaysCandidate != null && (baseDays == null || promoDaysCandidate > baseDays) ? promoDaysCandidate : null;
+  const displayDays = promoDays ?? baseDays;
+
+  return {
+    displayText: displayDays == null ? (school.trialText ?? "—") : `${displayDays}日間`,
+    promoDays,
+  };
+})();
+
 // Radar chart quality metrics:
 // - Prefer averages from approved user reviews (DB)
 // - Fall back to editorial scores in `src/content/schools/*.json`
@@ -610,7 +663,14 @@ if (faqItems.length) {
 
             <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">
               <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold text-zinc-700 ring-1 ring-zinc-200">無料体験</span>
-              <span class="min-w-0 break-words text-zinc-700">{school.trialText ?? "—"}</span>
+              <span class="inline-flex min-w-0 items-center gap-2 break-words text-zinc-700">
+                <span class="min-w-0 break-words">{trialPill.displayText}</span>
+                {trialPill.promoDays != null ? (
+                  <span class="inline-flex shrink-0 items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
+                    増量中
+                  </span>
+                ) : null}
+              </span>
             </div>
 
             <div class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-zinc-100 px-3 py-1 text-xs font-extrabold text-zinc-700">

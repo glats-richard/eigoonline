@@ -11,6 +11,10 @@ type Item = {
   heroImageAlt?: string | null;
   officialUrl: string;
   trialText?: string | null;
+  trialDetailText?: string | null;
+  trialMaxDays?: number | null;
+  trialPromoMaxDays?: number | null;
+  campaignEndsAt?: string | null;
   priceText?: string | null;
   benefitText?: string | null;
   points?: string[] | null;
@@ -48,6 +52,48 @@ const highlightText =
     .slice(0, 6)
     .join("、") ||
   (item.benefitText ? stripLeadingBullet(item.benefitText) : "");
+
+const parseCampaignEndsAt = (v: string | null | undefined): Date | null => {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  // YYYY-MM-DD -> interpret as end of day in JST.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(`${s}T23:59:59+09:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
+const isCampaignActive = (endsAt: string | null | undefined) => {
+  const d = parseCampaignEndsAt(endsAt);
+  if (!d) return false;
+  return Date.now() <= d.getTime();
+};
+
+const maxDaysFromText = (text: string): number | null => {
+  const s = String(text ?? "");
+  let max: number | null = null;
+  for (const m of s.matchAll(/(\d+)\s*日/g)) {
+    const n = Number(m?.[1]);
+    if (!Number.isFinite(n)) continue;
+    if (max == null || n > max) max = n;
+  }
+  return max;
+};
+
+const active = isCampaignActive(item.campaignEndsAt);
+const baseDaysFromField = typeof item.trialMaxDays === "number" && Number.isFinite(item.trialMaxDays) ? item.trialMaxDays : null;
+const baseDaysFromText = maxDaysFromText(String(item.trialText ?? ""));
+const daysTextPool = `${item.trialText ?? ""} ${item.trialDetailText ?? ""} ${item.benefitText ?? ""} ${highlightText ?? ""}`;
+const maxDaysBoth = maxDaysFromText(daysTextPool);
+const baseDays = baseDaysFromField ?? baseDaysFromText ?? maxDaysBoth;
+const promoDaysCandidate =
+  (active && typeof item.trialPromoMaxDays === "number" && Number.isFinite(item.trialPromoMaxDays) ? item.trialPromoMaxDays : null) ??
+  (active ? maxDaysBoth : null);
+const promoDays = active && promoDaysCandidate != null && (baseDays == null || promoDaysCandidate > baseDays) ? promoDaysCandidate : null;
+const displayDays = promoDays ?? baseDays;
 ---
 
 <article class="surface rounded-2xl border border-white/30 shadow-sm">
@@ -135,7 +181,14 @@ const highlightText =
       <div class="mt-2 flex flex-wrap gap-2">
         <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-700">無料体験</span>
         <span class="inline-flex max-w-full items-center rounded-md bg-white px-2 py-1 text-xs font-semibold text-zinc-900 ring-1 ring-zinc-200">
-          <span class="break-words">{item.trialText ?? "—"}</span>
+          <span class="break-words">
+            {displayDays == null ? (item.trialText ?? "—") : `${displayDays}日間`}
+          </span>
+          {promoDays != null ? (
+            <span class="ml-2 inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200">
+              増量中
+            </span>
+          ) : null}
         </span>
 
         <span class="ml-1 inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-700">月額</span>
