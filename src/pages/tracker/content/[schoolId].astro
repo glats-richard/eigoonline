@@ -125,7 +125,12 @@ if (overridesErr) errors.push(`school_overrides: ${overridesErr}`);
           <div class="mt-4 grid gap-4">
             <label class="grid gap-1">
               <span class="text-xs font-extrabold text-zinc-600">ヒーロー画像URL</span>
-              <input data-field="heroImageUrl" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold" value={school.heroImageUrl ?? ""} placeholder="/kimini_detail_banner.png など" />
+              <input
+                data-field="heroImageUrl"
+                class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm font-semibold"
+                value={school.heroImageUrl ?? ""}
+                placeholder="/heroes/kimini_detail_banner.webp など"
+              />
             </label>
             <label class="grid gap-1">
               <span class="text-xs font-extrabold text-zinc-600">ヒーロー画像ALT</span>

@@ -5,7 +5,6 @@ import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 import RankingListItem from "../components/RankingListItem.astro";
 import CompareTableTabs from "../components/CompareTableTabs.astro";
-import PickupCard from "../components/PickupCard.astro";
 import Sidebar from "../components/Sidebar.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
 import ReviewSubmitCard from "../components/ReviewSubmitCard.astro";
@@ -20,7 +19,6 @@ import { getSchoolsMerged } from "../lib/schools";
 const schools = await getSchoolsMerged();
 const rankings = await getCollection("rankings");
 const categories = await getCollection("categories");
-const pickups = await getCollection("pickups");
 const banners = await getCollection("banners");
 const reviews = await getCollection("reviews");
 
@@ -56,7 +54,6 @@ const catReco = categories
 	.filter((c) => c.data.group === "recommend")
 	.map((c) => c.data);
 
-const pickupTop = pickups[0]?.data;
 const sidebarBannersTop = banners
 	.filter((b) => ["sidebar", "sidebar_top"].includes(b.data.placement))
 	.map((b) => b.data);
@@ -426,9 +423,9 @@ const faqJsonLd = {
 ---
 
 <Layout
-	title="オンライン英会話 おすすめ比較・ランキング（総合・試験対策・日曜・ビジネス）"
+	title="オンライン英会話 おすすめ比較・ランキング（総合・試験対策・日曜・ビジネス）【2026年2月最新版】"
 	description="オンライン英会話のおすすめを「総合 / 試験対策 / 日曜英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
-	ogImage="/eigoonline_logo.png"
+	ogImage="/eigoonline_logo.webp"
 	headerOverlay
 >
 	<Fragment slot="head">
@@ -472,7 +469,7 @@ const faqJsonLd = {
 								type="image/webp"
 							/>
 							<img
-								src="/fv_1.jpg"
+								src="/fv_1.webp"
 								alt="オンライン英会話 おすすめランキング"
 								loading="eager"
 								decoding="async"
@@ -767,21 +764,6 @@ const faqJsonLd = {
 						}
 					</section>
 
-					<section id="pickup">
-						{
-							pickupTop?.schoolId ? (
-								<PickupCard
-									title={pickupTop.title}
-									label={pickupTop.label}
-									body={pickupTop.body}
-									offerId={pickupTop.schoolId}
-									ctaHref={pickupTop.ctaHref}
-									ctaLabel={pickupTop.ctaLabel}
-								/>
-							) : null
-						}
-					</section>
-
 					<section id="details" class="space-y-6">
 						<div
 							class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"
@@ -828,7 +810,7 @@ const faqJsonLd = {
 									type="image/webp"
 								/>
 								<img
-									src="/fv_1.jpg"
+									src="/fv_1.webp"
 									alt="オンライン英会話の始め方・選び方（初心者向け）"
 									loading="lazy"
 									decoding="async"
@@ -849,7 +831,7 @@ const faqJsonLd = {
 								</span>
 								<span
 									class="text-xs font-extrabold text-zinc-500"
-									>2026年最新</span
+									>2026年2月最新版</span
 								>
 							</div>
 							<h2

@@ -19,7 +19,7 @@ const {
   description = "オンライン英会話のおすすめを目的別（総合/日常/ビジネス）に比較。料金・特徴・無料体験・公式サイト導線までまとめてチェックできます。",
   keywords = "オンライン英会話,オンライン英会話 おすすめ,おすすめ,人気,比較,ランキング",
   robots,
-  ogImage = "/eigoonline_logo.png",
+  ogImage = "/eigoonline_logo.webp",
   showHeader = true,
   headerOverlay = false,
 } = Astro.props satisfies Props;
@@ -31,7 +31,7 @@ const ogImageAbs = new URL(ogImage, siteUrl).toString();
 const defaultRobots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
 
 const orgName = "eigoonline";
-const orgLogo = new URL("/eigoonline_logo.png", siteUrl).toString();
+const orgLogo = new URL("/eigoonline_logo.webp", siteUrl).toString();
 const orgUrl = siteUrl.toString().replace(/\/$/, "");
 
 // Debug/deploy trace: helps confirm which build is being served (useful under CDN caching).

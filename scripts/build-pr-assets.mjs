@@ -16,7 +16,7 @@ const manifest = [
   {
     schoolId: "kimini",
     assets: [
-      { src: "public/kimini_detail_banner.png", out: "hero.webp", width: 1200 },
+      { src: "public/heroes/kimini_detail_banner.webp", out: "hero.webp", width: 1200 },
       { src: "public/banners/company-30.webp", out: "banner.webp", width: 1200 },
       { src: "public/logos/company-30.webp", out: "logo.webp", width: 600 },
     ],
