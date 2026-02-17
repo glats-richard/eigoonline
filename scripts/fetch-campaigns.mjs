@@ -16,15 +16,50 @@ const { Pool } = pg;
 
 const SCHOOLS_DIR = join(process.cwd(), 'src/content/schools');
 
+function isPlainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function applyCampaignOverrides(baseSchoolData, overrideData) {
+  if (!isPlainObject(baseSchoolData) || !isPlainObject(overrideData)) return baseSchoolData;
+  const out = { ...baseSchoolData };
+
+  // Only merge campaign-related fields that affect this script and site display.
+  for (const key of ['campaignText', 'campaignEndsAt', 'benefitText', 'campaignBullets']) {
+    if (overrideData[key] !== undefined) out[key] = overrideData[key];
+  }
+
+  return out;
+}
+
 async function main() {
-  // Connect to database
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  });
+  // Connect to database (optional in non-prod/test environments)
+  const databaseUrl = process.env.DATABASE_URL;
+  const pool = databaseUrl
+    ? new Pool({
+        connectionString: databaseUrl,
+      })
+    : null;
 
   try {
 
     const changes = [];
+
+    // Load overrides once (same source that site display uses).
+    // If the table doesn't exist yet, fall back gracefully.
+    let overridesBySchoolId = new Map();
+    try {
+      if (!pool) throw new Error('DATABASE_URL is not set');
+      const ovRes = await pool.query('SELECT school_id, data FROM school_overrides');
+      overridesBySchoolId = new Map(
+        (ovRes.rows || [])
+          .filter((r) => r && r.school_id)
+          .map((r) => [String(r.school_id), r.data || {}]),
+      );
+    } catch (e) {
+      // ignore (table may not exist yet)
+      overridesBySchoolId = new Map();
+    }
 
     // Read all school JSON files
     const files = await readdir(SCHOOLS_DIR);
@@ -34,7 +69,9 @@ async function main() {
       const schoolId = file.replace('.json', '');
       const filePath = join(SCHOOLS_DIR, file);
       const content = await readFile(filePath, 'utf-8');
-      const schoolData = JSON.parse(content);
+      const baseSchoolData = JSON.parse(content);
+      const override = overridesBySchoolId.get(schoolId) || null;
+      const schoolData = override ? applyCampaignOverrides(baseSchoolData, override) : baseSchoolData;
 
       // Check if campaign exists and is expired or expiring soon
       if (schoolData.campaignEndsAt) {
@@ -61,18 +98,20 @@ async function main() {
           changes.push(change);
 
           // Log to database
-          await pool.query(
-            `INSERT INTO campaign_logs 
-             (school_id, action, old_campaign_data, source_url, notes) 
-             VALUES ($1, $2, $3, $4, $5)`,
-            [
-              schoolId,
-              'detected',
-              change.currentCampaign,
-              schoolData.officialUrl,
-              `Campaign expired ${Math.abs(daysUntilEnd)} days ago`,
-            ]
-          );
+          if (pool) {
+            await pool.query(
+              `INSERT INTO campaign_logs 
+               (school_id, action, old_campaign_data, source_url, notes) 
+               VALUES ($1, $2, $3, $4, $5)`,
+              [
+                schoolId,
+                'detected',
+                change.currentCampaign,
+                schoolData.officialUrl,
+                `Campaign expired ${Math.abs(daysUntilEnd)} days ago`,
+              ]
+            );
+          }
         }
       } else {
         // No campaign information present
@@ -88,18 +127,20 @@ async function main() {
         changes.push(change);
 
         // Log to database
-        await pool.query(
-          `INSERT INTO campaign_logs 
-           (school_id, action, old_campaign_data, source_url, notes) 
-           VALUES ($1, $2, $3, $4, $5)`,
-          [
-            schoolId,
-            'detected',
-            null,
-            schoolData.officialUrl,
-            'No campaign information found',
-          ]
-        );
+        if (pool) {
+          await pool.query(
+            `INSERT INTO campaign_logs 
+             (school_id, action, old_campaign_data, source_url, notes) 
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              schoolId,
+              'detected',
+              null,
+              schoolData.officialUrl,
+              'No campaign information found',
+            ]
+          );
+        }
       }
     }
 
@@ -116,7 +157,7 @@ async function main() {
     console.error('Error fetching campaigns:', error);
     process.exit(1);
   } finally {
-    await pool.end();
+    if (pool) await pool.end();
   }
 }
 
