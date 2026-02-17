@@ -3,7 +3,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 const SOURCE_URL =
-  "https://kimini.online/other/campaign/20260210_3months50off/img/PageHeader.jpg";
+  "https://kimini.online/other/campaign/20260217_freetrial30/img/PageHeader.jpg";
 
 const OUT_DIR = path.join(process.cwd(), "public", "banners");
 const OUT_1X = path.join(OUT_DIR, "kimini-3months50off-329.webp");
