@@ -8,6 +8,7 @@ type Props = {
 };
 
 const { logoSrc = "/eigoonline_logo.webp", logoAlt = "eigoonline.com", overlay = false } = Astro.props satisfies Props;
+const logoSrcset = logoSrc === "/eigoonline_logo.webp" ? "/eigoonline_logo-160.webp 160w, /eigoonline_logo.webp 320w" : undefined;
 ---
 
 <header
@@ -22,7 +23,9 @@ const { logoSrc = "/eigoonline_logo.webp", logoAlt = "eigoonline.com", overlay =
     <div class="flex items-center justify-between gap-3">
       <a href="/" class="flex shrink-0 items-center gap-3">
         <img
-          src={logoSrc}
+          src={logoSrc === "/eigoonline_logo.webp" ? "/eigoonline_logo-160.webp" : logoSrc}
+          srcset={logoSrcset}
+          sizes="140px"
           alt={logoAlt}
           width="140"
           height="48"

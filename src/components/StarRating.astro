@@ -11,9 +11,9 @@ const { value, max = 5, label = "評価", showValue = true, size = 18 } = Astro.
 const safe = typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(max, value)) : null;
 const rounded = safe === null ? null : Math.round(safe * 2) / 2;
 
-const STAR_FULL = "/star.webp";
-const STAR_HALF = "/star-half.webp";
-const STAR_GRAY = "/star-gray.webp";
+const STAR_FULL = "/star.webp"; // already small (64px)
+const STAR_HALF = "/star-half-64.webp";
+const STAR_GRAY = "/star-gray-64.webp";
 ---
 
 {safe === null ? (

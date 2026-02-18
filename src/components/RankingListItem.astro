@@ -38,6 +38,47 @@ const preferWebpForKnownPng = (url: string) => {
   return url;
 };
 
+const responsiveHero = (url: string) => {
+  if (url === "/kimini_detail_banner.webp") {
+    return {
+      width: 1024,
+      height: 534,
+      src: "/kimini_detail_banner.webp",
+      srcset: "/kimini_detail_banner-480.webp 480w, /kimini_detail_banner-640.webp 640w, /kimini_detail_banner-768.webp 768w, /kimini_detail_banner.webp 1024w",
+      sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 900px, 1024px",
+    };
+  }
+  if (url === "/heroes/kimini_detail_banner.webp") {
+    return {
+      width: 1400,
+      height: 730,
+      src: "/heroes/kimini_detail_banner.webp",
+      srcset:
+        "/heroes/kimini_detail_banner-700.webp 700w, /heroes/kimini_detail_banner-900.webp 900w, /heroes/kimini_detail_banner-1100.webp 1100w, /heroes/kimini_detail_banner.webp 1400w",
+      sizes: "(max-width: 640px) 100vw, (max-width: 1280px) 900px, 1400px",
+    };
+  }
+  return null;
+};
+
+const responsiveLogo = (url: string) => {
+  if (url === "/logos/company-30.webp") {
+    return {
+      src: "/logos/company-30-320.webp",
+      srcset: "/logos/company-30-320.webp 320w, /logos/company-30.webp 581w",
+      sizes: "160px",
+    };
+  }
+  if (url === "/logos/company-50.webp") {
+    return {
+      src: "/logos/company-50-320.webp",
+      srcset: "/logos/company-50-320.webp 320w, /logos/company-50.webp 596w",
+      sizes: "160px",
+    };
+  }
+  return null;
+};
+
 const stripLeadingBullet = (v: unknown): string =>
   String(v ?? "")
     .replace(/^[\s\u3000]+/, "")
@@ -123,30 +164,59 @@ const displayDays = promoDays ?? baseDays;
       class="block overflow-hidden rounded-t-2xl"
       aria-label={`${item.name}の詳細ページへ`}
     >
-      <img
-        src={preferWebpForKnownPng(item.heroImageUrl)}
-        alt={item.heroImageAlt ?? `${item.name} アイキャッチ`}
-        width="1024"
-        height="565"
-        loading="lazy"
-        decoding="async"
-        class="h-auto w-full object-contain"
-      />
+      {(() => {
+        const heroUrl = preferWebpForKnownPng(item.heroImageUrl as string);
+        const r = responsiveHero(heroUrl);
+        if (r) {
+          return (
+            <picture>
+              <source type="image/webp" srcset={r.srcset} sizes={r.sizes} />
+              <img
+                src={r.src}
+                alt={item.heroImageAlt ?? `${item.name} アイキャッチ`}
+                width={String(r.width)}
+                height={String(r.height)}
+                loading="lazy"
+                decoding="async"
+                class="h-auto w-full object-contain"
+              />
+            </picture>
+          );
+        }
+        return (
+          <img
+            src={heroUrl}
+            alt={item.heroImageAlt ?? `${item.name} アイキャッチ`}
+            width="1024"
+            height="565"
+            loading="lazy"
+            decoding="async"
+            class="h-auto w-full object-contain"
+          />
+        );
+      })()}
     </a>
   ) : null}
 
   <div class="grid grid-cols-[96px_1fr] gap-3 p-3 sm:grid-cols-[140px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
     <div class="flex h-16 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 p-2 sm:h-auto sm:p-3">
       {item.logoUrl ? (
-        <img
-          src={item.logoUrl}
-          alt={`${item.name} ロゴ`}
-          width="160"
-          height="64"
-          loading="lazy"
-          decoding="async"
-          class="h-12 w-auto max-w-full object-contain"
-        />
+        (() => {
+          const lr = responsiveLogo(item.logoUrl as string);
+          return (
+            <img
+              src={lr?.src ?? item.logoUrl}
+              srcset={lr?.srcset}
+              sizes={lr?.sizes}
+              alt={`${item.name} ロゴ`}
+              width="160"
+              height="64"
+              loading="lazy"
+              decoding="async"
+              class="h-12 w-auto max-w-full object-contain"
+            />
+          );
+        })()
       ) : (
         <div class="text-sm font-semibold text-zinc-600">{item.name}</div>
       )}

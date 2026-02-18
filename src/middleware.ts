@@ -95,6 +95,18 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     // Don't touch API responses (dynamic).
     if (pathname.startsWith("/api/")) return res;
 
+    // Prevent long-lived caching of errors/redirects (CDNs may cache these aggressively).
+    // - 4xx/5xx: never store
+    // - 3xx: short TTL only
+    if (res.status >= 400) {
+      res.headers.set("Cache-Control", "no-store");
+      return res;
+    }
+    if (res.status >= 300 && res.status < 400) {
+      res.headers.set("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
+      return res;
+    }
+
     // HTML: allow short edge caching + long SWR to improve FCP/LCP under CDN.
     // Keep tracker/admin paths fully dynamic.
     const contentType = res.headers.get("content-type") ?? "";
