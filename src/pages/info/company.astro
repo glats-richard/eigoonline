@@ -3,7 +3,6 @@ import Layout from "../../layouts/Layout.astro";
 const updatedAt = "2026-02-10";
 const siteName = "eigoonline.com";
 const operatorName = "Moxie";
-const supportEmail = "support@eigoonline.com";
 ---
 
 <Layout title="運営者情報" description="当サイトの運営者情報・お問い合わせ先を掲載しています。">
@@ -42,7 +41,15 @@ const supportEmail = "support@eigoonline.com";
             <tr class="[&_td]:border-t [&_td]:border-zinc-200">
               <td class="bg-zinc-50 p-3 font-extrabold text-zinc-700">お問い合わせ</td>
               <td class="p-3">
-                <a class="link-brand font-extrabold underline underline-offset-2" href={`mailto:${supportEmail}`}>{supportEmail}</a>
+                <a
+                  class="link-brand font-extrabold underline underline-offset-2"
+                  href="#"
+                  data-email-user="support"
+                  data-email-domain="eigoonline.com"
+                >
+                  support (at) eigoonline.com
+                </a>
+                <noscript>support (at) eigoonline.com</noscript>
               </td>
             </tr>
             <tr class="[&_td]:border-t [&_td]:border-zinc-200">

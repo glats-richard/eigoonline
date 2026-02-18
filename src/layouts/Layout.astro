@@ -93,11 +93,27 @@ const jsonLd = [
           <!-- Google Tag Manager -->
           <script is:inline>
             // @ts-nocheck
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;if(f&&f.parentNode){f.parentNode.insertBefore(j,f);}
-            })(window,document,'script','dataLayer','GTM-WN37MRC9');
+            (function () {
+              // Initialize dataLayer early, but defer downloading gtm.js off the critical path.
+              window.dataLayer = window.dataLayer || [];
+              window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+
+              function loadGtm() {
+                if (window.__gtmLoaded) return;
+                window.__gtmLoaded = true;
+                var d = document;
+                var s = d.createElement("script");
+                s.async = true;
+                s.src = "https://www.googletagmanager.com/gtm.js?id=GTM-WN37MRC9";
+                d.head.appendChild(s);
+              }
+
+              if ("requestIdleCallback" in window) {
+                requestIdleCallback(loadGtm, { timeout: 2000 });
+              } else {
+                window.addEventListener("load", loadGtm, { once: true });
+              }
+            })();
           </script>
           <!-- End Google Tag Manager -->
         </>
@@ -156,6 +172,24 @@ const jsonLd = [
     {buildId ? <span class="sr-only" data-build-id={buildId}>build:{buildId}</span> : null}
     <slot />
     <SiteFooter />
+    <script is:inline>
+      // Populate mailto links at runtime to avoid exposing addresses in HTML.
+      // This also prevents CDN email-obfuscation scripts from being injected into the critical path.
+      (function () {
+        try {
+          var nodes = document.querySelectorAll("a[data-email-user][data-email-domain]");
+          if (!nodes || !nodes.length) return;
+          nodes.forEach(function (a) {
+            var user = a.getAttribute("data-email-user") || "";
+            var domain = a.getAttribute("data-email-domain") || "";
+            if (!user || !domain) return;
+            var addr = user + "@" + domain;
+            a.textContent = addr;
+            a.setAttribute("href", "mailto:" + addr);
+          });
+        } catch (e) {}
+      })();
+    </script>
   </body>
 </html>
 
