@@ -19,6 +19,13 @@ create table if not exists reviews (
   price_rating numeric(3,1) not null check (price_rating >= 1 and price_rating <= 5),
   satisfaction_rating numeric(3,1) not null check (satisfaction_rating >= 1 and satisfaction_rating <= 5),
   body text not null,
+  -- Optional: improvement requests / complaints (free text)
+  improvement_points text,
+  -- Optional: learning context (course/material/frequency/time band)
+  course_name text,
+  material_unit text,
+  lesson_frequency text,
+  lesson_time_band text,
   -- Privacy: collect birth year/month only (no birth day).
   birth_year smallint not null check (birth_year >= 1900 and birth_year <= 2100),
   birth_month smallint not null check (birth_month >= 1 and birth_month <= 12),
@@ -57,6 +64,11 @@ alter table reviews add column if not exists connection_quality numeric(3,1);
 alter table reviews add column if not exists price_rating numeric(3,1);
 alter table reviews add column if not exists satisfaction_rating numeric(3,1);
 alter table reviews add column if not exists body text;
+alter table reviews add column if not exists improvement_points text;
+alter table reviews add column if not exists course_name text;
+alter table reviews add column if not exists material_unit text;
+alter table reviews add column if not exists lesson_frequency text;
+alter table reviews add column if not exists lesson_time_band text;
 alter table reviews add column if not exists birth_year smallint;
 alter table reviews add column if not exists birth_month smallint;
 alter table reviews add column if not exists age text;

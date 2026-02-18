@@ -200,6 +200,7 @@ type DbReview = {
   created_at: string | null;
   overall_rating: number | null;
   body: string | null;
+  improvement_points?: string | null;
   birth_year: number | null;
   birth_month: number | null;
   age: string | null; // legacy
@@ -207,7 +208,14 @@ type DbReview = {
   duration_months: number | null;
 };
 
-type DisplayReview = { label: string; rating: number; body: string; createdAt: string | null; studyPeriod: string | null };
+type DisplayReview = {
+  label: string;
+  rating: number;
+  body: string;
+  improvementPoints?: string | null;
+  createdAt: string | null;
+  studyPeriod: string | null;
+};
 
 let dbLatest: DisplayReview[] = [];
 let dbCount = 0;
@@ -264,6 +272,7 @@ try {
       r.nickname || "ユーザー",
     rating: r.overall_rating ?? 0,
     body: r.body ?? "",
+    improvementPoints: r.improvement_points ?? null,
     createdAt: r.created_at ?? null,
     studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
   }));
@@ -612,6 +621,7 @@ if (school) {
           reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
         };
         if (r.createdAt) review.datePublished = r.createdAt;
+        if (r.improvementPoints) review.negativeNotes = r.improvementPoints;
         return review;
       });
   }

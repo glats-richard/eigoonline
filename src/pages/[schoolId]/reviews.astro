@@ -44,6 +44,7 @@ type DbApprovedReviewRow = DBReviewRow & {
   id: number;
   created_at: string;
   body: string;
+  improvement_points?: string | null;
   featured_rank?: number | null;
   birth_year?: number | null;
   birth_month?: number | null;
@@ -126,6 +127,7 @@ try {
       price_rating,
       satisfaction_rating,
       body,
+      improvement_points,
       birth_year,
       birth_month,
       age,
@@ -148,6 +150,7 @@ const dbDisplayReviews = dbApprovedReviews.map((r) => ({
   age: r.nickname || "ユーザー",
   rating: typeof r.overall_rating === "number" ? r.overall_rating : 0,
   body: r.body,
+  improvementPoints: r.improvement_points ?? null,
   createdAt: r.created_at,
   studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
   teacherQuality: r.teacher_quality,
@@ -505,9 +508,11 @@ const formatJpDate = (isoLike: string) => {
               <div class="flex flex-wrap gap-2">
                 <a
                   class="inline-flex items-center justify-center rounded-xl bg-[color:var(--brand-link)] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm hover:opacity-90 transition-opacity"
-                  href={`/review/submit?school_id=${encodeURIComponent(
-                    schoolId
-                  )}`}
+                  href={
+                    schoolId === "kimini"
+                      ? `/review/submit?school_id=${encodeURIComponent(schoolId)}&from=kimini_reviews`
+                      : `/review/submit?school_id=${encodeURIComponent(schoolId)}`
+                  }
                 >
                   このサービスのレビューを投稿する
                 </a>
@@ -726,6 +731,19 @@ const formatJpDate = (isoLike: string) => {
                     </div>
 
                     <p class="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">{r.body}</p>
+                    {r.improvementPoints ? (
+                      <dl
+                        class="mt-3 rounded-lg border border-zinc-200 bg-white/60 p-3"
+                        data-review-negative-notes
+                      >
+                        <div>
+                          <dt class="text-xs font-extrabold text-zinc-600">改善点</dt>
+                          <dd class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">
+                            {r.improvementPoints}
+                          </dd>
+                        </div>
+                      </dl>
+                    ) : null}
                   </article>
                   ))}
                 </div>

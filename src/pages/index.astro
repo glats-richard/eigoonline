@@ -76,6 +76,7 @@ type DbFeaturedReviewRow = {
 	featured_rank: number | null;
 	overall_rating: number | null;
 	body: string | null;
+	improvement_points: string | null;
 	nickname: string | null;
 	duration_months: number | null;
 };
@@ -114,7 +115,7 @@ try {
 	// Featured reviews per school (1-5) only
 	const featuredRes = await query<DbFeaturedReviewRow>(
 		`
-		select school_id, created_at, featured_rank, overall_rating, body, nickname, duration_months
+		select school_id, created_at, featured_rank, overall_rating, body, improvement_points, nickname, duration_months
 		from reviews
 		where
 			status = 'approved'
@@ -138,7 +139,7 @@ try {
 // - Fall back to static reviews if no approved DB reviews exist
 const reviewsBySchoolId = new Map<
 	string,
-	{ age: string; rating: number; body: string }[]
+	{ age: string; rating: number; body: string; studyPeriod?: string | null; improvementPoints?: string | null }[]
 >();
 for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
 	reviewsBySchoolId.set(schoolId, [...staticItems]);
@@ -151,6 +152,7 @@ for (const [schoolId, rows] of dbFeaturedReviewsBySchoolId) {
 			age: r.nickname || "ユーザー",
 			rating: r.overall_rating as number,
 			body: r.body as string,
+			improvementPoints: r.improvement_points ?? null,
 			studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
 		}));
 	if (display.length) reviewsBySchoolId.set(schoolId, display);
@@ -336,7 +338,7 @@ for (const [schoolId, schoolData] of schoolsById) {
 				Number.isFinite(review.overall_rating) &&
 				review.body
 			) {
-				reviewObjects.push({
+				const obj: any = {
 					"@type": "Review",
 					author: {
 						"@type": "Person",
@@ -349,7 +351,9 @@ for (const [schoolId, schoolData] of schoolsById) {
 						worstRating: 1,
 					},
 					reviewBody: review.body,
-				});
+				};
+				if (review.improvement_points) obj.negativeNotes = review.improvement_points;
+				reviewObjects.push(obj);
 			}
 		}
 

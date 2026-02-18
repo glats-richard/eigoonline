@@ -20,6 +20,11 @@ type ReviewRow = {
   price_rating?: number | null;
   satisfaction_rating?: number | null;
   body?: string | null;
+  improvement_points?: string | null;
+  course_name?: string | null;
+  material_unit?: string | null;
+  lesson_frequency?: string | null;
+  lesson_time_band?: string | null;
   birth_year?: number | null;
   birth_month?: number | null;
   age?: string | null;
@@ -467,6 +472,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                 <th class="px-4 py-3">安さ</th>
                 <th class="px-4 py-3">満足度</th>
                 <th class="px-4 py-3">口コミ本文</th>
+                <th class="px-4 py-3">改善点</th>
                 <th class="px-4 py-3">誕生年月</th>
                 <th class="px-4 py-3">Email</th>
                 <th class="px-4 py-3">ステータス</th>
@@ -517,6 +523,14 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                       {r.body ? shortText(r.body, 100) : "—"}
                     </span>
                   </td>
+                  <td class="px-4 py-3 text-xs text-zinc-700">
+                    <span
+                      class="inline-block max-w-[240px] truncate align-top"
+                      title={r.improvement_points ?? ""}
+                    >
+                      {r.improvement_points ? shortText(r.improvement_points, 80) : "—"}
+                    </span>
+                  </td>
                   <td class="px-4 py-3 whitespace-nowrap text-xs text-zinc-700">{fmtBirthYm(r)}</td>
                   <td class="px-4 py-3 text-xs text-zinc-700">
                     <span class="inline-block max-w-[200px] truncate align-top" title={r.email ?? ""}>
@@ -553,6 +567,28 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">口コミ本文（全文）</div>
                           <div class="break-words text-xs">{r.body ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">改善点（自由記述）</div>
+                          <div class="break-words text-xs" data-review-negative-notes>
+                            {r.improvement_points ?? "—"}
+                          </div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">受講したコース名</div>
+                          <div class="break-words text-xs">{r.course_name ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">教材ユニット番号</div>
+                          <div class="break-words text-xs">{r.material_unit ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">受講頻度</div>
+                          <div class="break-words text-xs">{r.lesson_frequency ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">主な受講時間帯</div>
+                          <div class="break-words text-xs">{r.lesson_time_band ?? "—"}</div>
                         </div>
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">継続月数（目安）</div>
@@ -603,7 +639,7 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
               ))}
               {!reviews.length ? (
                 <tr>
-                  <td class="px-4 py-6 text-center text-zinc-500" colspan="12">
+                  <td class="px-4 py-6 text-center text-zinc-500" colspan="16">
                     データなし
                   </td>
                 </tr>

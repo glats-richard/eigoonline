@@ -156,6 +156,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const priceRatingRaw = formData.get("price_rating");
   const satisfactionRatingRaw = formData.get("satisfaction_rating");
   const body = String(formData.get("body") ?? "").trim();
+  const sourceContext = String(formData.get("source_context") ?? "").trim();
+  const improvementPointsRaw = String(formData.get("improvement_points") ?? "").trim();
+  const courseName = String(formData.get("course_name") ?? "").trim().slice(0, 120) || null;
+  const materialUnit = String(formData.get("material_unit") ?? "").trim().slice(0, 60) || null;
+  const lessonFrequency = String(formData.get("lesson_frequency") ?? "").trim().slice(0, 20) || null;
+  const lessonTimeBand = String(formData.get("lesson_time_band") ?? "").trim().slice(0, 20) || null;
   const email = String(formData.get("email") ?? "").trim().slice(0, 255) || null;
   const birthYear = toInt(formData.get("birth_year"));
   const birthMonth = toInt(formData.get("birth_month"));
@@ -282,6 +288,20 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const referrer = h.get("referer");
   const userAgent = h.get("user-agent");
 
+  const allowImprovementPoints =
+    schoolId === "kimini" &&
+    (sourceContext === "kimini_reviews" || Boolean(referrer && referrer.includes("/kimini/reviews")));
+  const improvementPoints = allowImprovementPoints
+    ? (improvementPointsRaw.length ? improvementPointsRaw : null)
+    : null;
+
+  if (improvementPoints && improvementPoints.length > 500) {
+    return new Response(JSON.stringify({ ok: false, error: "improvement_points must be 500 characters or less" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   const cfConnectingIp = h.get("cf-connecting-ip");
   const xForwardedFor = h.get("x-forwarded-for");
   const ip = cfConnectingIp ?? firstForwardedIp(xForwardedFor) ?? firstForwardedIp(h.get("x-real-ip")) ?? null;
@@ -326,8 +346,33 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Insert review
   try {
     await query(
-      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer, nickname) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)",
-      [schoolId, "pending", durationMonths, overallRating, teacherQuality, materialQuality, connectionQuality, priceRating, satisfactionRating, body, birthYear, birthMonth, email, ip, ipHash, ipVer, userAgent, referrer, nickname],
+      "insert into reviews (school_id, status, duration_months, overall_rating, teacher_quality, material_quality, connection_quality, price_rating, satisfaction_rating, body, improvement_points, course_name, material_unit, lesson_frequency, lesson_time_band, birth_year, birth_month, email, ip, ip_hash, ip_version, user_agent, referrer, nickname) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)",
+      [
+        schoolId,
+        "pending",
+        durationMonths,
+        overallRating,
+        teacherQuality,
+        materialQuality,
+        connectionQuality,
+        priceRating,
+        satisfactionRating,
+        body,
+        improvementPoints,
+        courseName,
+        materialUnit,
+        lessonFrequency,
+        lessonTimeBand,
+        birthYear,
+        birthMonth,
+        email,
+        ip,
+        ipHash,
+        ipVer,
+        userAgent,
+        referrer,
+        nickname,
+      ],
     );
   } catch (e: any) {
     return new Response(JSON.stringify({ ok: false, error: e?.message ?? String(e) }), {
@@ -351,6 +396,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     price_rating: String(priceRating),
     satisfaction_rating: String(satisfactionRating),
     body,
+    improvement_points: improvementPoints ?? "",
+    course_name: courseName ?? "",
+    material_unit: materialUnit ?? "",
+    lesson_frequency: lessonFrequency ?? "",
+    lesson_time_band: lessonTimeBand ?? "",
     nickname: nickname ?? "",
     duration_months: String(durationMonths),
     birth_year: String(birthYear),

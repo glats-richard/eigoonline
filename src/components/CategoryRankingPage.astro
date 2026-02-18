@@ -58,8 +58,17 @@ type DbAggRow = { school_id: string; count: number; avg: number | null };
 const dbAggBySchoolId = new Map<string, { count: number; avg: number | null }>();
 
 // Featured(1-5)のみ、表示用レビューとして取得
-type DbFeaturedRow = { school_id: string; nickname: string | null; overall_rating: number | null; body: string | null };
-const dbFeaturedBySchoolId = new Map<string, { age: string; rating: number; body: string }[]>();
+type DbFeaturedRow = {
+  school_id: string;
+  nickname: string | null;
+  overall_rating: number | null;
+  body: string | null;
+  improvement_points: string | null;
+};
+const dbFeaturedBySchoolId = new Map<
+  string,
+  { age: string; rating: number; body: string; improvementPoints?: string | null }[]
+>();
 if (!dbEnvError && items.length) {
   try {
     const ids = items.map((x) => x.id);
@@ -73,13 +82,18 @@ if (!dbEnvError && items.length) {
     }
 
     const feat = await query<DbFeaturedRow>(
-      "select school_id, nickname, overall_rating, body from reviews where status = 'approved' and featured_rank between 1 and 5 and overall_rating is not null and body is not null and school_id = any($1::text[]) order by school_id asc, featured_rank asc",
+      "select school_id, nickname, overall_rating, body, improvement_points from reviews where status = 'approved' and featured_rank between 1 and 5 and overall_rating is not null and body is not null and school_id = any($1::text[]) order by school_id asc, featured_rank asc",
       [ids],
     );
     for (const r of feat.rows ?? []) {
       if (typeof r.overall_rating !== "number" || !Number.isFinite(r.overall_rating) || !r.body) continue;
       const existing = dbFeaturedBySchoolId.get(r.school_id) ?? [];
-      existing.push({ age: r.nickname || "ユーザー", rating: r.overall_rating, body: r.body });
+      existing.push({
+        age: r.nickname || "ユーザー",
+        rating: r.overall_rating,
+        body: r.body,
+        improvementPoints: r.improvement_points ?? null,
+      });
       dbFeaturedBySchoolId.set(r.school_id, existing);
     }
   } catch {
