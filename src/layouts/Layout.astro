@@ -29,6 +29,8 @@ const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageAbs = new URL(ogImage, siteUrl).toString();
 
 const defaultRobots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
+const robotsValue = robots ?? defaultRobots;
+const disableThirdParty = /\bnoindex\b/i.test(robotsValue);
 
 const orgName = "eigoonline";
 const orgLogo = new URL("/eigoonline_logo.webp", siteUrl).toString();
@@ -79,22 +81,28 @@ const jsonLd = [
     <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <!-- Speed up GTM connection -->
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
-    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
-    <!-- Speed up Quoriza SDK connection (loaded via tags) -->
-    <link rel="preconnect" href="https://rc.quoriza.net" crossorigin />
-    <link rel="dns-prefetch" href="//rc.quoriza.net" />
-    <!-- Google Tag Manager -->
-    <script is:inline>
-      // @ts-nocheck
-      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;if(f&&f.parentNode){f.parentNode.insertBefore(j,f);}
-      })(window,document,'script','dataLayer','GTM-WN37MRC9');
-    </script>
-    <!-- End Google Tag Manager -->
+    {
+      !disableThirdParty ? (
+        <>
+          <!-- Speed up GTM connection -->
+          <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+          <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+          <!-- Speed up Quoriza SDK connection (loaded via tags) -->
+          <link rel="preconnect" href="https://rc.quoriza.net" crossorigin />
+          <link rel="dns-prefetch" href="//rc.quoriza.net" />
+          <!-- Google Tag Manager -->
+          <script is:inline>
+            // @ts-nocheck
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;if(f&&f.parentNode){f.parentNode.insertBefore(j,f);}
+            })(window,document,'script','dataLayer','GTM-WN37MRC9');
+          </script>
+          <!-- End Google Tag Manager -->
+        </>
+      ) : null
+    }
     <!-- Referrer policy:
          - Same-origin requests (e.g. /tracker -> /api/tracker/*) include Referer
          - Cross-origin requests do not leak Referer -->
@@ -102,7 +110,7 @@ const jsonLd = [
     <!-- Disable legacy interest-cohort/FLoC-style tracking -->
     <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
 
-    <meta name="robots" content={robots ?? defaultRobots} />
+    <meta name="robots" content={robotsValue} />
     <meta name="keywords" content={keywords} />
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -128,16 +136,22 @@ const jsonLd = [
     <slot name="head" />
   </head>
   <body class="min-h-dvh overflow-x-hidden bg-transparent antialiased">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript>
-      <iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-WN37MRC9"
-        height="0"
-        width="0"
-        style="display:none;visibility:hidden"
-      ></iframe>
-    </noscript>
-    <!-- End Google Tag Manager (noscript) -->
+    {
+      !disableThirdParty ? (
+        <>
+          <!-- Google Tag Manager (noscript) -->
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-WN37MRC9"
+              height="0"
+              width="0"
+              style="display:none;visibility:hidden"
+            ></iframe>
+          </noscript>
+          <!-- End Google Tag Manager (noscript) -->
+        </>
+      ) : null
+    }
     {showHeader ? <SiteHeader overlay={headerOverlay} /> : null}
     {buildId ? <span class="sr-only" data-build-id={buildId}>build:{buildId}</span> : null}
     <slot />

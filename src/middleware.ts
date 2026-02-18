@@ -95,6 +95,17 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     // Don't touch API responses (dynamic).
     if (pathname.startsWith("/api/")) return res;
 
+    // HTML: allow short edge caching + long SWR to improve FCP/LCP under CDN.
+    // Keep tracker/admin paths fully dynamic.
+    const contentType = res.headers.get("content-type") ?? "";
+    const isHtml = contentType.includes("text/html");
+    const isPublicPage = !pathname.startsWith("/tracker");
+    if (isHtml && isPublicPage) {
+      // Browser always revalidates; CDN may serve fresh for 5 min and SWR for 1 day.
+      res.headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=86400");
+      return res;
+    }
+
     // Build assets are fingerprinted → safe to cache for 1 year.
     if (pathname.startsWith("/_astro/")) {
       res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
