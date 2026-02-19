@@ -111,10 +111,11 @@ body {
     contain-intrinsic-size: 1000px;
   }
 
-  /* Long detail cards inside #details */
-  #details .rank-card {
+  /* Card lists: skip offscreen rendering */
+  .rank-card {
     content-visibility: auto;
-    contain-intrinsic-size: 900px;
+    /* width height */
+    contain-intrinsic-size: 1px 500px;
   }
 }
 
