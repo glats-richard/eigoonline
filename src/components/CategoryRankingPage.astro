@@ -64,10 +64,11 @@ type DbFeaturedRow = {
   overall_rating: number | null;
   body: string | null;
   improvement_points: string | null;
+  improvement_points_response: string | null;
 };
 const dbFeaturedBySchoolId = new Map<
   string,
-  { age: string; rating: number; body: string; improvementPoints?: string | null }[]
+  { age: string; rating: number; body: string; improvementPoints?: string | null; companyResponse?: string | null }[]
 >();
 if (!dbEnvError && items.length) {
   try {
@@ -82,7 +83,7 @@ if (!dbEnvError && items.length) {
     }
 
     const feat = await query<DbFeaturedRow>(
-      "select school_id, nickname, overall_rating, body, improvement_points from reviews where status = 'approved' and featured_rank between 1 and 5 and overall_rating is not null and body is not null and school_id = any($1::text[]) order by school_id asc, featured_rank asc",
+      "select school_id, nickname, overall_rating, body, improvement_points, improvement_points_response from reviews where status = 'approved' and featured_rank between 1 and 5 and overall_rating is not null and body is not null and school_id = any($1::text[]) order by school_id asc, featured_rank asc",
       [ids],
     );
     for (const r of feat.rows ?? []) {
@@ -93,6 +94,7 @@ if (!dbEnvError && items.length) {
         rating: r.overall_rating,
         body: r.body,
         improvementPoints: r.improvement_points ?? null,
+        companyResponse: r.improvement_points_response ?? null,
       });
       dbFeaturedBySchoolId.set(r.school_id, existing);
     }

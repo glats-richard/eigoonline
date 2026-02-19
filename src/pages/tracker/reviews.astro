@@ -21,6 +21,8 @@ type ReviewRow = {
   satisfaction_rating?: number | null;
   body?: string | null;
   improvement_points?: string | null;
+  improvement_points_response?: string | null;
+  improvement_points_responded_at?: string | Date | null;
   course_name?: string | null;
   material_unit?: string | null;
   lesson_frequency?: string | null;
@@ -573,6 +575,44 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                           <div class="break-words text-xs" data-review-negative-notes>
                             {r.improvement_points ?? "—"}
                           </div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">企業回答（1回のみ登録可）</div>
+                          {r.improvement_points ? (
+                            r.improvement_points_response ? (
+                              <div class="break-words text-xs">
+                                {r.improvement_points_response}
+                                {r.improvement_points_responded_at ? (
+                                  <span class="ml-2 text-[11px] font-semibold text-zinc-500">
+                                    （{fmtDate(r.improvement_points_responded_at)}）
+                                  </span>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <form method="post" action="/api/tracker/review-improvement-response" class="mt-1 space-y-2">
+                                <input type="hidden" name="id" value={String(r.id ?? "")} />
+                                <input type="hidden" name="returnTo" value={returnTo} />
+                                <textarea
+                                  name="improvement_points_response"
+                                  rows="3"
+                                  maxlength="800"
+                                  placeholder="企業としての回答を入力してください（登録は1回のみ）"
+                                  class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-link)]"
+                                  required
+                                />
+                                <div class="flex items-center justify-end gap-2">
+                                  <button
+                                    type="submit"
+                                    class="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-zinc-800"
+                                  >
+                                    回答を登録
+                                  </button>
+                                </div>
+                              </form>
+                            )
+                          ) : (
+                            <div class="break-words text-xs">—</div>
+                          )}
                         </div>
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">受講したコース名</div>

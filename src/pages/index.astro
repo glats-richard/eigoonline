@@ -77,6 +77,7 @@ type DbFeaturedReviewRow = {
 	overall_rating: number | null;
 	body: string | null;
 	improvement_points: string | null;
+	improvement_points_response: string | null;
 	nickname: string | null;
 	duration_months: number | null;
 };
@@ -115,7 +116,7 @@ try {
 	// Featured reviews per school (1-5) only
 	const featuredRes = await query<DbFeaturedReviewRow>(
 		`
-		select school_id, created_at, featured_rank, overall_rating, body, improvement_points, nickname, duration_months
+		select school_id, created_at, featured_rank, overall_rating, body, improvement_points, improvement_points_response, nickname, duration_months
 		from reviews
 		where
 			status = 'approved'
@@ -139,7 +140,7 @@ try {
 // - Fall back to static reviews if no approved DB reviews exist
 const reviewsBySchoolId = new Map<
 	string,
-	{ age: string; rating: number; body: string; studyPeriod?: string | null; improvementPoints?: string | null }[]
+	{ age: string; rating: number; body: string; studyPeriod?: string | null; improvementPoints?: string | null; companyResponse?: string | null }[]
 >();
 for (const [schoolId, staticItems] of staticReviewsBySchoolId) {
 	reviewsBySchoolId.set(schoolId, [...staticItems]);
@@ -153,6 +154,7 @@ for (const [schoolId, rows] of dbFeaturedReviewsBySchoolId) {
 			rating: r.overall_rating as number,
 			body: r.body as string,
 			improvementPoints: r.improvement_points ?? null,
+			companyResponse: r.improvement_points_response ?? null,
 			studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
 		}));
 	if (display.length) reviewsBySchoolId.set(schoolId, display);

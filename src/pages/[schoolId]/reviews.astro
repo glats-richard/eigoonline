@@ -45,6 +45,7 @@ type DbApprovedReviewRow = DBReviewRow & {
   created_at: string;
   body: string;
   improvement_points?: string | null;
+  improvement_points_response?: string | null;
   featured_rank?: number | null;
   birth_year?: number | null;
   birth_month?: number | null;
@@ -128,6 +129,7 @@ try {
       satisfaction_rating,
       body,
       improvement_points,
+      improvement_points_response,
       birth_year,
       birth_month,
       age,
@@ -151,6 +153,7 @@ const dbDisplayReviews = dbApprovedReviews.map((r) => ({
   rating: typeof r.overall_rating === "number" ? r.overall_rating : 0,
   body: r.body,
   improvementPoints: r.improvement_points ?? null,
+  companyResponse: r.improvement_points_response ?? null,
   createdAt: r.created_at,
   studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
   teacherQuality: r.teacher_quality,

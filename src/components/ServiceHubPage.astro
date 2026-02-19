@@ -201,6 +201,7 @@ type DbReview = {
   overall_rating: number | null;
   body: string | null;
   improvement_points?: string | null;
+  improvement_points_response?: string | null;
   birth_year: number | null;
   birth_month: number | null;
   age: string | null; // legacy
@@ -213,6 +214,7 @@ type DisplayReview = {
   rating: number;
   body: string;
   improvementPoints?: string | null;
+  companyResponse?: string | null;
   createdAt: string | null;
   studyPeriod: string | null;
 };
@@ -273,6 +275,7 @@ try {
     rating: r.overall_rating ?? 0,
     body: r.body ?? "",
     improvementPoints: r.improvement_points ?? null,
+    companyResponse: r.improvement_points_response ?? null,
     createdAt: r.created_at ?? null,
     studyPeriod: r.duration_months ? `${r.duration_months}ヶ月` : null,
   }));

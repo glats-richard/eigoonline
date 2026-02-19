@@ -21,6 +21,9 @@ create table if not exists reviews (
   body text not null,
   -- Optional: improvement requests / complaints (free text)
   improvement_points text,
+  -- Optional: company response to improvement points (one-time)
+  improvement_points_response text,
+  improvement_points_responded_at timestamptz,
   -- Optional: learning context (course/material/frequency/time band)
   course_name text,
   material_unit text,
@@ -65,6 +68,8 @@ alter table reviews add column if not exists price_rating numeric(3,1);
 alter table reviews add column if not exists satisfaction_rating numeric(3,1);
 alter table reviews add column if not exists body text;
 alter table reviews add column if not exists improvement_points text;
+alter table reviews add column if not exists improvement_points_response text;
+alter table reviews add column if not exists improvement_points_responded_at timestamptz;
 alter table reviews add column if not exists course_name text;
 alter table reviews add column if not exists material_unit text;
 alter table reviews add column if not exists lesson_frequency text;
