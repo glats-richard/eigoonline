@@ -27,6 +27,7 @@ type ReviewRow = {
   material_unit?: string | null;
   lesson_frequency?: string | null;
   lesson_time_band?: string | null;
+  other_comment?: string | null;
   birth_year?: number | null;
   birth_month?: number | null;
   age?: string | null;
@@ -621,6 +622,10 @@ if (totalReviewsErr) errors.push(`totalReviews: ${totalReviewsErr.message}`);
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">教材ユニット番号</div>
                           <div class="break-words text-xs">{r.material_unit ?? "—"}</div>
+                        </div>
+                        <div>
+                          <div class="text-[11px] font-extrabold text-zinc-500">その他・コメント</div>
+                          <div class="break-words text-xs">{r.other_comment ?? "—"}</div>
                         </div>
                         <div>
                           <div class="text-[11px] font-extrabold text-zinc-500">受講頻度</div>

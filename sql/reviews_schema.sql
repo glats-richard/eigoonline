@@ -29,6 +29,8 @@ create table if not exists reviews (
   material_unit text,
   lesson_frequency text,
   lesson_time_band text,
+  -- Optional: other free-form comment (separate from review body)
+  other_comment text,
   -- Privacy: collect birth year/month only (no birth day).
   birth_year smallint not null check (birth_year >= 1900 and birth_year <= 2100),
   birth_month smallint not null check (birth_month >= 1 and birth_month <= 12),
@@ -74,6 +76,7 @@ alter table reviews add column if not exists course_name text;
 alter table reviews add column if not exists material_unit text;
 alter table reviews add column if not exists lesson_frequency text;
 alter table reviews add column if not exists lesson_time_band text;
+alter table reviews add column if not exists other_comment text;
 alter table reviews add column if not exists birth_year smallint;
 alter table reviews add column if not exists birth_month smallint;
 alter table reviews add column if not exists age text;
