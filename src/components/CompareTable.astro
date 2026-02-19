@@ -217,6 +217,8 @@ const stripLeadingBullet = (v: unknown): string =>
                     <img
                       src={x.data.logoUrl}
                       alt={`${x.data.name} ロゴ`}
+                      width="112"
+                      height="28"
                       class="h-7 w-auto max-w-full object-contain"
                       loading="lazy"
                       decoding="async"
@@ -490,7 +492,15 @@ const stripLeadingBullet = (v: unknown): string =>
                 </div>
                 {x.data.logoUrl ? (
                   <div class="mt-2 flex items-center justify-center">
-                    <img src={x.data.logoUrl} alt={`${x.data.name} ロゴ`} class="h-10 w-auto max-w-full object-contain" loading="lazy" decoding="async" />
+                    <img
+                      src={x.data.logoUrl}
+                      alt={`${x.data.name} ロゴ`}
+                      width="160"
+                      height="40"
+                      class="h-10 w-auto max-w-full object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                 ) : null}
                         <a

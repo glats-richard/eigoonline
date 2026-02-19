@@ -3,6 +3,9 @@ import CTAButton from "./CTAButton.astro";
 import ReviewList from "./ReviewList.astro";
 import StarRating from "./StarRating.astro";
 import { getReviewStats } from "../utils/reviewStats";
+import { Picture } from "astro:assets";
+import kiminiDetailBanner from "../assets/kimini_detail_banner.webp";
+import kiminiHeroDetailBanner from "../assets/heroes/kimini_detail_banner.webp";
 
 type Item = {
   name: string;
@@ -41,21 +44,12 @@ const preferWebpForKnownPng = (url: string) => {
 const responsiveHero = (url: string) => {
   if (url === "/kimini_detail_banner.webp") {
     return {
-      width: 1024,
-      height: 534,
-      src: "/kimini_detail_banner.webp",
-      srcset: "/kimini_detail_banner-480.webp 480w, /kimini_detail_banner-640.webp 640w, /kimini_detail_banner-768.webp 768w, /kimini_detail_banner.webp 1024w",
-      sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 900px, 1024px",
+      asset: kiminiDetailBanner,
     };
   }
   if (url === "/heroes/kimini_detail_banner.webp") {
     return {
-      width: 1400,
-      height: 730,
-      src: "/heroes/kimini_detail_banner.webp",
-      srcset:
-        "/heroes/kimini_detail_banner-700.webp 700w, /heroes/kimini_detail_banner-900.webp 900w, /heroes/kimini_detail_banner-1100.webp 1100w, /heroes/kimini_detail_banner.webp 1400w",
-      sizes: "(max-width: 640px) 100vw, (max-width: 1280px) 900px, 1400px",
+      asset: kiminiHeroDetailBanner,
     };
   }
   return null;
@@ -169,18 +163,15 @@ const displayDays = promoDays ?? baseDays;
         const r = responsiveHero(heroUrl);
         if (r) {
           return (
-            <picture>
-              <source type="image/webp" srcset={r.srcset} sizes={r.sizes} />
-              <img
-                src={r.src}
-                alt={item.heroImageAlt ?? `${item.name} アイキャッチ`}
-                width={String(r.width)}
-                height={String(r.height)}
-                loading="lazy"
-                decoding="async"
-                class="h-auto w-full object-contain"
-              />
-            </picture>
+            <Picture
+              src={r.asset}
+              alt={item.heroImageAlt ?? `${item.name} アイキャッチ`}
+              widths={[400, 768, 1024]}
+              sizes="(max-width: 768px) 100vw, 1024px"
+              loading="lazy"
+              decoding="async"
+              class="h-auto w-full object-contain"
+            />
           );
         }
         return (
@@ -289,7 +280,7 @@ const displayDays = promoDays ?? baseDays;
 
       {highlightText ? (
         <div class="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-[#ffe8f2] px-3 py-2 ring-1 ring-[#ffc3dd]">
-          <span class="inline-flex items-center rounded-md bg-[#ff7ab6] px-2 py-1 text-xs font-extrabold text-white">特徴</span>
+          <span class="inline-flex items-center rounded-md bg-[#e84b9a] px-2 py-1 text-xs font-extrabold text-white">特徴</span>
           <span class="text-sm font-semibold text-zinc-800">{highlightText}</span>
         </div>
       ) : null}

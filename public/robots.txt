@@ -1,9 +1,8 @@
 User-agent: *
 Allow: /
-Disallow: /tracker
+Disallow: /tracker/
 Disallow: /ai/
 Disallow: /search/
 
-Sitemap: https://eigoonline.com/sitemap.xml
 Sitemap: https://eigoonline.com/sitemap-index.xml
 

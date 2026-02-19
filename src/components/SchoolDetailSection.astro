@@ -192,7 +192,15 @@ const trackHref = (href: string) =>
     </div>
 
     {item.logoUrl ? (
-      <img src={item.logoUrl} alt={`${item.name} ロゴ`} class="h-12 w-auto max-w-[200px] object-contain" loading="lazy" decoding="async" />
+      <img
+        src={item.logoUrl}
+        alt={`${item.name} ロゴ`}
+        width="200"
+        height="48"
+        class="h-12 w-auto max-w-[200px] object-contain"
+        loading="lazy"
+        decoding="async"
+      />
     ) : null}
   </div>
 
