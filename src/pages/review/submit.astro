@@ -14,9 +14,7 @@ const error = Astro.url.searchParams.get("error")?.trim() || "";
 const preselectedSchoolId =
   Astro.url.searchParams.get("school_id")?.trim() || "";
 const sourceContext = Astro.url.searchParams.get("from")?.trim() || "";
-const requestReferer = Astro.request.headers.get("referer") ?? "";
-const showImprovementPoints =
-  sourceContext === "kimini_reviews" || requestReferer.includes("/kimini/reviews");
+const showImprovementPoints = true;
 const RATING_VALUES = [1, 2, 3, 4, 5];
 const currentYear = new Date().getFullYear();
 const BIRTH_YEARS = Array.from(

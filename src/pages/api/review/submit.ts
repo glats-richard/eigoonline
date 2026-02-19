@@ -288,12 +288,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const referrer = h.get("referer");
   const userAgent = h.get("user-agent");
 
-  const allowImprovementPoints =
-    schoolId === "kimini" &&
-    (sourceContext === "kimini_reviews" || Boolean(referrer && referrer.includes("/kimini/reviews")));
-  const improvementPoints = allowImprovementPoints
-    ? (improvementPointsRaw.length ? improvementPointsRaw : null)
-    : null;
+  const improvementPoints = improvementPointsRaw.length ? improvementPointsRaw : null;
 
   if (improvementPoints && improvementPoints.length > 500) {
     return new Response(JSON.stringify({ ok: false, error: "improvement_points must be 500 characters or less" }), {
