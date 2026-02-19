@@ -11,7 +11,7 @@
   "logoUrl": "/logos/company-30.webp",
   "heroImageUrl": "/heroes/kimini_detail_banner.webp",
   "heroImageAlt": "Kimini英会話 30日間無料体験",
-  "officialUrl": "https://kimini.online/lp/trial/",
+  "officialUrl": "https://kimini.online/lp/trial/?utm_content=eigoonline&hc_ak=1IJJun.3.2VDRag",
   "campaignText": "【〜1月31日】特典：TOEIC® L&Rテスト講座（Shikaku Pass）が無料（対象プラン）",
   "summary": "Kimini英会話は月額1,210円から始められるため、無理なく続けやすい料金設定です。",
   "source": {
@@ -112,5 +112,5 @@
   ],
   "bannerImage": "/banners/kimini-freetrial30.webp",
   "bannerAlt": "Kimini英会話 30日間無料体験",
-  "bannerHref": "https://kimini.online/lp/trial/"
+  "bannerHref": "https://kimini.online/lp/trial/?utm_content=eigoonline&hc_ak=1IJJun.3.2VDRag"
 }
