@@ -1,7 +1,6 @@
 ---
 export const prerender = false;
 
-import { Picture, getImage } from "astro:assets";
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 import RankingListItem from "../components/RankingListItem.astro";
@@ -9,7 +8,6 @@ import CompareTableTabs from "../components/CompareTableTabs.astro";
 import Sidebar from "../components/Sidebar.astro";
 import SchoolDetailSection from "../components/SchoolDetailSection.astro";
 import ReviewSubmitCard from "../components/ReviewSubmitCard.astro";
-import fvHero from "../assets/fv_1.webp";
 import {
 	getReviewStats,
 	getDetailedReviewStatsFromDB,
@@ -135,8 +133,6 @@ try {
 } catch {
 	// best-effort: fall back to static reviews only
 }
-
-const fvHeroPreload = await getImage({ src: fvHero, width: 768 });
 
 // Display reviews for components:
 // - Prefer latest approved user-submitted reviews per school (max 3)
@@ -440,7 +436,9 @@ const faqJsonLd = {
 		<link
 			rel="preload"
 			as="image"
-			href={fvHeroPreload.src}
+			href="/fv_1-768.webp"
+			imagesrcset="/fv_1-640.webp 640w, /fv_1-768.webp 768w, /fv_1.webp 1024w"
+			imagesizes="(max-width: 768px) 100vw, 1024px"
 			fetchpriority="high"
 		/>
 	</Fragment>
@@ -471,16 +469,30 @@ const faqJsonLd = {
 					<div
 						class="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
 					>
-						<Picture
-							src={fvHero}
-							alt="オンライン英会話 おすすめランキング"
-							widths={[400, 768, 1024]}
-							sizes="(max-width: 768px) 100vw, 1024px"
-							loading="eager"
-							decoding="async"
-							fetchpriority="high"
-							class="block h-auto w-full object-cover"
-						/>
+						<picture>
+							<source
+								media="(max-width: 768px)"
+								srcset="/fv_1-640.webp 640w, /fv_1-768.webp 768w"
+								sizes="100vw"
+								type="image/webp"
+							/>
+							<source
+								media="(min-width: 769px)"
+								srcset="/fv_1.webp 1024w"
+								sizes="1024px"
+								type="image/webp"
+							/>
+							<img
+								src="/fv_1-768.webp"
+								alt="オンライン英会話 おすすめランキング"
+								loading="eager"
+								decoding="async"
+								fetchpriority="high"
+								width="1024"
+								height="565"
+								class="block h-auto w-full object-cover"
+							/>
+						</picture>
 					</div>
 
 					<section id="ranking" class="w-full min-w-0">
@@ -805,15 +817,29 @@ const faqJsonLd = {
 						<div
 							class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50"
 						>
-							<Picture
-								src={fvHero}
-								alt="オンライン英会話の始め方・選び方（初心者向け）"
-								widths={[400, 768, 1024]}
-								sizes="(max-width: 768px) 100vw, 1024px"
-								loading="lazy"
-								decoding="async"
-								class="block h-40 w-full object-cover sm:h-48"
-							/>
+							<picture>
+								<source
+									media="(max-width: 768px)"
+									srcset="/fv_1-640.webp 640w, /fv_1-768.webp 768w"
+									sizes="100vw"
+									type="image/webp"
+								/>
+								<source
+									media="(min-width: 769px)"
+									srcset="/fv_1.webp 1024w"
+									sizes="1024px"
+									type="image/webp"
+								/>
+								<img
+									src="/fv_1-768.webp"
+									alt="オンライン英会話の始め方・選び方（初心者向け）"
+									loading="lazy"
+									decoding="async"
+									width="1024"
+									height="565"
+									class="block h-40 w-full object-cover sm:h-48"
+								/>
+							</picture>
 						</div>
 
 						<!-- Decorated title -->

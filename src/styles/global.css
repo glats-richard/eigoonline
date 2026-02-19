@@ -114,8 +114,13 @@ body {
   /* Card lists: skip offscreen rendering */
   .rank-card {
     content-visibility: auto;
-    /* width height */
-    contain-intrinsic-size: 1px 500px;
+    contain-intrinsic-size: 500px;
+  }
+
+  /* Footer is always below the fold on typical pages */
+  footer {
+    content-visibility: auto;
+    contain-intrinsic-size: 800px;
   }
 }
 
