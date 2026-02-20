@@ -1,0 +1,53 @@
+{
+  "name": "QQEnglish",
+  "priceText": "3,280円から",
+  "trialText": "2回",
+  "trialMaxLessons": 2,
+  "benefitText": null,
+  "hoursText": "24時間",
+  "features": [
+    "カランメソッドなどの学習法に対応",
+    "ポイント制で受講回数を調整しやすい"
+  ],
+  "logoUrl": "/logos/qqenglish.svg",
+  "heroImageUrl": "/heroes/qqenglish.webp",
+  "heroImageAlt": "QQEnglish キャンペーンバナー",
+  "officialUrl": "https://www.qqeng.com/",
+  "planUrl": "https://www.qqeng.com/fee/",
+  "campaignText": null,
+  "summary": "QQEnglishはポイント制で受講回数を調整でき、目的に合わせてオンライン英会話を続けやすいサービスです。",
+  "source": {
+    "url": "https://www.qqeng.com/fee/",
+    "note": "公式の料金プランページを参照"
+  },
+  "points": [],
+  "recommendedFor": [
+    "受講回数を自分のペースで調整したい",
+    "カランメソッドなどの学習法も検討したい"
+  ],
+  "teacherQuality": null,
+  "materialQuality": null,
+  "connectionQuality": null,
+  "trialDetailText": "無料体験（2回）",
+  "editorialComments": [],
+  "campaignEndsAt": null,
+  "campaignBullets": [],
+  "uniquenessTitle": "独自性（他社との違い）",
+  "uniquenessBullets": [
+    "ポイント制で、教師のレベルに応じて必要ポイントが変わる",
+    "カランメソッド等の学習法に対応（提供内容は公式で確認）"
+  ],
+  "primarySources": [
+    {
+      "label": "料金プラン",
+      "url": "https://www.qqeng.com/fee/",
+      "type": "official"
+    },
+    {
+      "label": "利用規約",
+      "url": "https://www.qqeng.com/terms.html",
+      "type": "official"
+    }
+  ]
+}
+

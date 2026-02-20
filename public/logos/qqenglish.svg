@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="64" viewBox="0 0 160 64" role="img" aria-label="QQEnglish">
+  <rect width="160" height="64" rx="12" fill="#ffffff"/>
+  <g fill="#0b5bd3">
+    <text x="80" y="40" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.2">
+      QQEnglish
+    </text>
+  </g>
+</svg>
+
