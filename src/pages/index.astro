@@ -246,6 +246,39 @@ const businessItemsRated = applyReviewRating(businessItems);
 const base = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
 const pageUrl = new URL(Astro.url.pathname, base).toString();
 
+// Merchant Listings: digital service (no physical shipping)
+const merchantReturnLink = `${base.origin}/info/return-policy`;
+const shippingDetails = [
+	{
+		"@type": "OfferShippingDetails",
+		shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "JPY" },
+		shippingDestination: { "@type": "DefinedRegion", addressCountry: "JP" },
+		deliveryTime: {
+			"@type": "ShippingDeliveryTime",
+			handlingTime: {
+				"@type": "QuantitativeValue",
+				minValue: 0,
+				maxValue: 0,
+				unitCode: "DAY",
+			},
+			transitTime: {
+				"@type": "QuantitativeValue",
+				minValue: 0,
+				maxValue: 0,
+				unitCode: "DAY",
+			},
+		},
+	},
+];
+const hasMerchantReturnPolicy = {
+	"@type": "MerchantReturnPolicy",
+	applicableCountry: "JP",
+	// Digital service: no physical returns; see cancellation/refund policy link.
+	returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+	merchantReturnLink,
+	inStoreReturnsOffered: false,
+};
+
 function detailUrlForSchoolId(schoolId: string): string {
 	// Canonical service detail page: https://eigoonline.com/<schoolId>/
 	return new URL(`/${encodeURIComponent(schoolId)}/`, base).toString();
@@ -403,7 +436,10 @@ for (const [schoolId, schoolData] of schoolsById) {
 						price: minPrice,
 						priceCurrency: "JPY",
 						priceValidUntil: DEFAULT_PRICE_VALID_UNTIL,
+						itemCondition: "https://schema.org/NewCondition",
 						availability: "https://schema.org/InStock",
+						shippingDetails,
+						hasMerchantReturnPolicy,
 					}
 				: undefined,
 			aggregateRating,
