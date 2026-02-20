@@ -553,6 +553,30 @@ if (school) {
   const orgUrl = baseUrl.origin;
   const webpageId = `${pageUrl}#webpage`; // matches Layout.astro
   const offerUrl = school.planUrl || school.officialUrl || pageUrl;
+  const merchantReturnLink = `${orgUrl}/info/return-policy`;
+
+  // Merchant Listings: digital service (no physical shipping)
+  const shippingDetails = [
+    {
+      "@type": "OfferShippingDetails",
+      shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "JPY" },
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "JP" },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
+        transitTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
+      },
+    },
+  ];
+
+  const hasMerchantReturnPolicy = {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: "JP",
+    // Digital service: no physical returns; see cancellation/refund policy link.
+    returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+    merchantReturnLink,
+    inStoreReturnsOffered: false,
+  };
 
   const service: any = {
     // Review Snippet 対象の type に合わせる（Service は対象外になりやすい）
@@ -587,7 +611,10 @@ if (school) {
         minPrice: minPriceYen,
         unitText: "MONTH",
       },
+      itemCondition: "https://schema.org/NewCondition",
       availability: "https://schema.org/InStock",
+      shippingDetails,
+      hasMerchantReturnPolicy,
     };
   } else if (school.priceText) {
     // Keep a human-readable offer snippet even when we can't parse a number
@@ -597,7 +624,10 @@ if (school) {
       priceCurrency: "JPY",
       description: String(school.priceText),
       priceValidUntil: DEFAULT_PRICE_VALID_UNTIL,
+      itemCondition: "https://schema.org/NewCondition",
       availability: "https://schema.org/InStock",
+      shippingDetails,
+      hasMerchantReturnPolicy,
     };
   }
 

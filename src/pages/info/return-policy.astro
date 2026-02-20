@@ -1,0 +1,61 @@
+---
+import Layout from "../../layouts/Layout.astro";
+const updatedAt = "2026-02-20";
+---
+
+<Layout
+  title="解約・返金ポリシーについて"
+  description="オンライン英会話（デジタルサービス）における解約・返金の考え方と、確認すべき公式規約の案内です。"
+>
+  <main class="mx-auto w-full max-w-3xl px-4 py-10">
+    <header class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h1 class="text-2xl font-extrabold tracking-tight text-zinc-900">
+        解約・返金ポリシーについて
+      </h1>
+      <p class="mt-3 text-sm font-semibold text-zinc-600">
+        当サイトで紹介しているオンライン英会話は、デジタル提供（役務提供）であり、物理商品の返品とは扱いが異なります。
+        解約・返金の可否や条件は、各サービスの公式規約・ヘルプに基づきます。
+      </p>
+      <p class="mt-2 text-xs font-semibold text-zinc-500">最終更新日: {updatedAt}</p>
+    </header>
+
+    <section class="mt-6 space-y-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div class="space-y-2">
+        <h2 class="text-lg font-extrabold text-zinc-900">配送（Shipping）について</h2>
+        <p class="text-sm leading-relaxed text-zinc-700">
+          オンライン英会話はデジタルサービスのため、物理的な配送はありません。送料は発生しません（0円）。
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="text-lg font-extrabold text-zinc-900">解約・返金について</h2>
+        <p class="text-sm leading-relaxed text-zinc-700">
+          返金や解約の扱いは、サービスごとに異なります。無料体験の有無、初回課金のタイミング、返金可否、手続き方法などは、
+          必ず各サービスの「利用規約」「特定商取引法に基づく表記」「ヘルプ（返金/解約）」をご確認ください。
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="text-lg font-extrabold text-zinc-900">当サイトへのお問い合わせ</h2>
+        <p class="text-sm leading-relaxed text-zinc-700">
+          当サイトの掲載内容に関するご連絡は、お問い合わせページからお願いします。
+        </p>
+        <div>
+          <a
+            class="link-brand font-semibold underline underline-offset-2"
+            href="/inquiry/contact"
+          >
+            お問い合わせはこちら →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-6">
+      <a class="btn-brand inline-block rounded-xl px-4 py-2 text-sm font-extrabold text-white" href="/">
+        トップへ戻る
+      </a>
+    </div>
+  </main>
+</Layout>
+
