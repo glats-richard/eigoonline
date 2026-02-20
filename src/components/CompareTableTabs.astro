@@ -29,12 +29,13 @@ type Props = {
   overall: Ranking;
   exam: Ranking;
   daily: Ranking;
-  business: Ranking;
+  business?: Ranking;
   /** How many columns to show in compare table */
   columns?: number;
 };
 
 const { overall, exam, daily, business, columns = 4 } = Astro.props satisfies Props;
+const hasBusiness = Boolean(business);
 
 const sliceCols = (r: Ranking, n: number) => ({ ...r, items: r.items.slice(0, n) });
 const desktopCols = columns;
@@ -44,27 +45,30 @@ const mobileCols = Math.min(4, columns);
 const oMobile = sliceCols(overall, mobileCols);
 const eMobile = sliceCols(exam, mobileCols);
 const dMobile = sliceCols(daily, mobileCols);
-const bMobile = sliceCols(business, mobileCols);
+const bMobile = business ? sliceCols(business, mobileCols) : null;
 
 const oDesktop = sliceCols(overall, desktopCols);
 const eDesktop = sliceCols(exam, desktopCols);
 const dDesktop = sliceCols(daily, desktopCols);
-const bDesktop = sliceCols(business, desktopCols);
+const bDesktop = business ? sliceCols(business, desktopCols) : null;
+
+const tabHeaderClass = `rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4
+peer-checked/ct-overall:[&_.tab-overall]:relative peer-checked/ct-overall:[&_.tab-overall]:z-10 peer-checked/ct-overall:[&_.tab-overall]:h-full peer-checked/ct-overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-overall:[&_.tab-overall]:text-white peer-checked/ct-overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
+peer-checked/ct-exam:[&_.tab-exam]:relative peer-checked/ct-exam:[&_.tab-exam]:z-10 peer-checked/ct-exam:[&_.tab-exam]:h-full peer-checked/ct-exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-exam:[&_.tab-exam]:text-white peer-checked/ct-exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
+peer-checked/ct-daily:[&_.tab-daily]:relative peer-checked/ct-daily:[&_.tab-daily]:z-10 peer-checked/ct-daily:[&_.tab-daily]:h-full peer-checked/ct-daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-daily:[&_.tab-daily]:text-white peer-checked/ct-daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
+${hasBusiness ? "peer-checked/ct-business:[&_.tab-business]:relative peer-checked/ct-business:[&_.tab-business]:z-10 peer-checked/ct-business:[&_.tab-business]:h-full peer-checked/ct-business:[&_.tab-business]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-business:[&_.tab-business]:text-white peer-checked/ct-business:[&_.tab-business]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]" : ""}`;
 ---
 
 <section class="min-w-0 rounded-2xl border-2 border-[#F49BB5] bg-white p-0 shadow-sm overflow-hidden">
   <input class="peer/ct-overall sr-only" type="radio" name="comparetab" id="ct-overall" checked />
   <input class="peer/ct-exam sr-only" type="radio" name="comparetab" id="ct-exam" />
   <input class="peer/ct-daily sr-only" type="radio" name="comparetab" id="ct-daily" />
-  <input class="peer/ct-business sr-only" type="radio" name="comparetab" id="ct-business" />
+  {hasBusiness ? (
+    <input class="peer/ct-business sr-only" type="radio" name="comparetab" id="ct-business" />
+  ) : null}
 
-  <div class="rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4
-    peer-checked/ct-overall:[&_.tab-overall]:relative peer-checked/ct-overall:[&_.tab-overall]:z-10 peer-checked/ct-overall:[&_.tab-overall]:h-full peer-checked/ct-overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-overall:[&_.tab-overall]:text-white peer-checked/ct-overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-    peer-checked/ct-exam:[&_.tab-exam]:relative peer-checked/ct-exam:[&_.tab-exam]:z-10 peer-checked/ct-exam:[&_.tab-exam]:h-full peer-checked/ct-exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-exam:[&_.tab-exam]:text-white peer-checked/ct-exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-    peer-checked/ct-daily:[&_.tab-daily]:relative peer-checked/ct-daily:[&_.tab-daily]:z-10 peer-checked/ct-daily:[&_.tab-daily]:h-full peer-checked/ct-daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-daily:[&_.tab-daily]:text-white peer-checked/ct-daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-    peer-checked/ct-business:[&_.tab-business]:relative peer-checked/ct-business:[&_.tab-business]:z-10 peer-checked/ct-business:[&_.tab-business]:h-full peer-checked/ct-business:[&_.tab-business]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/ct-business:[&_.tab-business]:text-white peer-checked/ct-business:[&_.tab-business]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]
-  ">
-    <div class="grid h-[50px] w-full grid-cols-4 items-end gap-0.5 text-[#595959] sm:gap-[10px]">
+  <div class={tabHeaderClass}>
+    <div class={`grid h-[50px] w-full items-end gap-0.5 text-[#595959] sm:gap-[10px] ${hasBusiness ? "grid-cols-4" : "grid-cols-3"}`}>
       <label
         for="ct-overall"
         class="tab tab-overall w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
@@ -98,17 +102,19 @@ const bDesktop = sliceCols(business, desktopCols);
           </span>
         </div>
       </label>
-      <label
-        for="ct-business"
-        class="tab tab-business w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
-      >
-        <div class="grid h-[80%] place-items-center">
-          <span class="grid grid-rows-2 leading-tight">
-            <span class="block">ビジネス</span>
-            <span class="block">英会話</span>
-          </span>
-        </div>
-      </label>
+      {hasBusiness ? (
+        <label
+          for="ct-business"
+          class="tab tab-business w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
+        >
+          <div class="grid h-[80%] place-items-center">
+            <span class="grid grid-rows-2 leading-tight">
+              <span class="block">ビジネス</span>
+              <span class="block">英会話</span>
+            </span>
+          </div>
+        </label>
+      ) : null}
     </div>
   </div>
 
@@ -136,13 +142,15 @@ const bDesktop = sliceCols(business, desktopCols);
       <CompareTable ranking={dDesktop} variant="table" />
     </div>
   </div>
-  <div class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/ct-business:block">
-    <div class="sm:hidden">
-      <CompareTable ranking={bMobile} variant="stack" />
+  {hasBusiness && bMobile && bDesktop ? (
+    <div class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/ct-business:block">
+      <div class="sm:hidden">
+        <CompareTable ranking={bMobile} variant="stack" />
+      </div>
+      <div class="hidden sm:block">
+        <CompareTable ranking={bDesktop} variant="table" />
+      </div>
     </div>
-    <div class="hidden sm:block">
-      <CompareTable ranking={bDesktop} variant="table" />
-    </div>
-  </div>
+  ) : null}
 </section>
 

@@ -30,7 +30,6 @@ const rankingByCategory = new Map(
 const overall = rankingByCategory.get("overall");
 const exam = rankingByCategory.get("exam");
 const daily = rankingByCategory.get("daily");
-const business = rankingByCategory.get("business");
 
 const resolveItems = (items: string[] | undefined) =>
 	(items ?? [])
@@ -42,7 +41,6 @@ const resolveItems = (items: string[] | undefined) =>
 const overallItems = resolveItems(overall?.items);
 const examItems = resolveItems(exam?.items);
 const dailyItems = resolveItems(daily?.items);
-const businessItems = resolveItems(business?.items);
 
 const catLevel = categories
 	.filter((c) => c.data.group === "level")
@@ -241,7 +239,6 @@ const applyReviewRating = <
 const overallItemsRated = applyReviewRating(overallItems);
 const examItemsRated = applyReviewRating(examItems);
 const dailyItemsRated = applyReviewRating(dailyItems);
-const businessItemsRated = applyReviewRating(businessItems);
 
 const base = Astro.site ? new URL(Astro.site) : new URL(Astro.url.origin);
 const pageUrl = new URL(Astro.url.pathname, base).toString();
@@ -440,7 +437,7 @@ const faqJsonLd = {
 			name: "オンライン英会話のおすすめはどう選べばいい？",
 			acceptedAnswer: {
 				"@type": "Answer",
-				text: "目的（総合/試験対策/日常英会話/ビジネス英会話）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
+				text: "目的（総合/試験対策/日常英会話）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。",
 			},
 		},
 		{
@@ -464,8 +461,8 @@ const faqJsonLd = {
 ---
 
 <Layout
-	title="オンライン英会話 おすすめ比較・ランキング（総合・試験対策・日常・ビジネス）【2026年2月最新版】"
-	description="オンライン英会話のおすすめを「総合 / 試験対策 / 日常英会話 / ビジネス英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
+	title="オンライン英会話 おすすめ比較・ランキング（総合・試験対策・日常）【2026年2月最新版】"
+	description="オンライン英会話のおすすめを「総合 / 試験対策 / 日常英会話」の目的別に比較。料金の目安・特徴・無料体験・公式サイト導線をまとめてチェックできます。"
 	ogImage="/fv_1.webp"
 	headerOverlay
 >
@@ -564,18 +561,12 @@ const faqJsonLd = {
 								name="ranktab"
 								id="tab-daily"
 							/>
-							<input
-								class="peer/business sr-only"
-								type="radio"
-								name="ranktab"
-								id="tab-business"
-							/>
 
 							<div
-								class="rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4 peer-checked/overall:[&_.tab-overall]:relative peer-checked/overall:[&_.tab-overall]:z-10 peer-checked/overall:[&_.tab-overall]:h-full peer-checked/overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/overall:[&_.tab-overall]:text-white peer-checked/overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/exam:[&_.tab-exam]:relative peer-checked/exam:[&_.tab-exam]:z-10 peer-checked/exam:[&_.tab-exam]:h-full peer-checked/exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/exam:[&_.tab-exam]:text-white peer-checked/exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/daily:[&_.tab-daily]:relative peer-checked/daily:[&_.tab-daily]:z-10 peer-checked/daily:[&_.tab-daily]:h-full peer-checked/daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/daily:[&_.tab-daily]:text-white peer-checked/daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/business:[&_.tab-business]:relative peer-checked/business:[&_.tab-business]:z-10 peer-checked/business:[&_.tab-business]:h-full peer-checked/business:[&_.tab-business]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/business:[&_.tab-business]:text-white peer-checked/business:[&_.tab-business]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
+								class="rounded-t-2xl bg-[#ecf9fe] px-3 pt-3 sm:px-4 peer-checked/overall:[&_.tab-overall]:relative peer-checked/overall:[&_.tab-overall]:z-10 peer-checked/overall:[&_.tab-overall]:h-full peer-checked/overall:[&_.tab-overall]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/overall:[&_.tab-overall]:text-white peer-checked/overall:[&_.tab-overall]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/exam:[&_.tab-exam]:relative peer-checked/exam:[&_.tab-exam]:z-10 peer-checked/exam:[&_.tab-exam]:h-full peer-checked/exam:[&_.tab-exam]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/exam:[&_.tab-exam]:text-white peer-checked/exam:[&_.tab-exam]:shadow-[0_2px_8px_rgba(0,0,0,0.18)] peer-checked/daily:[&_.tab-daily]:relative peer-checked/daily:[&_.tab-daily]:z-10 peer-checked/daily:[&_.tab-daily]:h-full peer-checked/daily:[&_.tab-daily]:bg-[linear-gradient(to_bottom,#EE6B95,#F49BB5_55%,#fff_100%)] peer-checked/daily:[&_.tab-daily]:text-white peer-checked/daily:[&_.tab-daily]:shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
 							>
 								<div
-									class="grid h-[50px] w-full grid-cols-4 items-end gap-0.5 text-[#595959] sm:gap-[10px]"
+									class="grid h-[50px] w-full grid-cols-3 items-end gap-0.5 text-[#595959] sm:gap-[10px]"
 								>
 									<label
 										for="tab-overall"
@@ -626,24 +617,6 @@ const faqJsonLd = {
 												class="grid grid-rows-2 leading-tight"
 											>
 												<span class="block">日常</span>
-												<span class="block">英会話</span
-												>
-											</span>
-										</div>
-									</label>
-									<label
-										for="tab-business"
-										class="tab tab-business w-full cursor-pointer rounded-t-xl bg-[#d1d1d1] px-1.5 py-1 text-center text-[11px] font-extrabold leading-tight transition hover:bg-zinc-200 sm:px-3 sm:text-sm"
-									>
-										<div
-											class="grid h-[80%] place-items-center"
-										>
-											<span
-												class="grid grid-rows-2 leading-tight"
-											>
-												<span class="block"
-													>ビジネス</span
-												>
 												<span class="block">英会話</span
 												>
 											</span>
@@ -745,36 +718,6 @@ const faqJsonLd = {
 								</div>
 							</section>
 
-							<section
-								class="px-3 pb-3 pt-4 sm:px-4 sm:pb-4 hidden peer-checked/business:block"
-							>
-								<p class="mb-3 text-sm text-zinc-600">
-									{business?.description}
-								</p>
-								<div class="grid gap-4">
-									{
-										businessItemsRated
-											.slice(0, 3)
-											.map((x, idx) => (
-												<RankingListItem
-													item={x.data}
-													offerId={x.id}
-													rank={idx + 1}
-													reviews={
-														reviewsBySchoolId.get(
-															x.id
-														) ?? []
-													}
-													reviewStats={
-														reviewStatsBySchoolId.get(
-															x.id
-														) ?? null
-													}
-												/>
-											))
-									}
-								</div>
-							</section>
 						</div>
 					</section>
 
@@ -791,7 +734,7 @@ const faqJsonLd = {
 						</div>
 
 						{
-							overall && exam && daily && business ? (
+							overall && exam && daily ? (
 								<CompareTableTabs
 									overall={{
 										title: overall.title,
@@ -805,11 +748,7 @@ const faqJsonLd = {
 										title: daily.title,
 										items: dailyItemsRated,
 									}}
-									business={{
-										title: business.title,
-										items: businessItemsRated,
-									}}
-									columns={4}
+									columns={3}
 								/>
 							) : null
 						}
@@ -1630,7 +1569,7 @@ const faqJsonLd = {
 									>オンライン英会話のおすすめはどう選べばいい？</summary
 								>
 								<p class="mt-2 text-sm text-zinc-700">
-									目的（総合/日常/ビジネス）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。
+									目的（総合/試験対策/日常英会話）を決めた上で、料金・無料体験の有無・受講可能時間・講師の質を比較すると選びやすいです。本ページでは目的別タブで比較できます。
 								</p>
 							</details>
 							<details
