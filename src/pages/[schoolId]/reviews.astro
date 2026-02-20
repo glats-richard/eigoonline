@@ -734,19 +734,6 @@ const formatJpDate = (isoLike: string) => {
                     </div>
 
                     <p class="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">{r.body}</p>
-                    {r.improvementPoints ? (
-                      <dl
-                        class="mt-3 rounded-lg border border-zinc-200 bg-white/60 p-3"
-                        data-review-negative-notes
-                      >
-                        <div>
-                          <dt class="text-xs font-extrabold text-zinc-600">改善点</dt>
-                          <dd class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">
-                            {r.improvementPoints}
-                          </dd>
-                        </div>
-                      </dl>
-                    ) : null}
                   </article>
                   ))}
                 </div>

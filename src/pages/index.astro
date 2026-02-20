@@ -334,22 +334,6 @@ for (const [schoolId, schoolData] of schoolsById) {
 	const stats = reviewStatsBySchoolId.get(schoolId);
 
 	if (stats && stats.count > 0 && stats.avg !== null) {
-		// Google Rich Results expects (negative|positive)Notes as ItemList, not plain text.
-		const notesAsItemList = (raw: unknown) => {
-			const text = String(raw ?? "").trim();
-			if (!text) return null;
-			return {
-				"@type": "ItemList",
-				itemListElement: [
-					{
-						"@type": "ListItem",
-						position: 1,
-						name: text,
-					},
-				],
-			};
-		};
-
 		// Create AggregateRating
 		const aggregateRating = {
 			"@type": "AggregateRating",
@@ -403,7 +387,6 @@ for (const [schoolId, schoolData] of schoolsById) {
 					},
 					reviewBody: review.body,
 				};
-				if (review.improvement_points) obj.negativeNotes = notesAsItemList(review.improvement_points);
 				reviewObjects.push(obj);
 			}
 		}

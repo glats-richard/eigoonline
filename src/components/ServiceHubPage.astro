@@ -578,22 +578,6 @@ if (school) {
     inStoreReturnsOffered: false,
   };
 
-  // Google Rich Results expects (negative|positive)Notes as ItemList, not plain text.
-  const notesAsItemList = (raw: unknown) => {
-    const text = String(raw ?? "").trim();
-    if (!text) return null;
-    return {
-      "@type": "ItemList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: text,
-        },
-      ],
-    };
-  };
-
   const service: any = {
     // Review Snippet 対象の type に合わせる（Service は対象外になりやすい）
     "@type": "Product",
@@ -670,7 +654,6 @@ if (school) {
           reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
         };
         if (r.createdAt) review.datePublished = r.createdAt;
-        if (r.improvementPoints) review.negativeNotes = notesAsItemList(r.improvementPoints);
         return review;
       });
   }
