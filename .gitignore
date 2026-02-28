@@ -26,5 +26,8 @@ pnpm-debug.log*
 # local exports (generated)
 exports/
 
+# local artifacts (screenshots, experiments)
+artifacts/
+
 # Lighthouse reports (local, generated)
 lighthouse-*.json
