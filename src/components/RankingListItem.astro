@@ -189,8 +189,8 @@ const displayDays = promoDays ?? baseDays;
     </a>
   ) : null}
 
-  <div class="grid grid-cols-[96px_1fr] gap-3 p-3 sm:grid-cols-[140px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
-    <div class="flex h-16 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 p-2 sm:h-auto sm:p-3">
+  <div class="grid grid-cols-[88px_1fr] gap-3 p-3 max-[360px]:grid-cols-[80px_1fr] max-[360px]:gap-2 max-[360px]:p-2 sm:grid-cols-[140px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
+    <div class="flex h-16 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 p-2 max-[360px]:h-14 max-[360px]:p-1.5 sm:h-auto sm:p-3">
       {item.logoUrl ? (
         (() => {
           const lr = responsiveLogo(item.logoUrl as string);
@@ -204,7 +204,7 @@ const displayDays = promoDays ?? baseDays;
               height="64"
               loading="lazy"
               decoding="async"
-              class="h-12 w-auto max-w-full object-contain"
+              class="h-12 w-auto max-w-full object-contain max-[360px]:h-10"
             />
           );
         })()
@@ -223,7 +223,7 @@ const displayDays = promoDays ?? baseDays;
             height="36"
             loading="eager"
             decoding="async"
-            class="h-9 w-9 shrink-0 object-contain"
+            class="h-9 w-9 shrink-0 object-contain max-[360px]:h-8 max-[360px]:w-8"
           />
         ) : (
           <div class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f4f0ff] text-xs font-extrabold text-[#6a56d6] ring-1 ring-[#d8ceff]">
