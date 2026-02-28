@@ -108,19 +108,21 @@ body {
   section#compare,
   section#details {
     content-visibility: auto;
-    contain-intrinsic-size: 1000px;
+    /* Prevent intrinsic inline-size from inflating width (Safari can treat single-value as both axes). */
+    contain-intrinsic-size: 1px 1000px;
   }
 
   /* Card lists: skip offscreen rendering */
   .rank-card {
     content-visibility: auto;
-    contain-intrinsic-size: 500px;
+    /* Avoid horizontal overflow on first paint (notably iOS Safari). */
+    contain-intrinsic-size: 1px 500px;
   }
 
   /* Footer is always below the fold on typical pages */
   footer {
     content-visibility: auto;
-    contain-intrinsic-size: 800px;
+    contain-intrinsic-size: 1px 800px;
   }
 }
 

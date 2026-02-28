@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 
 const ROOT = process.cwd();
 
@@ -23,10 +23,6 @@ async function main() {
   const absOutDir = path.resolve(ROOT, outDir);
   await ensureDir(absOutDir);
 
-  const browser = await chromium.launch();
-  const ctx = await browser.newContext({ deviceScaleFactor: 2 });
-  const page = await ctx.newPage();
-
   const viewports = [
     { name: "se-320x568", width: 320, height: 568 },
     { name: "iphone8-375x667", width: 375, height: 667 }, // iPhone SE (2/3 gen) / small Safari-ish
@@ -35,15 +31,13 @@ async function main() {
 
   const failures = [];
 
-  for (const vp of viewports) {
-    await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto(url, { waitUntil: "networkidle" });
-    await page.waitForSelector("#ranking", { timeout: 20_000 });
+  const browsers = [
+    { name: "chromium", launcher: chromium },
+    { name: "webkit", launcher: webkit }, // closer to iOS Safari behavior
+  ];
 
-    // Scroll into the tabs section to ensure layout settled.
-    await page.locator("#ranking").scrollIntoViewIfNeeded();
-
-    const result = await page.evaluate(() => {
+  const measure = (page) =>
+    page.evaluate(() => {
       const el = document.querySelector("#ranking");
       if (!el) return { ok: false, reason: "#ranking not found" };
 
@@ -67,15 +61,34 @@ async function main() {
       };
     });
 
-    if (!result.ok) {
-      const prefix = path.join(absOutDir, vp.name);
-      await page.screenshot({ path: `${prefix}-full.png`, fullPage: true });
-      await page.locator("#ranking").screenshot({ path: `${prefix}-ranking.png` });
-      failures.push({ viewport: vp, result });
-    }
-  }
+  for (const b of browsers) {
+    const browser = await b.launcher.launch();
+    const ctx = await browser.newContext({ deviceScaleFactor: 2 });
+    const page = await ctx.newPage();
 
-  await browser.close();
+    for (const vp of viewports) {
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.goto(url, { waitUntil: "networkidle" });
+      await page.waitForSelector("#ranking", { timeout: 20_000 });
+
+      // Some engines "fix" layout after a scroll/reflow; catch both states.
+      const before = await measure(page);
+      await page.locator("#ranking").scrollIntoViewIfNeeded();
+      await page.mouse.wheel(0, 250);
+      await page.mouse.wheel(0, -250);
+      const after = await measure(page);
+
+      const ok = Boolean(before.ok && after.ok);
+      if (!ok) {
+        const prefix = path.join(absOutDir, `${b.name}-${vp.name}`);
+        await page.screenshot({ path: `${prefix}-full.png`, fullPage: true });
+        await page.locator("#ranking").screenshot({ path: `${prefix}-ranking.png` });
+        failures.push({ browser: b.name, viewport: vp, before, after });
+      }
+    }
+
+    await browser.close();
+  }
 
   if (failures.length) {
     // eslint-disable-next-line no-console
