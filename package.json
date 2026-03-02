@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "astro build && node scripts/postbuild.mjs",
+    "build": "NODE_OPTIONS=\"--require ./scripts/localhost-polyfill.cjs\" astro build && node scripts/postbuild.mjs",
     "preview": "astro preview",
     "start": "HOST=0.0.0.0 PORT=${PORT:-4321} node ./dist/server/entry.mjs",
     "astro": "astro",
