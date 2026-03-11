@@ -29,10 +29,13 @@ const withTracking = (href: string) => {
   // Already a tracking URL → そのまま使う
   if (href.startsWith("/api/track/click")) return href;
 
-  // 外部リンクは原則 tracking 経由にする（Kiminiだけは除外して直接遷移）
+  // 外部リンクは原則 tracking 経由にする（Kimini CTAは除外して直接遷移）
   if (/^https?:\/\//.test(href)) {
-    // Kiminiドメインはリダイレクトを通さずにそのまま遷移
-    if (href.includes("kimini.online")) {
+    // Kiminiの直接リンク・Quoriza経由リンクはリダイレクトを通さない
+    if (
+      href.includes("kimini.online") ||
+      href === "https://t.quoriza.net/cl?ak=1IKVvx.3.2VGNhu"
+    ) {
       return href;
     }
     // Kimini以外は外部トラッキング経由
